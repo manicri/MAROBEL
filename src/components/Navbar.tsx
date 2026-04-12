@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader, SheetDescription } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
@@ -24,7 +24,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled 
           ? "bg-[#5D4037] py-3 shadow-xl" 
           : "bg-black/40 py-6"
@@ -77,9 +77,12 @@ export default function Navbar() {
               <Menu className="w-6 h-6" />
             </SheetTrigger>
             <SheetContent side="right" className="bg-[#5D4037] text-white border-l-[#E5D3B3]/20">
-              <SheetTitle className="text-[#E5D3B3] font-serif text-2xl flex items-center gap-2 mt-4">
-                <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-full" /> MAROBEL
-              </SheetTitle>
+              <SheetHeader>
+                <SheetTitle className="text-[#E5D3B3] font-serif text-2xl flex items-center gap-2 mt-4">
+                  <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-full" /> MAROBEL
+                </SheetTitle>
+                <SheetDescription className="sr-only">Menú de navegación</SheetDescription>
+              </SheetHeader>
               <div className="flex flex-col space-y-6 mt-10">
                 {navLinks.map((link) => (
                   <a key={link.name} href={link.href} className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold transition-colors">
