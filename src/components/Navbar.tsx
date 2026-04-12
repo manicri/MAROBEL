@@ -1,5 +1,3 @@
-
-iimport { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, LogIn, LogOut, User as UserIcon, Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
