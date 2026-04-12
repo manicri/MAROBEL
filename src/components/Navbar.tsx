@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, LogIn, LogOut, User as UserIcon, Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -110,9 +109,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
+    <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
         isScrolled 
           ? "bg-[#5D4037] py-3 shadow-2xl" 
@@ -128,28 +125,22 @@ export default function Navbar() {
               : "text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]"
           }`}
         >
-          {/* LOGO MEJORADO CON ANIMACIÓN */}
-          <motion.div 
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            whileTap={{ scale: 0.9 }}
-            className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-500 overflow-hidden ${
+          <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-500 overflow-hidden ${
             isScrolled ? "border-[#E5D3B3] bg-[#5D4037]" : "border-white bg-black/20 backdrop-blur-md"
           }`}>
             <img 
               src="/logo.png" 
               alt="Marobel Logo"
-              className="w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40?text=M'; }} 
+              className="w-full h-full object-contain"
             />
-          </motion.div>
+          </div>
           <span className="hidden sm:inline">MAROBEL</span>
         </a>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-10">
           {navLinks.map((link) => (
-            <motion.a
-              whileHover={{ y: -2 }}
+            <a
               key={link.name}
               href={link.href}
               className={`text-[10px] uppercase tracking-[0.4em] font-bold transition-all duration-500 ${
@@ -157,7 +148,7 @@ export default function Navbar() {
               }`}
             >
               {link.name}
-            </motion.a>
+            </a>
           ))}
           
           {isAdmin && (
@@ -198,57 +189,26 @@ export default function Navbar() {
 
         {/* Mobile Nav */}
         <div className="md:hidden flex items-center gap-4">
-          {user && (
-             <img 
-             src={user.user_metadata?.avatar_url || ''} 
-             className="w-8 h-8 rounded-full border border-[#E5D3B3]/30" 
-             alt="Avatar" 
-           />
-          )}
           <Sheet>
             <SheetTrigger className="text-white p-2 hover:bg-white/10 rounded-md transition-colors">
               <Menu className="w-6 h-6" />
             </SheetTrigger>
             <SheetContent side="right" className="bg-[#5D4037] border-l-[#E5D3B3]/20 text-white">
               <SheetTitle className="text-[#E5D3B3] font-serif text-3xl mb-12 tracking-tighter flex items-center gap-3">
-                <img 
-                  src="/logo.png" 
-                  alt="Marobel Logo" 
-                  className="w-10 h-10 object-contain" 
-                />
+                <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
                 MAROBEL
               </SheetTitle>
               <div className="flex flex-col space-y-8 mt-10">
                 {navLinks.map((link) => (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    className="text-sm font-bold uppercase tracking-[0.3em] text-white/70 hover:text-[#E5D3B3] transition-colors"
-                  >
+                  <a key={link.name} href={link.href} className="text-sm font-bold uppercase tracking-[0.3em] text-white/70">
                     {link.name}
                   </a>
                 ))}
-                {isAdmin && (
-                  <a href="#admin" className="text-sm font-bold uppercase tracking-[0.3em] text-yellow-500">Panel Admin</a>
-                )}
-                <div className="pt-8 border-t border-white/10">
-                  {user ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl">
-                        <span className="text-xs uppercase tracking-widest font-bold">Mi Perfil</span>
-                        <ProfileEditor />
-                      </div>
-                      <Button onClick={logout} variant="outline" className="w-full border-white/20 text-white rounded-full h-12 uppercase tracking-widest text-xs">Cerrar Sesión</Button>
-                    </div>
-                  ) : (
-                    <Button type="button" onClick={login} className="w-full bg-[#E5D3B3] text-[#5D4037] rounded-full h-12 uppercase tracking-widest text-xs font-bold">Ingresar con Google</Button>
-                  )}
-                </div>
               </div>
             </SheetContent>
           </Sheet>
         </div>
       </div>
-    </motion.nav>
+    </nav>
   );
 }
