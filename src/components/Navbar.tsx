@@ -206,11 +206,11 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="bg-[#5D4037] border-l-[#E5D3B3]/20 text-white">
               <SheetTitle className="text-[#E5D3B3] font-serif text-3xl mb-12 tracking-tighter flex items-center gap-3">
-                <img 
-                  src="/logo.png" 
-                  alt="Marobel Logo"
-                  className="w-10 h-10 rounded-full object-cover"
-                />
+               <img 
+  src="/logo.png" 
+  alt="Marobel Logo" 
+  className="w-10 h-10 object-contain" 
+/>
                 MAROBEL
               </SheetTitle>
               <div className="flex flex-col space-y-8 mt-10">
