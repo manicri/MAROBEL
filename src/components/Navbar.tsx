@@ -211,7 +211,7 @@ export default function Navbar() {
                   alt="Marobel Logo"
                   className="w-10 h-10 rounded-full object-cover"
                 />
-                MAROBEL
+                MARO
               </SheetTitle>
               <div className="flex flex-col space-y-8 mt-10">
                 {navLinks.map((link) => (
