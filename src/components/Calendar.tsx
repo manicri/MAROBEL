@@ -35,7 +35,8 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
       const { data, error } = await supabase
         .from('citas')
         .select('hora')
-        .eq('fecha', selectedDate);
+        .eq('fecha', selectedDate)
+        .in('Estado', ['Aceptada', 'Pendiente']);
       
       if (error) {
         console.error('Error fetching booked slots:', error);
@@ -80,7 +81,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
             disabled={isBooked}
             className={cn(
               "p-4 rounded-xl border text-sm font-bold transition-all duration-300 flex flex-col items-center justify-center gap-1",
-              isBooked ? "bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed" : 
+              isBooked ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-60" : 
               isSelected ? "bg-[#E5D3B3] border-[#E5D3B3] text-[#5D4037] shadow-[0_0_20px_rgba(229,211,179,0.4)]" :
               "bg-green-500/10 border-green-500/20 text-green-600 hover:bg-green-500/20"
             )}

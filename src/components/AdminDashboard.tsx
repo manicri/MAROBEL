@@ -14,7 +14,7 @@ interface Appointment {
   Servicio: string;
   fecha: string;
   hora: string;
-  Estado: 'Pendiente' | 'Confirmado' | 'Finalizado' | 'Cancelado';
+  Estado: 'Pendiente' | 'Aceptada' | 'Cancelada';
   whatsapp?: string;
   notas?: string;
 }
@@ -28,9 +28,15 @@ interface Service {
   duracion: string;
 }
 
+interface Category {
+  id: string;
+  nombre: string;
+}
+
 export const AdminDashboard: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [activeTab, setActiveTab] = useState<'appointments' | 'services'>('appointments');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,6 +44,10 @@ export const AdminDashboard: React.FC = () => {
   const [isBlocking, setIsBlocking] = useState(false);
   const [blockTime, setBlockTime] = useState('09:00');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
+
+  // Category Form State
+  const [isManagingCategories, setIsManagingCategories] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Partial<Category>>({ nombre: '' });
 
   // Service Form State
   const [isEditingService, setIsEditingService] = useState(false);
@@ -76,9 +86,22 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    const { data, error } = await supabase
+      .from('categorias')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching categories:', error);
+    } else {
+      setCategories(data || []);
+    }
+  };
+
   useEffect(() => {
     fetchAppointments();
     fetchServices();
+    fetchCategories();
 
     const appointmentsChannel = supabase
       .channel('admin_citas')
@@ -94,9 +117,17 @@ export const AdminDashboard: React.FC = () => {
       })
       .subscribe();
 
+    const categoriesChannel = supabase
+      .channel('admin_categorias')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categorias' }, () => {
+        fetchCategories();
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(appointmentsChannel);
       supabase.removeChannel(servicesChannel);
+      supabase.removeChannel(categoriesChannel);
     };
   }, []);
 
@@ -135,7 +166,7 @@ export const AdminDashboard: React.FC = () => {
       Servicio: 'BLOQUEO DE HORARIO',
       fecha: selectedDate,
       hora: blockTime,
-      Estado: 'Confirmado',
+      Estado: 'Aceptada',
       notas: 'Horario bloqueado por administración'
     };
 
@@ -190,6 +221,57 @@ export const AdminDashboard: React.FC = () => {
     } else {
       toast.success('Servicio eliminado');
       fetchServices();
+    }
+  };
+
+  const handleSaveCategory = async () => {
+    if (!editingCategory.nombre) {
+      toast.error('El nombre de la categoría es obligatorio');
+      return;
+    }
+
+    const isNew = !editingCategory.id;
+    const oldName = editingCategory.id ? categories.find(c => c.id === editingCategory.id)?.nombre : null;
+
+    const { error } = await supabase
+      .from('categorias')
+      .upsert({
+        id: editingCategory.id || undefined,
+        nombre: editingCategory.nombre
+      });
+
+    if (error) {
+      toast.error('Error al guardar. ¿Creaste la tabla "categorias" en Supabase?');
+      console.error(error);
+    } else {
+      toast.success(isNew ? 'Categoría creada' : 'Categoría actualizada');
+      
+      if (!isNew && oldName && oldName !== editingCategory.nombre) {
+        await supabase
+          .from('servicios')
+          .update({ categoria: editingCategory.nombre })
+          .eq('categoria', oldName);
+        fetchServices();
+      }
+
+      setEditingCategory({ nombre: '' });
+      fetchCategories();
+    }
+  };
+
+  const handleDeleteCategory = async (id: string, nombre: string) => {
+    if (!window.confirm(`¿Estás seguro de eliminar la categoría "${nombre}"? Los servicios asociados mantendrán el nombre de la categoría pero ya no aparecerá en la lista principal.`)) return;
+
+    const { error } = await supabase
+      .from('categorias')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Error al eliminar la categoría');
+    } else {
+      toast.success('Categoría eliminada');
+      fetchCategories();
     }
   };
 
@@ -270,12 +352,12 @@ export const AdminDashboard: React.FC = () => {
                         <div className="flex items-center gap-5">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                             app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? "bg-red-500/10 text-red-600" :
-                            app.Estado === 'Confirmado' ? "bg-green-500/10 text-green-600" :
+                            app.Estado === 'Aceptada' ? "bg-green-500/10 text-green-600" :
                             app.Estado === 'Pendiente' ? "bg-yellow-500/10 text-yellow-600" :
                             "bg-gray-500/10 text-gray-600"
                           }`}>
                             {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? <Clock className="w-6 h-6" /> : 
-                             app.Estado === 'Confirmado' ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
+                             app.Estado === 'Aceptada' ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
                           </div>
                           <div>
                             <div className="flex items-center gap-3 mb-1">
@@ -307,23 +389,33 @@ export const AdminDashboard: React.FC = () => {
                           </div>
                           <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                             {app.Estado === 'Pendiente' && (
-                              <Button 
-                                size="sm" 
-                                className="bg-green-600 hover:bg-green-700 text-white rounded-full px-4 text-[10px] uppercase tracking-widest font-bold flex items-center gap-2"
-                                onClick={() => updateStatus(app.cita, 'Confirmado')}
-                              >
-                                <Check className="w-3 h-3" />
-                                Confirmar
-                              </Button>
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700 text-white rounded-full px-4 text-[10px] uppercase tracking-widest font-bold flex items-center gap-2"
+                                  onClick={() => updateStatus(app.cita, 'Aceptada')}
+                                >
+                                  <Check className="w-3 h-3" />
+                                  Aceptar
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  className="rounded-full px-4 text-[10px] uppercase tracking-widest font-bold border-[#E5D3B3]/30 text-[#5D4037]/60"
+                                  onClick={() => updateStatus(app.cita, 'Cancelada')}
+                                >
+                                  Cancelar
+                                </Button>
+                              </>
                             )}
-                            {app.Estado === 'Confirmado' && (
+                            {app.Estado === 'Aceptada' && (
                               <Button 
                                 size="sm" 
                                 variant="outline"
                                 className="rounded-full px-4 text-[10px] uppercase tracking-widest font-bold border-[#E5D3B3]/30 text-[#5D4037]/60"
-                                onClick={() => updateStatus(app.cita, 'Finalizado')}
+                                onClick={() => updateStatus(app.cita, 'Cancelada')}
                               >
-                                Finalizar
+                                Cancelar
                               </Button>
                             )}
                             <Button 
@@ -385,19 +477,31 @@ export const AdminDashboard: React.FC = () => {
             <div className="space-y-8">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <h2 className="text-2xl font-serif text-[#5D4037]">Gestión de Servicios</h2>
-                <div className="flex items-center gap-4 w-full md:w-auto">
+                <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="flex-1 md:flex-none bg-white border-none rounded-full px-4 h-10 text-xs text-[#5D4037] shadow-sm outline-none cursor-pointer"
                   >
-                    {['Todas', ...Array.from(new Set(services.map(s => s.categoria).filter(Boolean)))].map(cat => (
+                    <option value="Todas">Todas</option>
+                    {Array.from(new Set([...categories.map(c => c.nombre), ...services.map(s => s.categoria).filter(Boolean)])).map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
                   <Button 
                     onClick={() => {
+                      setIsManagingCategories(!isManagingCategories);
+                      setIsEditingService(false);
+                    }}
+                    variant="outline"
+                    className={`rounded-full px-6 h-10 uppercase tracking-widest text-[10px] font-bold whitespace-nowrap ${isManagingCategories ? 'bg-[#E5D3B3] text-[#5D4037] border-transparent' : 'border-[#E5D3B3]/30 text-[#5D4037]'}`}
+                  >
+                    Categorías
+                  </Button>
+                  <Button 
+                    onClick={() => {
                       setIsEditingService(true);
+                      setIsManagingCategories(false);
                       setCurrentService({ nombre: '', descripcion: '', categoria: '', precio: 0, duracion: '' });
                     }}
                     className="bg-[#5D4037] text-white rounded-full px-6 h-10 uppercase tracking-widest text-[10px] font-bold whitespace-nowrap"
@@ -406,6 +510,67 @@ export const AdminDashboard: React.FC = () => {
                   </Button>
                 </div>
               </div>
+
+              {isManagingCategories && (
+                <Card className="border-none shadow-lg bg-[#FAF9F6] rounded-3xl overflow-hidden mb-8">
+                  <CardContent className="p-8 space-y-6">
+                    <h3 className="text-xl font-serif text-[#5D4037]">Administrar Categorías</h3>
+                    
+                    <div className="flex gap-4 items-end">
+                      <div className="flex-1 space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest font-bold text-[#5D4037]/60">
+                          {editingCategory.id ? 'Editar Categoría' : 'Nueva Categoría'}
+                        </label>
+                        <Input 
+                          value={editingCategory.nombre || ''}
+                          onChange={(e) => setEditingCategory({...editingCategory, nombre: e.target.value})}
+                          className="bg-white border-none h-12 rounded-xl"
+                          placeholder="Ej: Faciales, Masajes..."
+                        />
+                      </div>
+                      <Button onClick={handleSaveCategory} className="bg-[#5D4037] text-white rounded-xl px-8 h-12 uppercase tracking-widest text-xs font-bold">
+                        {editingCategory.id ? 'Actualizar' : 'Añadir'}
+                      </Button>
+                      {editingCategory.id && (
+                        <Button onClick={() => setEditingCategory({ nombre: '' })} variant="ghost" className="text-[#5D4037]/60 rounded-xl px-4 h-12 uppercase tracking-widest text-xs font-bold">
+                          Cancelar
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="mt-8 space-y-3">
+                      <h4 className="text-[10px] uppercase tracking-widest font-bold text-[#5D4037]/40 mb-4">Categorías Existentes</h4>
+                      {categories.length === 0 ? (
+                        <p className="text-sm text-[#5D4037]/60 italic">No hay categorías creadas en la base de datos. (Asegúrate de crear la tabla "categorias" en Supabase).</p>
+                      ) : (
+                        categories.map(cat => (
+                          <div key={cat.id} className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm">
+                            <span className="font-medium text-[#5D4037]">{cat.nombre}</span>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-[#5D4037]/60 hover:text-[#5D4037]"
+                                onClick={() => setEditingCategory(cat)}
+                              >
+                                Editar
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => handleDeleteCategory(cat.id, cat.nombre)}
+                              >
+                                Eliminar
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {isEditingService && (
                 <Card className="border-none shadow-lg bg-[#FAF9F6] rounded-3xl overflow-hidden">
@@ -422,12 +587,16 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] uppercase tracking-widest font-bold text-[#5D4037]/60">Categoría</label>
-                        <Input 
+                        <select 
                           value={currentService.categoria}
                           onChange={(e) => setCurrentService({...currentService, categoria: e.target.value})}
-                          className="bg-white border-none h-12 rounded-xl"
-                          placeholder="Ej: Cabello, Uñas..."
-                        />
+                          className="w-full bg-white border-none h-12 rounded-xl px-3 text-sm text-[#5D4037] outline-none"
+                        >
+                          <option value="">Seleccionar categoría...</option>
+                          {Array.from(new Set([...categories.map(c => c.nombre), ...services.map(s => s.categoria).filter(Boolean)])).map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[10px] uppercase tracking-widest font-bold text-[#5D4037]/60">Precio ($)</label>
@@ -464,46 +633,48 @@ export const AdminDashboard: React.FC = () => {
                 </Card>
               )}
 
-              <div className="grid gap-4">
-                {(selectedCategory === 'Todas' ? services : services.filter(s => s.categoria === selectedCategory)).map((service) => (
-                  <Card key={service.id} className="border-none shadow-sm bg-white rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
-                    <CardContent className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
-                          <h3 className="text-lg font-serif text-[#5D4037]">{service.nombre}</h3>
-                          <span className="text-[8px] uppercase tracking-widest font-bold px-2 py-0.5 bg-[#E5D3B3]/20 text-[#8D6E63] rounded-full">{service.categoria}</span>
+              {!isManagingCategories && (
+                <div className="grid gap-4">
+                  {(selectedCategory === 'Todas' ? services : services.filter(s => s.categoria === selectedCategory)).map((service) => (
+                    <Card key={service.id} className="border-none shadow-sm bg-white rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
+                      <CardContent className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-1">
+                            <h3 className="text-lg font-serif text-[#5D4037]">{service.nombre}</h3>
+                            <span className="text-[8px] uppercase tracking-widest font-bold px-2 py-0.5 bg-[#E5D3B3]/20 text-[#8D6E63] rounded-full">{service.categoria}</span>
+                          </div>
+                          <p className="text-xs text-[#5D4037]/60 line-clamp-1 mb-2">{service.descripcion}</p>
+                          <div className="flex items-center gap-4 text-[10px] font-bold text-[#8D6E63] uppercase tracking-widest">
+                            <span>{service.duracion}</span>
+                            <span>${service.precio}</span>
+                          </div>
                         </div>
-                        <p className="text-xs text-[#5D4037]/60 line-clamp-1 mb-2">{service.descripcion}</p>
-                        <div className="flex items-center gap-4 text-[10px] font-bold text-[#8D6E63] uppercase tracking-widest">
-                          <span>{service.duracion}</span>
-                          <span>${service.precio}</span>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-[#5D4037]/60 hover:text-[#5D4037]"
+                            onClick={() => {
+                              setCurrentService(service);
+                              setIsEditingService(true);
+                            }}
+                          >
+                            Editar
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDeleteService(service.id)}
+                          >
+                            Eliminar
+                          </Button>
                         </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-[#5D4037]/60 hover:text-[#5D4037]"
-                          onClick={() => {
-                            setCurrentService(service);
-                            setIsEditingService(true);
-                          }}
-                        >
-                          Editar
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => handleDeleteService(service.id)}
-                        >
-                          Eliminar
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>

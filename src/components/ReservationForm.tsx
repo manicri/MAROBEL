@@ -37,7 +37,7 @@ interface Appointment {
   Servicio: string;
   fecha: string;
   hora: string;
-  Estado: 'Pendiente' | 'Confirmado' | 'Finalizado' | 'Cancelado';
+  Estado: 'Pendiente' | 'Aceptada' | 'Cancelada';
 }
 
 export default function ReservationForm() {
@@ -141,7 +141,13 @@ export default function ReservationForm() {
 
     if (error) {
       console.error("Error detallado de Supabase:", error);
-      toast.error(`Error BD: ${error.message || 'Revisa la consola para más detalles'}`);
+      if (error.code === '23505' || error.message.toLowerCase().includes('unique')) {
+        toast.error('Este horario acaba de ser reservado, elige otro', {
+          description: 'El horario seleccionado ya no está disponible.',
+        });
+      } else {
+        toast.error(`Error BD: ${error.message || 'Revisa la consola para más detalles'}`);
+      }
       return;
     }
 
@@ -163,17 +169,19 @@ export default function ReservationForm() {
     try {
       const { error } = await supabase
         .from('citas')
-        .delete()
+        .update({ Estado: 'Cancelada' })
         .eq('cita', id_de_la_cita);
       
       if (error) throw error;
       
       toast.success('Cita cancelada', {
-        description: 'Tu cita ha sido eliminada exitosamente.',
+        description: 'Tu cita ha sido cancelada exitosamente.',
       });
       
       // Actualización inmediata de la interfaz
-      setMyAppointments(prev => prev.filter(app => app.cita !== id_de_la_cita));
+      setMyAppointments(prev => prev.map(app => 
+        app.cita === id_de_la_cita ? { ...app, Estado: 'Cancelada' } : app
+      ));
     } catch (error) {
       console.error('Error cancelling appointment:', error);
       toast.error('Error', {
@@ -183,7 +191,14 @@ export default function ReservationForm() {
   };
 
   return (
-    <section id="reservas" className="py-32 bg-[#FAF9F6]">
+    <motion.section 
+      id="reservas" 
+      className="py-32 bg-[#FAF9F6]"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.6 }}
+    >
       <div className="container mx-auto px-6">
         <div className="max-w-5xl mx-auto">
           <div className="flex justify-center mb-16">
@@ -243,7 +258,7 @@ export default function ReservationForm() {
                     />
                     <div className="mt-8 flex gap-4 text-[10px] uppercase tracking-widest font-bold opacity-60">
                       <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/30"></span> Libre</div>
-                      <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/30"></span> Ocupado</div>
+                      <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-200 border border-gray-300"></span> Ocupado</div>
                       <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#E5D3B3]"></span> Tu Selección</div>
                     </div>
                   </div>
@@ -251,46 +266,69 @@ export default function ReservationForm() {
 
                 <Card className="border-none shadow-2xl bg-white rounded-3xl overflow-hidden">
                   <CardContent className="p-8 md:p-12">
-                    {!user ? (
-                      <div className="text-center py-16">
-                        <div className="w-20 h-20 bg-[#FAF9F6] rounded-full flex items-center justify-center mx-auto mb-8">
-                          <LogIn className="w-8 h-8 text-[#E5D3B3]" />
-                        </div>
-                        <h3 className="text-2xl font-serif text-[#5D4037] mb-4">Inicia sesión para continuar</h3>
-                        <p className="text-[#5D4037]/60 mb-10 font-light text-sm leading-relaxed">Para ofrecerte un servicio personalizado y gestionar tus citas, por favor ingresa con tu cuenta de Google.</p>
-                        <Button onClick={login} className="bg-[#5D4037] text-white rounded-full px-12 h-14 uppercase tracking-widest text-xs font-bold hover:scale-105 transition-transform">Ingresar con Google</Button>
-                      </div>
-                    ) : isSuccess ? (
-                      <div className="text-center py-16">
-                        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
-                          <CheckCircle2 className="w-10 h-10 text-green-500" />
-                        </div>
-                        <h3 className="text-3xl font-serif text-[#5D4037] mb-4">¡Reserva Confirmada!</h3>
-                        <p className="text-[#5D4037]/60 mb-10 font-light text-sm leading-relaxed">
-                          Tu cita ha sido agendada exitosamente. Te esperamos en Marobel Studio.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                          <Button 
-                            onClick={() => {
-                              setIsSuccess(false);
-                              setActiveTab('my-appointments');
-                            }} 
-                            className="bg-[#5D4037] text-white rounded-full px-8 h-12 uppercase tracking-widest text-xs font-bold"
-                          >
-                            Ver mis citas
-                          </Button>
-                          <Button 
-                            onClick={() => setIsSuccess(false)} 
-                            variant="outline"
-                            className="border-[#E5D3B3] text-[#5D4037] rounded-full px-8 h-12 uppercase tracking-widest text-xs font-bold"
-                          >
-                            Agendar otra
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                        <div className="grid md:grid-cols-2 gap-8">
+                    <AnimatePresence mode="wait">
+                      {!user ? (
+                        <motion.div
+                          key="login"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-center py-16"
+                        >
+                          <div className="w-20 h-20 bg-[#FAF9F6] rounded-full flex items-center justify-center mx-auto mb-8">
+                            <LogIn className="w-8 h-8 text-[#E5D3B3]" />
+                          </div>
+                          <h3 className="text-2xl font-serif text-[#5D4037] mb-4">Inicia sesión para continuar</h3>
+                          <p className="text-[#5D4037]/60 mb-10 font-light text-sm leading-relaxed">Para ofrecerte un servicio personalizado y gestionar tus citas, por favor ingresa con tu cuenta de Google.</p>
+                          <Button onClick={login} className="bg-[#5D4037] text-white rounded-full px-12 h-14 uppercase tracking-widest text-xs font-bold hover:scale-105 transition-transform">Ingresar con Google</Button>
+                        </motion.div>
+                      ) : isSuccess ? (
+                        <motion.div
+                          key="success"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-center py-16"
+                        >
+                          <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
+                            <CheckCircle2 className="w-10 h-10 text-green-500" />
+                          </div>
+                          <h3 className="text-3xl font-serif text-[#5D4037] mb-4">¡Reserva Confirmada!</h3>
+                          <p className="text-[#5D4037]/60 mb-10 font-light text-sm leading-relaxed">
+                            Tu cita ha sido agendada exitosamente. Te esperamos en Marobel Studio.
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Button 
+                              onClick={() => {
+                                setIsSuccess(false);
+                                setActiveTab('my-appointments');
+                              }} 
+                              className="bg-[#5D4037] text-white rounded-full px-8 h-12 uppercase tracking-widest text-xs font-bold"
+                            >
+                              Ver mis citas
+                            </Button>
+                            <Button 
+                              onClick={() => setIsSuccess(false)} 
+                              variant="outline"
+                              className="border-[#E5D3B3] text-[#5D4037] rounded-full px-8 h-12 uppercase tracking-widest text-xs font-bold"
+                            >
+                              Agendar otra
+                            </Button>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <motion.form 
+                          key="form"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.3 }}
+                          onSubmit={handleSubmit(onSubmit)} 
+                          className="space-y-8"
+                        >
+                          <div className="grid md:grid-cols-2 gap-8">
                           <div className="space-y-3">
                             <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Nombre</Label>
                             <div className="relative">
@@ -358,8 +396,9 @@ export default function ReservationForm() {
                         >
                           {isSubmitting ? 'Procesando...' : 'Confirmar Reserva'}
                         </Button>
-                      </form>
+                      </motion.form>
                     )}
+                    </AnimatePresence>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -391,13 +430,13 @@ export default function ReservationForm() {
                         <CardContent className="p-8 flex items-center justify-between">
                           <div className="flex items-center gap-6">
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                              app.Estado === 'Confirmado' ? "bg-green-500/10 text-green-600" :
+                              app.Estado === 'Aceptada' ? "bg-green-500/10 text-green-600" :
                               app.Estado === 'Pendiente' ? "bg-yellow-500/10 text-yellow-600" :
-                              app.Estado === 'Cancelado' ? "bg-red-500/10 text-red-600" :
+                              app.Estado === 'Cancelada' ? "bg-red-500/10 text-red-600" :
                               "bg-gray-500/10 text-gray-600"
                             }`}>
-                              {app.Estado === 'Confirmado' ? <CheckCircle2 className="w-7 h-7" /> : 
-                               app.Estado === 'Cancelado' ? <AlertCircle className="w-7 h-7" /> : 
+                              {app.Estado === 'Aceptada' ? <CheckCircle2 className="w-7 h-7" /> : 
+                               app.Estado === 'Cancelada' ? <AlertCircle className="w-7 h-7" /> : 
                                <Clock className="w-7 h-7" />}
                             </div>
                             <div>
@@ -407,14 +446,14 @@ export default function ReservationForm() {
                           </div>
                           <div className="text-right flex flex-col items-end gap-3">
                             <span className={`px-4 py-1.5 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold ${
-                              app.Estado === 'Confirmado' ? "bg-green-500 text-white" :
+                              app.Estado === 'Aceptada' ? "bg-green-500 text-white" :
                               app.Estado === 'Pendiente' ? "bg-yellow-500 text-white" :
-                              app.Estado === 'Cancelado' ? "bg-red-500 text-white" :
+                              app.Estado === 'Cancelada' ? "bg-red-500 text-white" :
                               "bg-gray-400 text-white"
                             }`}>
                               {app.Estado}
                             </span>
-                            {(app.Estado === 'Pendiente' || app.Estado === 'Confirmado') && (
+                            {(app.Estado === 'Pendiente' || app.Estado === 'Aceptada') && (
                               <button 
                                 onClick={() => handleCancelAppointment(app.cita)}
                                 className="text-[10px] uppercase tracking-widest font-bold text-red-500 hover:text-red-700 transition-colors"
@@ -433,6 +472,6 @@ export default function ReservationForm() {
           </AnimatePresence>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

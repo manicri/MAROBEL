@@ -34,6 +34,10 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
   :root {
     --background: #FAF9F6;
     --foreground: #5D4037;
