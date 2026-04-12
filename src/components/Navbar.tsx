@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { Menu, LogIn, LogOut, Bell, Settings } from "lucide-react";
+
+import { motion, AnimatePresence } from "motion/react";
+import { Menu, X, LogIn, LogOut, User as UserIcon, Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -32,10 +33,10 @@ function ProfileEditor() {
     setIsSaving(true);
     try {
       await updateProfile({ displayName, phone });
-      toast.success("Perfil actualizado");
+      toast.success("Perfil actualizado exitosamente");
       setIsOpen(false);
     } catch (error) {
-      toast.error("Error al actualizar");
+      toast.error("Error al actualizar el perfil");
     } finally {
       setIsSaving(false);
     }
@@ -43,14 +44,14 @@ function ProfileEditor() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger className="text-white/60 p-2 hover:text-white transition-colors">
+      <DialogTrigger className="text-white/60 hover:text-white hover:bg-white/5 p-2 rounded-md transition-colors">
         <Settings className="w-4 h-4" />
       </DialogTrigger>
-      <DialogContent className="bg-white text-[#5D4037]">
+      <DialogContent className="sm:max-w-[425px] bg-white text-[#5D4037]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-[#5D4037]">Mi Perfil</DialogTitle>
+          <DialogTitle className="font-serif text-2xl text-[#5D4037]">Mi Perfil</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-6 py-4">
           <div className="flex items-center gap-4 mb-2">
             <img 
               src={profile?.photoURL || ''} 
@@ -63,17 +64,34 @@ function ProfileEditor() {
             </div>
           </div>
           <div className="grid gap-2">
-            <Label>Nombre</Label>
-            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+            <Label htmlFor="name" className="text-xs uppercase tracking-widest font-bold text-[#5D4037]/70">Nombre</Label>
+            <Input
+              id="name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="bg-[#FAF9F6] border-none"
+            />
           </div>
           <div className="grid gap-2">
-            <Label>Teléfono</Label>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <Label htmlFor="phone" className="text-xs uppercase tracking-widest font-bold text-[#5D4037]/70">Teléfono / WhatsApp</Label>
+            <Input
+              id="phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="bg-[#FAF9F6] border-none"
+              placeholder="Ej. 0987654321"
+            />
           </div>
         </div>
-        <Button onClick={handleSave} disabled={isSaving} className="bg-[#5D4037] text-white">
-          {isSaving ? "Guardando..." : "Guardar"}
-        </Button>
+        <div className="flex justify-end">
+          <Button 
+            onClick={handleSave} 
+            disabled={isSaving}
+            className="bg-[#5D4037] text-white rounded-full px-8 uppercase tracking-widest text-xs font-bold"
+          >
+            {isSaving ? "Guardando..." : "Guardar Cambios"}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -84,30 +102,50 @@ export default function Navbar() {
   const { user, profile, login, logout, isAdmin } = useAuth();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? "bg-[#5D4037] py-2 shadow-lg" : "bg-black/40 py-4"
-    }`}>
+    <motion.nav
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
+        isScrolled 
+          ? "bg-[#5D4037] py-3 shadow-2xl" 
+          : "bg-gradient-to-b from-black/60 to-transparent py-6"
+      }`}
+    >
       <div className="container mx-auto px-6 flex items-center justify-between">
-        <a href="#inicio" className="flex items-center gap-2 text-white font-bold group">
-          <div className="w-10 h-10 rounded-full border border-white/50 overflow-hidden bg-white/10">
-            <img 
-              src="/logo.png" 
-              alt="Logo" 
-              className="w-full h-full object-contain"
-            />
+        <a 
+          href="#inicio" 
+          className={`text-2xl font-serif font-bold tracking-tighter transition-all duration-500 flex items-center gap-2 ${
+            isScrolled 
+              ? "text-[#E5D3B3] drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]" 
+              : "text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]"
+          }`}
+        >
+          <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
+            isScrolled ? "border-[#E5D3B3] bg-[#5D4037]" : "border-white bg-black/20 backdrop-blur-md"
+          }`}>
+            <span className="text-xs">M</span>
           </div>
-          <span className="tracking-tighter">MAROBEL</span>
+          <span className="hidden sm:inline">MAROBEL <span className="font-light italic">Studio</span></span>
         </a>
 
-        <div className="hidden md:flex items-center gap-8">
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center space-x-10">
           {navLinks.map((link) => (
-            <a key={link.name} href={link.href} className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold">
+            <a
+              key={link.name}
+              href={link.href}
+              className={`text-[10px] uppercase tracking-[0.4em] font-bold transition-all duration-500 ${
+                isScrolled ? "text-white/80 hover:text-[#E5D3B3]" : "text-white/90 hover:text-white"
+              }`}
+            >
               {link.name}
             </a>
           ))}
@@ -136,48 +174,64 @@ export default function Navbar() {
                 </div>
               </div>
             ) : (
-              <Button onClick={login} className="bg-[#E5D3B3] text-[#5D4037] hover:bg-white rounded-full text-xs uppercase tracking-widest font-bold">
-                <LogIn className="w-4 h-4 mr-2" /> Ingresar
+              <Button 
+                type="button"
+                onClick={login} 
+                className="bg-[#E5D3B3] text-[#5D4037] hover:bg-white rounded-full px-8 h-11 text-[10px] uppercase tracking-[0.2em] font-bold shadow-xl transition-all hover:scale-105"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Ingresar
               </Button>
             )}
           </div>
         </div>
 
         {/* Mobile Nav */}
-        <div className="md:hidden flex items-center gap-3">
-          {!user && (
-            <Button onClick={login} className="bg-[#E5D3B3] text-[#5D4037] hover:bg-white rounded-full h-8 px-3 text-[10px] uppercase tracking-widest font-bold">
-              Ingresar
-            </Button>
-          )}
+        <div className="md:hidden flex items-center gap-4">
           {user && (
-            <img src={user.user_metadata?.avatar_url || ''} className="w-8 h-8 rounded-full border border-[#E5D3B3]/30" alt="Avatar" />
+             <img 
+             src={user.user_metadata?.avatar_url || ''} 
+             className="w-8 h-8 rounded-full border border-[#E5D3B3]/30" 
+             alt="Avatar" 
+           />
           )}
           <Sheet>
-            <SheetTrigger className="text-white p-2">
+            <SheetTrigger className="text-white p-2 hover:bg-white/10 rounded-md transition-colors">
               <Menu className="w-6 h-6" />
             </SheetTrigger>
-            <SheetContent side="right" className="bg-[#5D4037] text-white">
-              <SheetTitle className="text-[#E5D3B3] font-serif text-2xl flex items-center gap-2 mt-4">
-                <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-full" /> MAROBEL
-              </SheetTitle>
-              <div className="flex flex-col space-y-6 mt-10">
+            <SheetContent side="right" className="bg-[#5D4037] border-l-[#E5D3B3]/20 text-white">
+              <SheetTitle className="text-[#E5D3B3] font-serif text-3xl mb-12 tracking-tighter">MAROBEL</SheetTitle>
+              <div className="flex flex-col space-y-8 mt-10">
                 {navLinks.map((link) => (
-                  <a key={link.name} href={link.href} className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold">
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    className="text-sm font-bold uppercase tracking-[0.3em] text-white/70 hover:text-[#E5D3B3] transition-colors"
+                  >
                     {link.name}
                   </a>
                 ))}
-                {isAdmin && <a href="#admin" className="text-sm uppercase tracking-widest text-yellow-500 font-bold">Admin</a>}
-                {user && (
-                  <Button onClick={logout} variant="outline" className="w-full mt-4 border-white/20 text-white">
-                    Cerrar Sesión
-                  </Button>
+                {isAdmin && (
+                  <a href="#admin" className="text-sm font-bold uppercase tracking-[0.3em] text-yellow-500">Panel Admin</a>
                 )}
+                <div className="pt-8 border-t border-white/10">
+                  {user ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl">
+                        <span className="text-xs uppercase tracking-widest font-bold">Mi Perfil</span>
+                        <ProfileEditor />
+                      </div>
+                      <Button onClick={logout} variant="outline" className="w-full border-white/20 text-white rounded-full h-12 uppercase tracking-widest text-xs">Cerrar Sesión</Button>
+                    </div>
+                  ) : (
+                    <Button type="button" onClick={login} className="w-full bg-[#E5D3B3] text-[#5D4037] rounded-full h-12 uppercase tracking-widest text-xs font-bold">Ingresar con Google</Button>
+                  )}
+                </div>
               </div>
             </SheetContent>
           </Sheet>
         </div>
       </div>
-    </nav>
+    </motion.nav>
   );
 }
