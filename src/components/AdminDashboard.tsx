@@ -37,6 +37,7 @@ export const AdminDashboard: React.FC = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isBlocking, setIsBlocking] = useState(false);
   const [blockTime, setBlockTime] = useState('09:00');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
 
   // Service Form State
   const [isEditingService, setIsEditingService] = useState(false);
@@ -206,7 +207,7 @@ export const AdminDashboard: React.FC = () => {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <h1 className="text-4xl font-serif text-[#5D4037] mb-2">Panel Administrativo</h1>
-          <p className="text-[#5D4037]/60 font-light italic">Gestión integral de Marobel Studio</p>
+          <p className="text-[#5D4037]/60 font-light italic">Gestión integral de Marobel</p>
         </div>
         <div className="flex flex-col md:flex-row gap-4 items-center">
           <div className="flex bg-[#E5D3B3]/10 p-1 rounded-full border border-[#E5D3B3]/20">
@@ -382,17 +383,28 @@ export const AdminDashboard: React.FC = () => {
             </>
           ) : (
             <div className="space-y-8">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <h2 className="text-2xl font-serif text-[#5D4037]">Gestión de Servicios</h2>
-                <Button 
-                  onClick={() => {
-                    setIsEditingService(true);
-                    setCurrentService({ nombre: '', descripcion: '', categoria: '', precio: 0, duracion: '' });
-                  }}
-                  className="bg-[#5D4037] text-white rounded-full px-6 h-10 uppercase tracking-widest text-[10px] font-bold"
-                >
-                  Nuevo Servicio
-                </Button>
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="flex-1 md:flex-none bg-white border-none rounded-full px-4 h-10 text-xs text-[#5D4037] shadow-sm outline-none cursor-pointer"
+                  >
+                    {['Todas', ...Array.from(new Set(services.map(s => s.categoria).filter(Boolean)))].map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  <Button 
+                    onClick={() => {
+                      setIsEditingService(true);
+                      setCurrentService({ nombre: '', descripcion: '', categoria: '', precio: 0, duracion: '' });
+                    }}
+                    className="bg-[#5D4037] text-white rounded-full px-6 h-10 uppercase tracking-widest text-[10px] font-bold whitespace-nowrap"
+                  >
+                    Nuevo Servicio
+                  </Button>
+                </div>
               </div>
 
               {isEditingService && (
@@ -453,7 +465,7 @@ export const AdminDashboard: React.FC = () => {
               )}
 
               <div className="grid gap-4">
-                {services.map((service) => (
+                {(selectedCategory === 'Todas' ? services : services.filter(s => s.categoria === selectedCategory)).map((service) => (
                   <Card key={service.id} className="border-none shadow-sm bg-white rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
                     <CardContent className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                       <div className="flex-1">

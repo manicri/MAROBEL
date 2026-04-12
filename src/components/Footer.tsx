@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
           <div className="space-y-8">
             <h3 className="text-3xl font-serif font-bold tracking-tighter text-[#E5D3B3]">
-              MAROBEL <span className="font-light italic text-white">Studio</span>
+              MAROBEL
             </h3>
             <p className="text-white/60 font-light leading-relaxed text-sm">
               Tu santuario de belleza y bienestar en Guayaquil. 
@@ -82,7 +82,7 @@ export default function Footer() {
         <Separator className="bg-white/10 mb-12" />
         
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-white/30 text-[10px] uppercase tracking-[0.3em] font-bold">
-          <p>© {new Date().getFullYear()} Marobel Studio. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} Marobel. Todos los derechos reservados.</p>
           <div className="flex gap-10">
             <a href="#" className="hover:text-white transition-colors">Privacidad</a>
             <a href="#" className="hover:text-white transition-colors">Términos</a>

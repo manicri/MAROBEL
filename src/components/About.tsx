@@ -15,7 +15,7 @@ export default function About() {
             <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
               <img
                 src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1920&auto=format&fit=crop"
-                alt="Marobel Studio Interior"
+                alt="Marobel Interior"
                 className="w-full h-[600px] object-cover"
                 referrerPolicy="no-referrer"
               />
@@ -30,7 +30,7 @@ export default function About() {
               className="absolute top-1/2 -right-12 bg-white p-8 rounded-2xl shadow-2xl z-20 hidden md:block max-w-[200px]"
             >
               <p className="text-4xl font-serif text-[#5D4037] mb-2">10+</p>
-              <p className="text-[10px] uppercase tracking-widest text-[#5D4037]/60 font-bold">Años de Excelencia en Belleza</p>
+              <p className="text-[10px] uppercase tracking-widest text-[#5D4037]/60 font-bold">Años de Excelencia</p>
             </motion.div>
           </motion.div>
 
@@ -48,7 +48,7 @@ export default function About() {
                 Donde la elegancia <br /> se encuentra con <br /> <span className="italic font-light">el bienestar</span>
               </h2>
               <p className="text-[#5D4037]/70 font-light leading-relaxed text-lg">
-                En Marobel Studio, creemos que la belleza es un reflejo de tu paz interior. 
+                En Marobel, creemos que la belleza es un reflejo de tu paz interior. 
                 Ubicados en el corazón de la Alborada, Guayaquil, hemos creado un espacio 
                 donde cada detalle está pensado para tu confort y transformación.
               </p>
@@ -79,7 +79,7 @@ export default function About() {
               <div className="p-8 bg-[#5D4037] rounded-3xl text-white relative overflow-hidden group">
                 <div className="relative z-10">
                   <p className="text-sm font-light italic mb-4 opacity-80">"Nuestra misión es que salgas de aquí sintiéndote la mejor versión de ti misma."</p>
-                  <p className="text-xs uppercase tracking-widest font-bold text-[#E5D3B3]">Fundadora de Marobel Studio</p>
+                  <p className="text-xs uppercase tracking-widest font-bold text-[#E5D3B3]">Fundadora de Marobel</p>
                 </div>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
               </div>

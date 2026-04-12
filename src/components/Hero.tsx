@@ -1,6 +1,25 @@
 import { motion } from "motion/react";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" }
+  },
+};
 
 export default function Hero() {
   return (
@@ -20,28 +39,25 @@ export default function Hero() {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
           >
-            <div className="flex items-center gap-3 mb-8">
-              <span className="h-[1px] w-12 bg-[#E5D3B3]"></span>
-              <span className="text-[#E5D3B3] font-medium tracking-[0.4em] uppercase text-[10px] sm:text-xs">
-                Guayaquil • Alborada
-              </span>
-            </div>
+            <motion.div variants={itemVariants} className="mb-12">
+              <span className="h-[1px] w-12 bg-[#E5D3B3] block"></span>
+            </motion.div>
             
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif text-white mb-8 leading-[0.9] tracking-tighter">
+            <motion.h1 variants={itemVariants} className="text-6xl md:text-8xl lg:text-9xl font-serif text-white mb-8 leading-[0.9] tracking-tighter">
               El arte de <br /> 
               <span className="text-[#E5D3B3] italic font-light">consentirte</span>
-            </h1>
+            </motion.h1>
             
-            <p className="text-lg md:text-xl text-white/70 mb-12 max-w-xl font-light leading-relaxed">
+            <motion.p variants={itemVariants} className="text-lg md:text-xl text-white/70 mb-12 max-w-xl font-light leading-relaxed">
               Descubre un refugio de serenidad donde la belleza y el bienestar se encuentran. 
               Tratamientos exclusivos diseñados para renovar tu cuerpo y alma.
-            </p>
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-6">
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-6">
               <a 
                 href="#reservas"
                 className="inline-flex items-center justify-center bg-[#E5D3B3] text-[#5D4037] hover:bg-white rounded-full px-10 h-16 text-xs uppercase tracking-[0.3em] font-bold shadow-2xl transition-all hover:scale-105"
@@ -55,7 +71,7 @@ export default function Hero() {
               >
                 Ver Servicios
               </a>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
@@ -64,10 +80,10 @@ export default function Hero() {
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 2 }}
+        transition={{ delay: 1.2, duration: 2 }}
         className="absolute bottom-12 right-12 hidden lg:flex items-center gap-4 text-white/20"
       >
-        <span className="text-[10px] uppercase tracking-[0.5em] [writing-mode:vertical-rl] rotate-180">Marobel Studio 2026</span>
+        <span className="text-[10px] uppercase tracking-[0.5em] [writing-mode:vertical-rl] rotate-180">Marobel 2026</span>
         <div className="h-24 w-[1px] bg-white/20"></div>
       </motion.div>
     </section>

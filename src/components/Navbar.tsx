@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import Logo from "./Logo";
 
 const navLinks = [
   { name: "Inicio", href: "#inicio" },
@@ -128,12 +129,16 @@ export default function Navbar() {
               : "text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]"
           }`}
         >
-          <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
+          <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-500 overflow-hidden ${
             isScrolled ? "border-[#E5D3B3] bg-[#5D4037]" : "border-white bg-black/20 backdrop-blur-md"
           }`}>
-            <span className="text-xs">M</span>
+            <img 
+              src="/logo.png" 
+              alt="Marobel Logo"
+              className="w-full h-full object-cover"
+            />
           </div>
-          <span className="hidden sm:inline">MAROBEL <span className="font-light italic">Studio</span></span>
+          <span className="hidden sm:inline">MAROBEL</span>
         </a>
 
         {/* Desktop Nav */}
@@ -200,7 +205,14 @@ export default function Navbar() {
               <Menu className="w-6 h-6" />
             </SheetTrigger>
             <SheetContent side="right" className="bg-[#5D4037] border-l-[#E5D3B3]/20 text-white">
-              <SheetTitle className="text-[#E5D3B3] font-serif text-3xl mb-12 tracking-tighter">MAROBEL</SheetTitle>
+              <SheetTitle className="text-[#E5D3B3] font-serif text-3xl mb-12 tracking-tighter flex items-center gap-3">
+                <img 
+                  src="/logo.png" 
+                  alt="Marobel Logo"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                MAROBEL
+              </SheetTitle>
               <div className="flex flex-col space-y-8 mt-10">
                 {navLinks.map((link) => (
                   <a
