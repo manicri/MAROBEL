@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+// CAMBIO 1: Usamos framer-motion en lugar de motion/react para mayor compatibilidad local
+import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, LogIn, LogOut, User as UserIcon, Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+// CAMBIO 2: Importamos las descripciones requeridas por shadcn/ui
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
@@ -51,6 +53,8 @@ function ProfileEditor() {
       <DialogContent className="sm:max-w-[425px] bg-white text-[#5D4037]">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl text-[#5D4037]">Mi Perfil</DialogTitle>
+          {/* Añadido para evitar errores de accesibilidad en Radix UI / shadcn */}
+          <DialogDescription className="hidden">Edita tu información personal</DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="flex items-center gap-4 mb-2">
@@ -225,14 +229,18 @@ export default function Navbar() {
               <Menu className="w-6 h-6" />
             </SheetTrigger>
             <SheetContent side="right" className="bg-[#5D4037] border-l-[#E5D3B3]/20 text-white">
-              <SheetTitle className="text-[#E5D3B3] font-serif text-3xl mb-12 tracking-tighter flex items-center gap-3">
-                <img 
-                  src="/logo.png" 
-                  alt="Marobel Logo"
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                MAROBEL
-              </SheetTitle>
+              <SheetHeader>
+                <SheetTitle className="text-[#E5D3B3] font-serif text-3xl mb-12 tracking-tighter flex items-center gap-3">
+                  <img 
+                    src="/logo.png" 
+                    alt="Marobel Logo"
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  MAROBEL
+                </SheetTitle>
+                {/* Añadido para evitar errores de accesibilidad en Radix UI / shadcn */}
+                <SheetDescription className="hidden">Menú de navegación móvil</SheetDescription>
+              </SheetHeader>
               <div className="flex flex-col space-y-8 mt-10">
                 {navLinks.map((link) => (
                   <motion.a
