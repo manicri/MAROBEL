@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "App user profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "client"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Booking record",
+      "type": "object",
+      "properties": {
+        "clientUid": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientEmail": { "type": "string" },
+        "service": { "type": "string" },
+        "category": { "type": "string" },
+        "specialist": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "time": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "completed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["clientUid", "service", "date", "time", "status"]
+    },
+    "Availability": {
+      "title": "Availability",
+      "description": "Blocked or booked slots for the calendar",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "time": { "type": "string" },
+        "isBlocked": { "type": "boolean" },
+        "appointmentId": { "type": "string" }
+      },
+      "required": ["date", "time"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/appointments/{appointmentId}": {
+      "schema": "Appointment",
+      "description": "All appointments"
+    },
+    "/availability/{slotId}": {
+      "schema": "Availability",
+      "description": "Calendar slot status"
+    }
+  }
+}

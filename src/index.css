@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+  --color-brand-cream: #E5D3B3;
+  --color-brand-brown: #5D4037;
+  --color-brand-offwhite: #FAF9F6;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-sm: calc(var(--radius) * 0.6);
+}
+
+@layer base {
+  :root {
+    --background: #FAF9F6;
+    --foreground: #5D4037;
+    --card: #FAF9F6;
+    --card-foreground: #5D4037;
+    --popover: #FAF9F6;
+    --popover-foreground: #5D4037;
+    --primary: #5D4037;
+    --primary-foreground: #FAF9F6;
+    --secondary: #E5D3B3;
+    --secondary-foreground: #5D4037;
+    --muted: #E5D3B3;
+    --muted-foreground: #5D4037;
+    --accent: #E5D3B3;
+    --accent-foreground: #5D4037;
+    --destructive: #ef4444;
+    --destructive-foreground: #FAF9F6;
+    --border: #E5D3B3;
+    --input: #E5D3B3;
+    --ring: #5D4037;
+    --radius: 0.75rem;
+  }
+
+  body {
+    @apply font-sans text-brand-brown bg-brand-offwhite;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
