@@ -33,7 +33,7 @@ export default function Navbar() {
       <div className="container mx-auto px-6 flex items-center justify-between">
         <a href="#inicio" className="text-2xl font-serif font-bold text-white flex items-center gap-2">
           <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20">
-            <img src="/logo.png" alt="Marobel Logo" className="w-full h-full object-cover" />
+            <img src="/logo.png" alt="Marobel Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
           </div>
           MAROBEL
         </a>
@@ -50,7 +50,7 @@ export default function Navbar() {
           )}
           {user ? (
             <div className="flex items-center gap-4">
-              <img src={user.user_metadata?.avatar_url || ''} className="w-8 h-8 rounded-full" alt="Avatar" />
+              <img src={user.user_metadata?.avatar_url || ''} className="w-8 h-8 rounded-full" alt="Avatar" referrerPolicy="no-referrer" />
               <Button variant="ghost" size="sm" onClick={logout} className="text-white hover:text-white hover:bg-white/10 transition-colors">
                 <LogOut className="w-4 h-4" />
               </Button>
@@ -70,7 +70,7 @@ export default function Navbar() {
             </Button>
           )}
           {user && (
-            <img src={user.user_metadata?.avatar_url || ''} className="w-8 h-8 rounded-full border border-[#E5D3B3]/30" alt="Avatar" />
+            <img src={user.user_metadata?.avatar_url || ''} className="w-8 h-8 rounded-full border border-[#E5D3B3]/30" alt="Avatar" referrerPolicy="no-referrer" />
           )}
           <Sheet>
             <SheetTrigger className="text-white p-2 hover:bg-white/10 rounded-md transition-colors">
@@ -78,7 +78,7 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="bg-[#5D4037] text-white border-l-[#E5D3B3]/20" aria-describedby={undefined}>
               <SheetTitle className="text-[#E5D3B3] font-serif text-2xl flex items-center gap-2 mt-4">
-                <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-full" /> MAROBEL
+                <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" /> MAROBEL
               </SheetTitle>
               <div className="flex flex-col space-y-6 mt-10">
                 {navLinks.map((link) => (
