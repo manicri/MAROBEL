@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion"; // Cambiado para asegurar compatibilidad
 import { Menu, X, LogIn, LogOut, User as UserIcon, Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import Logo from "./Logo";
 
 const navLinks = [
   { name: "Inicio", href: "#inicio" },
@@ -129,22 +128,28 @@ export default function Navbar() {
               : "text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]"
           }`}
         >
-          <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-500 overflow-hidden ${
+          {/* LOGO MEJORADO CON ANIMACIÓN */}
+          <motion.div 
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
+            className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-500 overflow-hidden ${
             isScrolled ? "border-[#E5D3B3] bg-[#5D4037]" : "border-white bg-black/20 backdrop-blur-md"
           }`}>
             <img 
               src="/logo.png" 
               alt="Marobel Logo"
               className="w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/40?text=M'; }} 
             />
-          </div>
+          </motion.div>
           <span className="hidden sm:inline">MAROBEL</span>
         </a>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-10">
           {navLinks.map((link) => (
-            <a
+            <motion.a
+              whileHover={{ y: -2 }}
               key={link.name}
               href={link.href}
               className={`text-[10px] uppercase tracking-[0.4em] font-bold transition-all duration-500 ${
@@ -152,7 +157,7 @@ export default function Navbar() {
               }`}
             >
               {link.name}
-            </a>
+            </motion.a>
           ))}
           
           {isAdmin && (
@@ -206,11 +211,11 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="bg-[#5D4037] border-l-[#E5D3B3]/20 text-white">
               <SheetTitle className="text-[#E5D3B3] font-serif text-3xl mb-12 tracking-tighter flex items-center gap-3">
-               <img 
-  src="/logo.png" 
-  alt="Marobel Logo" 
-  className="w-10 h-10 object-contain" 
-/>
+                <img 
+                  src="/logo.png" 
+                  alt="Marobel Logo" 
+                  className="w-10 h-10 object-contain" 
+                />
                 MAROBEL
               </SheetTitle>
               <div className="flex flex-col space-y-8 mt-10">
