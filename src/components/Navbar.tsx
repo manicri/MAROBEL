@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Menu, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
-  { name: "Inicio", href: "#inicio" },
-  { name: "Servicios", href: "#servicios" },
-  { name: "Reservas", href: "#reservas" },
+  { name: "Inicio", href: "/" },
+  { name: "Cabello", href: "/cabello" },
+  { name: "Uñas", href: "/unas" },
+  { name: "Estética Facial", href: "/estetica-facial" },
 ];
 
 export default function Navbar() {
@@ -31,22 +33,22 @@ export default function Navbar() {
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
-        <a href="#inicio" className="text-2xl font-serif font-bold text-white flex items-center gap-2">
+        <Link to="/" className="text-2xl font-serif font-bold text-white flex items-center gap-2">
           <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20">
             <img src="/logo.png" alt="Marobel Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
           </div>
           MAROBEL
-        </a>
+        </Link>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
-            <a key={link.name} href={link.href} className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold transition-colors">
+            <Link key={link.name} to={link.href} className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold transition-colors">
               {link.name}
-            </a>
+            </Link>
           ))}
           {isAdmin && (
-            <a href="#admin" className="text-xs uppercase tracking-widest text-yellow-500 hover:text-yellow-400 font-bold transition-colors">Admin</a>
+            <Link to="/admin" className="text-xs uppercase tracking-widest text-yellow-500 hover:text-yellow-400 font-bold transition-colors">Admin</Link>
           )}
           {user ? (
             <div className="flex items-center gap-4">
@@ -82,11 +84,11 @@ export default function Navbar() {
               </SheetTitle>
               <div className="flex flex-col space-y-6 mt-10">
                 {navLinks.map((link) => (
-                  <a key={link.name} href={link.href} className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold transition-colors">
+                  <Link key={link.name} to={link.href} className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold transition-colors">
                     {link.name}
-                  </a>
+                  </Link>
                 ))}
-                {isAdmin && <a href="#admin" className="text-sm uppercase tracking-widest text-yellow-500 hover:text-yellow-400 font-bold transition-colors">Admin</a>}
+                {isAdmin && <Link to="/admin" className="text-sm uppercase tracking-widest text-yellow-500 hover:text-yellow-400 font-bold transition-colors">Admin</Link>}
                 {user && (
                   <Button onClick={logout} variant="outline" className="w-full mt-4 border-white/20 text-white hover:bg-white/10 transition-colors">
                     Cerrar Sesión

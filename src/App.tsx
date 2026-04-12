@@ -3,63 +3,48 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import About from "./components/About";
-import Services from "./components/Services";
-import InstagramGallery from "./components/InstagramGallery";
-import ReservationForm from "./components/ReservationForm";
-import Footer from "./components/Footer";
-import WhatsAppButton from "./components/WhatsAppButton";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { SelectionProvider } from "./context/SelectionContext";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
+import Cabello from "./pages/Cabello";
+import Unas from "./pages/Unas";
+import EsteticaFacial from "./pages/EsteticaFacial";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { NotificationManager } from "./components/NotificationManager";
 import { Toaster } from "sonner";
-import React from 'react';
-
-function MainContent() {
-  const { isAdmin } = useAuth();
-  const [showAdmin, setShowAdmin] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleHash = () => setShowAdmin(window.location.hash === '#admin' || window.location.hash === '#admin-marobel');
-    window.addEventListener('hashchange', handleHash);
-    handleHash();
-    return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
-
-  if (showAdmin && isAdmin) {
-    return (
-      <div className="min-h-screen bg-brand-offwhite pt-32 pb-24 px-6">
-        <div className="container mx-auto">
-          <AdminDashboard />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <main>
-      <Hero />
-      <About />
-      <Services />
-      <InstagramGallery />
-      <ReservationForm />
-    </main>
-  );
-}
+import WhatsAppButton from "./components/WhatsAppButton";
+import Footer from "./components/Footer";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <NotificationManager />
-      <Toaster position="top-right" richColors closeButton />
-      <div className="min-h-screen selection:bg-brand-cream selection:text-brand-brown">
-        <Navbar />
-        <MainContent />
-        <Footer />
-        <WhatsAppButton />
-      </div>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <SelectionProvider>
+          <NotificationManager />
+          <Toaster position="top-right" richColors closeButton />
+          <div className="selection:bg-brand-cream selection:text-brand-brown">
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/cabello" element={<Cabello />} />
+                <Route path="/unas" element={<Unas />} />
+                <Route path="/estetica-facial" element={<EsteticaFacial />} />
+                <Route path="/admin" element={
+                  <div className="min-h-screen bg-brand-offwhite pt-32 pb-24 px-6">
+                    <div className="container mx-auto">
+                      <AdminDashboard />
+                    </div>
+                  </div>
+                } />
+              </Route>
+            </Routes>
+            <Footer />
+            <WhatsAppButton />
+          </div>
+        </SelectionProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
