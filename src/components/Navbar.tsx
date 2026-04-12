@@ -1,16 +1,13 @@
 import { useState, useEffect } from "react";
-// CAMBIO 1: Usamos framer-motion en lugar de motion/react para mayor compatibilidad local
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogIn, LogOut, User as UserIcon, Bell, Settings } from "lucide-react";
+import { motion } from "motion/react";
+import { Menu, LogIn, LogOut, Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-// CAMBIO 2: Importamos las descripciones requeridas por shadcn/ui
-import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader, SheetDescription } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import Logo from "./Logo";
 
 const navLinks = [
   { name: "Inicio", href: "#inicio" },
@@ -53,7 +50,6 @@ function ProfileEditor() {
       <DialogContent className="sm:max-w-[425px] bg-white text-[#5D4037]">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl text-[#5D4037]">Mi Perfil</DialogTitle>
-          {/* Añadido para evitar errores de accesibilidad en Radix UI / shadcn */}
           <DialogDescription className="hidden">Edita tu información personal</DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
@@ -238,7 +234,6 @@ export default function Navbar() {
                   />
                   MAROBEL
                 </SheetTitle>
-                {/* Añadido para evitar errores de accesibilidad en Radix UI / shadcn */}
                 <SheetDescription className="hidden">Menú de navegación móvil</SheetDescription>
               </SheetHeader>
               <div className="flex flex-col space-y-8 mt-10">
