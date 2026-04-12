@@ -9,6 +9,46 @@ export function NotificationManager() {
   useEffect(() => {
     if (!user) return;
 
+    // Check for upcoming appointments (reminders)
+    const checkUpcomingAppointments = async () => {
+      if (isAdmin) return; // Admins don't need personal reminders here
+
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const todayStr = today.toISOString().split('T')[0];
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+      const { data, error } = await supabase
+        .from('citas')
+        .select('*')
+        .eq('cliente_email', user.email)
+        .eq('Estado', 'Aceptada')
+        .in('fecha', [todayStr, tomorrowStr]);
+
+      if (error || !data) return;
+
+      data.forEach(app => {
+        // Use localStorage to avoid spamming the reminder on every reload
+        const reminderKey = `reminder_${app.cita}_${app.fecha}`;
+        if (!localStorage.getItem(reminderKey)) {
+          const isToday = app.fecha === todayStr;
+          const dayText = isToday ? 'HOY' : 'MAÑANA';
+          
+          toast('¡Recordatorio de Cita!', {
+            description: `Tienes una cita para ${app.Servicio} ${dayText} a las ${app.hora}. ¡Te esperamos!`,
+            duration: 10000,
+            icon: '📅',
+          });
+          
+          localStorage.setItem(reminderKey, 'true');
+        }
+      });
+    };
+
+    checkUpcomingAppointments();
+
     // Client notifications: Listen for updates on their own appointments
     const clientChannel = supabase
       .channel('client_notifications')

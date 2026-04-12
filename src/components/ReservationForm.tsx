@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircle, Calendar as CalendarIcon, Clock, User, LogIn, CheckCircle2, AlertCircle, Scissors, Sparkles, Heart } from "lucide-react";
+import { MessageCircle, Calendar as CalendarIcon, Clock, User, LogIn, CheckCircle2, AlertCircle, Scissors, Sparkles, Heart, Lock, Check } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Calendar } from "./Calendar";
 import { supabase } from "../supabase";
@@ -242,24 +242,40 @@ export default function ReservationForm() {
                   </div>
                   
                   <div className="bg-white p-8 rounded-3xl shadow-xl border border-[#E5D3B3]/10">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
                       <Label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/60">1. Seleccionar Fecha</Label>
-                      <input 
-                        type="date" 
-                        value={selectedDate} 
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        className="bg-[#FAF9F6] border-none rounded-lg p-2 text-xs font-bold text-[#5D4037] outline-none"
-                      />
+                      <div className="relative">
+                        <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
+                        <input 
+                          type="date" 
+                          value={selectedDate} 
+                          onChange={(e) => setSelectedDate(e.target.value)}
+                          className="bg-[#5D4037] text-white border-none rounded-xl pl-12 pr-4 py-3 text-sm font-bold outline-none shadow-md cursor-pointer hover:bg-[#4a332c] transition-colors w-full sm:w-auto"
+                        />
+                      </div>
                     </div>
                     <Calendar 
                       selectedDate={selectedDate} 
                       selectedTime={selectedTime} 
                       onSelectSlot={setSelectedTime} 
                     />
-                    <div className="mt-8 flex gap-4 text-[10px] uppercase tracking-widest font-bold opacity-60">
-                      <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/30"></span> Libre</div>
-                      <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-200 border border-gray-300"></span> Ocupado</div>
-                      <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#E5D3B3]"></span> Tu Selección</div>
+                    <div className="mt-8 flex flex-wrap gap-6 text-[10px] uppercase tracking-widest font-bold opacity-80 border-t border-[#E5D3B3]/20 pt-6">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-white border-2 border-[#E5D3B3]/50 shadow-sm"></span> 
+                        <span className="text-[#5D4037]">Libre</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-gray-50 border-2 border-gray-200 flex items-center justify-center">
+                          <Lock className="w-2.5 h-2.5 text-gray-400" />
+                        </span> 
+                        <span className="text-gray-500">Ocupado</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-[#E5D3B3] border-2 border-[#5D4037] flex items-center justify-center shadow-md">
+                          <Check className="w-2.5 h-2.5 text-[#5D4037]" />
+                        </span> 
+                        <span className="text-[#5D4037]">Tu Selección</span>
+                      </div>
                     </div>
                   </div>
                 </div>

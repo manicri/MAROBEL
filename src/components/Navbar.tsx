@@ -1,4 +1,4 @@
-
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, LogIn, LogOut, User as UserIcon, Bell, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import Logo from "./Logo";
 
 const navLinks = [
   { name: "Inicio", href: "#inicio" },
@@ -128,30 +129,45 @@ export default function Navbar() {
               : "text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]"
           }`}
         >
-          <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-500 ${
+          <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-500 overflow-hidden ${
             isScrolled ? "border-[#E5D3B3] bg-[#5D4037]" : "border-white bg-black/20 backdrop-blur-md"
           }`}>
-            <span className="text-xs">M</span>
+            <img 
+              src="/logo.png" 
+              alt="Marobel Logo"
+              className="w-full h-full object-cover"
+            />
           </div>
-          <span className="hidden sm:inline">MAROBEL <span className="font-light italic">Studio</span></span>
+          <span className="hidden sm:inline">MAROBEL</span>
         </a>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-10">
           {navLinks.map((link) => (
-            <a
+            <motion.a
               key={link.name}
               href={link.href}
-              className={`text-[10px] uppercase tracking-[0.4em] font-bold transition-all duration-500 ${
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`relative text-[10px] uppercase tracking-[0.4em] font-bold transition-colors duration-300 group ${
                 isScrolled ? "text-white/80 hover:text-[#E5D3B3]" : "text-white/90 hover:text-white"
               }`}
             >
               {link.name}
-            </a>
+              <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-[#E5D3B3] transition-all duration-300 group-hover:w-full"></span>
+            </motion.a>
           ))}
           
           {isAdmin && (
-            <a href="#admin" className="text-[10px] uppercase tracking-[0.4em] font-bold text-yellow-500 hover:text-yellow-400">Admin</a>
+            <motion.a 
+              href="#admin" 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative text-[10px] uppercase tracking-[0.4em] font-bold text-yellow-500 hover:text-yellow-400 transition-colors duration-300 group"
+            >
+              Admin
+              <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-yellow-500 transition-all duration-300 group-hover:w-full"></span>
+            </motion.a>
           )}
 
           <div className="flex items-center gap-6">
@@ -187,7 +203,16 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Nav */}
-        <div className="md:hidden flex items-center gap-4">
+        <div className="md:hidden flex items-center gap-3">
+          {!user && (
+            <Button 
+              type="button"
+              onClick={login} 
+              className="bg-[#E5D3B3] text-[#5D4037] hover:bg-white rounded-full px-4 h-9 text-[10px] uppercase tracking-[0.2em] font-bold shadow-xl transition-all"
+            >
+              Ingresar
+            </Button>
+          )}
           {user && (
              <img 
              src={user.user_metadata?.avatar_url || ''} 
@@ -200,19 +225,35 @@ export default function Navbar() {
               <Menu className="w-6 h-6" />
             </SheetTrigger>
             <SheetContent side="right" className="bg-[#5D4037] border-l-[#E5D3B3]/20 text-white">
-              <SheetTitle className="text-[#E5D3B3] font-serif text-3xl mb-12 tracking-tighter">MAROBEL</SheetTitle>
+              <SheetTitle className="text-[#E5D3B3] font-serif text-3xl mb-12 tracking-tighter flex items-center gap-3">
+                <img 
+                  src="/logo.png" 
+                  alt="Marobel Logo"
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                MAROBEL
+              </SheetTitle>
               <div className="flex flex-col space-y-8 mt-10">
                 {navLinks.map((link) => (
-                  <a
+                  <motion.a
                     key={link.name}
                     href={link.href}
+                    whileHover={{ x: 10 }}
+                    whileTap={{ scale: 0.95 }}
                     className="text-sm font-bold uppercase tracking-[0.3em] text-white/70 hover:text-[#E5D3B3] transition-colors"
                   >
                     {link.name}
-                  </a>
+                  </motion.a>
                 ))}
                 {isAdmin && (
-                  <a href="#admin" className="text-sm font-bold uppercase tracking-[0.3em] text-yellow-500">Panel Admin</a>
+                  <motion.a 
+                    href="#admin" 
+                    whileHover={{ x: 10 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="text-sm font-bold uppercase tracking-[0.3em] text-yellow-500"
+                  >
+                    Panel Admin
+                  </motion.a>
                 )}
                 <div className="pt-8 border-t border-white/10">
                   {user ? (
