@@ -15,39 +15,38 @@ export default function Navbar() {
   const { user, login, logout, isAdmin } = useAuth();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? "bg-[#5D4037] py-3 shadow-xl" 
-          : "bg-black/40 py-6"
-      }`}
-    >
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled ? "bg-[#5D4037] py-2 shadow-lg" : "bg-black/40 py-4"
+    }`}>
       <div className="container mx-auto px-6 flex items-center justify-between">
-        <a href="#inicio" className="text-2xl font-serif font-bold text-white flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20">
-            <img src="/logo.png" alt="Marobel Logo" className="w-full h-full object-cover" />
+        <a href="#inicio" className="flex items-center gap-2 text-white font-bold group">
+          <div className="w-10 h-10 rounded-full border border-white/50 overflow-hidden bg-white/10">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
-          MAROBEL
+          <span className="tracking-tighter">MAROBEL</span>
         </a>
 
-        {/* Menú de Computadora */}
-        <div className="hidden md:flex items-center space-x-8">
+        <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <a key={link.name} href={link.href} className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold">
               {link.name}
             </a>
           ))}
+          
           {isAdmin && (
-            <a href="#admin" className="text-xs uppercase tracking-widest text-yellow-500 font-bold">Admin</a>
+            <a href="#admin" className="text-[10px] uppercase tracking-[0.4em] font-bold text-yellow-500 hover:text-yellow-400">Admin</a>
           )}
+
           {user ? (
             <div className="flex items-center gap-4">
               <img src={user.user_metadata?.avatar_url || ''} className="w-8 h-8 rounded-full" alt="Avatar" />
@@ -62,20 +61,11 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Menú de Celular (Con el botón arreglado) */}
-        <div className="md:hidden flex items-center gap-3">
-          
-          {/* Este es el botón de ingresar que ahora sí se verá en celulares */}
-          {!user && (
-            <Button onClick={login} className="bg-[#E5D3B3] text-[#5D4037] hover:bg-white rounded-full h-8 px-4 text-[10px] uppercase tracking-widest font-bold">
-              Ingresar
-            </Button>
-          )}
-          
+        {/* Mobile Nav */}
+        <div className="md:hidden flex items-center gap-4">
           {user && (
             <img src={user.user_metadata?.avatar_url || ''} className="w-8 h-8 rounded-full border border-[#E5D3B3]/30" alt="Avatar" />
           )}
-          
           <Sheet>
             <SheetTrigger className="text-white p-2">
               <Menu className="w-6 h-6" />
@@ -91,10 +81,12 @@ export default function Navbar() {
                   </a>
                 ))}
                 {isAdmin && <a href="#admin" className="text-sm uppercase tracking-widest text-yellow-500 font-bold">Admin</a>}
-                {user && (
+                {user ? (
                   <Button onClick={logout} variant="outline" className="w-full mt-4 border-white/20 text-white">
                     Cerrar Sesión
                   </Button>
+                ) : (
+                  <Button onClick={login} className="w-full bg-[#E5D3B3] text-[#5D4037] mt-4">Ingresar</Button>
                 )}
               </div>
             </SheetContent>
