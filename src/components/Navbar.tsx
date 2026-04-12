@@ -144,19 +144,30 @@ export default function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-10">
           {navLinks.map((link) => (
-            <a
+            <motion.a
               key={link.name}
               href={link.href}
-              className={`text-[10px] uppercase tracking-[0.4em] font-bold transition-all duration-500 ${
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`relative text-[10px] uppercase tracking-[0.4em] font-bold transition-colors duration-300 group ${
                 isScrolled ? "text-white/80 hover:text-[#E5D3B3]" : "text-white/90 hover:text-white"
               }`}
             >
               {link.name}
-            </a>
+              <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-[#E5D3B3] transition-all duration-300 group-hover:w-full"></span>
+            </motion.a>
           ))}
           
           {isAdmin && (
-            <a href="#admin" className="text-[10px] uppercase tracking-[0.4em] font-bold text-yellow-500 hover:text-yellow-400">Admin</a>
+            <motion.a 
+              href="#admin" 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative text-[10px] uppercase tracking-[0.4em] font-bold text-yellow-500 hover:text-yellow-400 transition-colors duration-300 group"
+            >
+              Admin
+              <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-yellow-500 transition-all duration-300 group-hover:w-full"></span>
+            </motion.a>
           )}
 
           <div className="flex items-center gap-6">
@@ -192,7 +203,16 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Nav */}
-        <div className="md:hidden flex items-center gap-4">
+        <div className="md:hidden flex items-center gap-3">
+          {!user && (
+            <Button 
+              type="button"
+              onClick={login} 
+              className="bg-[#E5D3B3] text-[#5D4037] hover:bg-white rounded-full px-4 h-9 text-[10px] uppercase tracking-[0.2em] font-bold shadow-xl transition-all"
+            >
+              Ingresar
+            </Button>
+          )}
           {user && (
              <img 
              src={user.user_metadata?.avatar_url || ''} 
@@ -215,16 +235,25 @@ export default function Navbar() {
               </SheetTitle>
               <div className="flex flex-col space-y-8 mt-10">
                 {navLinks.map((link) => (
-                  <a
+                  <motion.a
                     key={link.name}
                     href={link.href}
+                    whileHover={{ x: 10 }}
+                    whileTap={{ scale: 0.95 }}
                     className="text-sm font-bold uppercase tracking-[0.3em] text-white/70 hover:text-[#E5D3B3] transition-colors"
                   >
                     {link.name}
-                  </a>
+                  </motion.a>
                 ))}
                 {isAdmin && (
-                  <a href="#admin" className="text-sm font-bold uppercase tracking-[0.3em] text-yellow-500">Panel Admin</a>
+                  <motion.a 
+                    href="#admin" 
+                    whileHover={{ x: 10 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="text-sm font-bold uppercase tracking-[0.3em] text-yellow-500"
+                  >
+                    Panel Admin
+                  </motion.a>
                 )}
                 <div className="pt-8 border-t border-white/10">
                   {user ? (
