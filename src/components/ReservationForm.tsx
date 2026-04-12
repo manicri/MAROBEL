@@ -149,7 +149,7 @@ export default function ReservationForm() {
     reset();
     setSelectedTime(null);
     const text = `Hola Marobel Studio! Acabo de agendar una cita.%0A%0A*Nombre:* ${data.nombre}%0A*Servicio:* ${data.servicio}%0A*Fecha:* ${data.date}%0A*Hora:* ${data.time}`;
-    window.open(`https://wa.me/593900000000?text=${text}`, "_blank");
+    window.open(`https://wa.me/593969272530?text=${text}`, "_blank");
     setIsSuccess(true);
   };
 
