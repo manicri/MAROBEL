@@ -10,6 +10,7 @@ const navLinks = [
   { name: "Cabello", href: "/cabello" },
   { name: "Uñas", href: "/unas" },
   { name: "Estética Facial", href: "/estetica-facial" },
+  { name: "Rituales", href: "/rituales" },
 ];
 
 export default function Navbar() {

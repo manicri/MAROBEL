@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import Cabello from "./pages/Cabello";
 import Unas from "./pages/Unas";
 import EsteticaFacial from "./pages/EsteticaFacial";
+import Rituales from "./pages/Rituales";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { NotificationManager } from "./components/NotificationManager";
 import { Toaster } from "sonner";
@@ -31,6 +32,7 @@ export default function App() {
                 <Route path="/cabello" element={<Cabello />} />
                 <Route path="/unas" element={<Unas />} />
                 <Route path="/estetica-facial" element={<EsteticaFacial />} />
+                <Route path="/rituales" element={<Rituales />} />
                 <Route path="/admin" element={
                   <div className="min-h-screen bg-brand-offwhite pt-32 pb-24 px-6">
                     <div className="container mx-auto">

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import ServiceCard from '../components/ServiceCard';
 import FloatingReservationButton from '../components/FloatingReservationButton';
+import { ServiceSidebar } from '../components/ServiceSidebar';
 import { ServiceItem } from '../context/SelectionContext';
 
 const CABELLO_SERVICES: ServiceItem[] = [
@@ -27,10 +28,13 @@ export default function Cabello() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {CABELLO_SERVICES.map((service) => (
-            <ServiceCard key={service.id} service={service} />
-          ))}
+        <div className="flex flex-col md:flex-row gap-8">
+          <ServiceSidebar />
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+            {CABELLO_SERVICES.map((service) => (
+              <ServiceCard key={service.id} service={service} />
+            ))}
+          </div>
         </div>
       </div>
       <FloatingReservationButton />

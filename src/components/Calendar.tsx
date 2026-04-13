@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabase';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Lock, Check } from 'lucide-react';
 
@@ -19,7 +19,7 @@ interface CalendarProps {
 }
 
 export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, selectedTime, isAdmin }) => {
-  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [citasDelDia, setCitasDelDia] = useState<{hora: string, Estado: string}[]>([]);
 
   const getHours = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -29,15 +29,14 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
     return Array.from({ length: 18 - start + 1 }, (_, i) => `${i + start}:00`);
   };
 
-  const hours = getHours(selectedDate);
+  const hours = useMemo(() => getHours(selectedDate), [selectedDate]);
 
   useEffect(() => {
     const fetchBookedSlots = async () => {
       const { data, error } = await supabase
         .from('citas')
-        .select('hora')
-        .eq('fecha', selectedDate)
-        .in('Estado', ['Aceptada', 'Pendiente']);
+        .select('hora, Estado')
+        .eq('fecha', selectedDate);
       
       if (error) {
         console.error('Error fetching booked slots:', error);
@@ -45,7 +44,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
       }
 
       if (data) {
-        setBookedSlots(data.map(d => d.hora));
+        setCitasDelDia(data);
       }
     };
 
@@ -63,6 +62,12 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
       supabase.removeChannel(channel);
     };
   }, [selectedDate]);
+
+  const bookedSlots = useMemo(() => {
+    return citasDelDia
+      .filter(cita => cita.Estado === 'Aceptada')
+      .map(cita => cita.hora);
+  }, [citasDelDia]);
 
   return (
     <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">

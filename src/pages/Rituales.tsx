@@ -4,14 +4,13 @@ import FloatingReservationButton from '../components/FloatingReservationButton';
 import { ServiceSidebar } from '../components/ServiceSidebar';
 import { ServiceItem } from '../context/SelectionContext';
 
-const FACIAL_SERVICES: ServiceItem[] = [
-  { id: 'f1', name: 'Limpieza Facial Profunda', price: 50, category: 'estetica-facial' },
-  { id: 'f2', name: 'Tratamiento Anti-Edad', price: 85, category: 'estetica-facial' },
-  { id: 'f3', name: 'Peeling Químico', price: 110, category: 'estetica-facial' },
-  { id: 'f4', name: 'Hidratación Intensiva', price: 60, category: 'estetica-facial' },
+const RITUALES_SERVICES: ServiceItem[] = [
+  { id: 'r1', name: 'Ritual Relajante', price: 60, category: 'rituales' },
+  { id: 'r2', name: 'Ritual Renovador', price: 90, category: 'rituales' },
+  { id: 'r3', name: 'Ritual Marobel', price: 150, category: 'rituales' },
 ];
 
-export default function EsteticaFacial() {
+export default function Rituales() {
   return (
     <div className="pt-32 pb-24 px-6 min-h-screen bg-stone-50">
       <div className="container mx-auto max-w-6xl">
@@ -21,17 +20,17 @@ export default function EsteticaFacial() {
           className="text-center mb-16"
         >
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#5D4037] mb-4">
-            Estética Facial
+            Rituales
           </h1>
           <p className="text-stone-600 max-w-2xl mx-auto">
-            Rejuvenece y cuida tu piel con nuestros tratamientos faciales avanzados. Resultados visibles desde la primera sesión.
+            Desconecta del mundo y reconecta contigo misma con nuestros rituales exclusivos de relajación y belleza.
           </p>
         </motion.div>
 
         <div className="flex flex-col md:flex-row gap-8">
           <ServiceSidebar />
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-            {FACIAL_SERVICES.map((service) => (
+            {RITUALES_SERVICES.map((service) => (
               <ServiceCard key={service.id} service={service} />
             ))}
           </div>

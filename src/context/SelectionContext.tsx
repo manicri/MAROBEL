@@ -4,7 +4,7 @@ export interface ServiceItem {
   id: string;
   name: string;
   price: number;
-  category: 'cabello' | 'unas' | 'estetica-facial';
+  category: 'cabello' | 'unas' | 'estetica-facial' | 'rituales';
 }
 
 interface SelectionContextType {

@@ -39,6 +39,8 @@ export default function ReservationForm() {
   const [activeTab, setActiveTab] = React.useState<'reserve' | 'my-appointments'>('reserve');
   const [isSuccess, setIsSuccess] = React.useState(false);
 
+  const [showTransferModal, setShowTransferModal] = React.useState(false);
+
   const {
     register,
     handleSubmit,
@@ -395,6 +397,36 @@ export default function ReservationForm() {
                             />
                           </div>
 
+                          <div className="space-y-4 pt-4 border-t border-[#E5D3B3]/20">
+                            <Label className="text-[#5D4037] font-serif text-lg block">¿Deseas asegurar tu cita con un adelanto?</Label>
+                            <p className="text-xs text-[#5D4037]/60 mb-4">Asegura tu espacio realizando un abono previo.</p>
+                            
+                            <div className="grid sm:grid-cols-2 gap-4">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowTransferModal(true)}
+                                className="h-14 rounded-xl border-[#E5D3B3] text-[#5D4037] hover:bg-[#E5D3B3]/10"
+                              >
+                                Transferencia Bancaria
+                              </Button>
+                              
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                  toast.info('CONSULTA TÉCNICA OBLIGATORIA', {
+                                    description: 'Antes de escribir el código de pago por tarjeta, dime qué credenciales, SDKs o pasarelas de pago (Stripe, Mercado Pago, etc.) necesitas que yo te proporcione para que el botón sea 100% funcional y seguro.',
+                                    duration: 8000
+                                  });
+                                }}
+                                className="h-14 rounded-xl border-[#E5D3B3] text-[#5D4037] hover:bg-[#E5D3B3]/10"
+                              >
+                                Tarjeta de Crédito/Débito
+                              </Button>
+                            </div>
+                          </div>
+
                           <Button 
                             type="submit" 
                             disabled={isSubmitting || !selectedTime || selectedServices.length === 0} 
@@ -478,6 +510,59 @@ export default function ReservationForm() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Transfer Modal */}
+      <AnimatePresence>
+        {showTransferModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowTransferModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <h3 className="text-2xl font-serif text-[#5D4037] mb-2">Datos Bancarios</h3>
+              <p className="text-sm text-[#5D4037]/60 mb-6">Realiza tu transferencia para asegurar la cita.</p>
+              
+              <div className="bg-[#FAF9F6] p-4 rounded-xl space-y-2 mb-6 text-sm text-[#5D4037]">
+                <p><span className="font-bold">Banco:</span> Pichincha</p>
+                <p><span className="font-bold">Cuenta Ahorros:</span> 2200000000</p>
+                <p><span className="font-bold">Nombre:</span> Marobel Studio</p>
+                <p><span className="font-bold">CI/RUC:</span> 1700000000</p>
+              </div>
+
+              <div className="space-y-4">
+                <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Comprobante de Pago</Label>
+                <div className="border-2 border-dashed border-[#E5D3B3] rounded-xl p-6 text-center hover:bg-[#FAF9F6] transition-colors cursor-pointer" onClick={() => document.getElementById('modal-comprobante')?.click()}>
+                  <p className="text-sm text-[#5D4037]/60">Haz clic para subir tu comprobante (JPG, PNG, PDF)</p>
+                  <input type="file" id="modal-comprobante" className="hidden" accept="image/*,.pdf" onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      toast.success('Comprobante adjuntado correctamente');
+                      setShowTransferModal(false);
+                    }
+                  }} />
+                </div>
+              </div>
+
+              <div className="mt-8 flex gap-3">
+                <Button onClick={() => setShowTransferModal(false)} variant="outline" className="flex-1 rounded-full border-[#E5D3B3] text-[#5D4037]">
+                  Cancelar
+                </Button>
+                <Button onClick={() => setShowTransferModal(false)} className="flex-1 rounded-full bg-[#5D4037] text-white">
+                  Listo
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 }

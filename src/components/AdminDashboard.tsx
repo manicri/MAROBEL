@@ -139,6 +139,9 @@ export const AdminDashboard: React.FC = () => {
     
     if (error) {
       console.error('Error updating status:', error);
+      toast.error(`Error al actualizar: ${error.message}`);
+    } else {
+      toast.success(`Cita ${Estado.toLowerCase()} correctamente`);
     }
   };
 
