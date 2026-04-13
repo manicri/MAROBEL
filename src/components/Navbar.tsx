@@ -5,14 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 
-const navLinks = [
-  { name: "Inicio", href: "/" },
-  { name: "Cabello", href: "/cabello" },
-  { name: "Uñas", href: "/unas" },
-  { name: "Estética Facial", href: "/estetica-facial" },
-  { name: "Rituales", href: "/rituales" },
-];
-
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, login, logout, isAdmin } = useAuth();
@@ -43,11 +35,6 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-8">
-          {navLinks.map((link) => (
-            <Link key={link.name} to={link.href} className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold transition-colors">
-              {link.name}
-            </Link>
-          ))}
           {isAdmin && (
             <Link to="/admin" className="text-xs uppercase tracking-widest text-yellow-500 hover:text-yellow-400 font-bold transition-colors">Admin</Link>
           )}
@@ -84,11 +71,6 @@ export default function Navbar() {
                 <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" /> MAROBEL
               </SheetTitle>
               <div className="flex flex-col space-y-6 mt-10">
-                {navLinks.map((link) => (
-                  <Link key={link.name} to={link.href} className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold transition-colors">
-                    {link.name}
-                  </Link>
-                ))}
                 {isAdmin && <Link to="/admin" className="text-sm uppercase tracking-widest text-yellow-500 hover:text-yellow-400 font-bold transition-colors">Admin</Link>}
                 {user && (
                   <Button onClick={logout} variant="outline" className="w-full mt-4 border-white/20 text-white hover:bg-white/10 transition-colors">

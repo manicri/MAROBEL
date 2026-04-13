@@ -1,5 +1,6 @@
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { Scissors, Sparkles, Heart, Star } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const services = [
   {
@@ -7,28 +8,32 @@ const services = [
     description: "Cortes de vanguardia, coloración premium y tratamientos de keratina para un brillo inigualable.",
     icon: Scissors,
     image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=2069&auto=format&fit=crop",
-    items: ["Balayage", "Corte Dama", "Alisados", "Hidratación"]
+    items: ["Balayage", "Corte Dama", "Alisados", "Hidratación"],
+    link: "/cabello"
   },
   {
     title: "Uñas",
     description: "Manicura rusa, uñas acrílicas y pedicura SPA con los mejores productos del mercado.",
     icon: Star,
     image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=1974&auto=format&fit=crop",
-    items: ["Acrílicas", "Gelish", "SPA Pedicura", "Nail Art"]
+    items: ["Acrílicas", "Gelish", "SPA Pedicura", "Nail Art"],
+    link: "/unas"
   },
   {
     title: "Estética Facial",
     description: "Limpiezas profundas y tratamientos rejuvenecedores para una piel radiante y saludable.",
     icon: Sparkles,
     image: "https://images.unsplash.com/photo-1570172619245-711f83f5fd19?q=80&w=2070&auto=format&fit=crop",
-    items: ["Limpieza Profunda", "Peeling", "Microdermabrasión"]
+    items: ["Limpieza Profunda", "Peeling", "Microdermabrasión"],
+    link: "/estetica-facial"
   },
   {
     title: "Rituales Spa",
     description: "Masajes relajantes y descontracturantes en un ambiente de paz absoluta.",
     icon: Heart,
     image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1920&auto=format&fit=crop",
-    items: ["Masaje Relajante", "Piedras Volcánicas", "Exfoliación"]
+    items: ["Masaje Relajante", "Piedras Volcánicas", "Exfoliación"],
+    link: "/rituales"
   }
 ];
 
@@ -63,9 +68,9 @@ export default function Services() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="group"
+              className="group flex flex-col"
             >
-              <div className="relative h-[400px] rounded-3xl overflow-hidden mb-8 shadow-2xl">
+              <div className="relative h-[400px] rounded-3xl overflow-hidden mb-6 shadow-2xl">
                 <img
                   src={service.image}
                   alt={service.title}
@@ -85,9 +90,17 @@ export default function Services() {
                   </div>
                 </div>
               </div>
-              <p className="text-sm text-[#5D4037]/70 font-light leading-relaxed px-4">
+              <p className="text-sm text-[#5D4037]/70 font-light leading-relaxed px-4 mb-6 flex-grow">
                 {service.description}
               </p>
+              <div className="px-4 mt-auto">
+                <Link 
+                  to={service.link}
+                  className="inline-block w-full text-center py-3 rounded-full border-2 border-[#5D4037] text-[#5D4037] font-bold text-xs uppercase tracking-widest hover:bg-[#5D4037] hover:text-white transition-colors duration-300"
+                >
+                  Ver Servicios
+                </Link>
+              </div>
             </motion.div>
           ))}
         </div>

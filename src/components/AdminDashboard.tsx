@@ -355,12 +355,12 @@ export const AdminDashboard: React.FC = () => {
                         <div className="flex items-center gap-5">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                             app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? "bg-red-500/10 text-red-600" :
-                            app.Estado === 'Aceptada' ? "bg-green-500/10 text-green-600" :
+                            app.Estado === 'Confirmada' ? "bg-green-500/10 text-green-600" :
                             app.Estado === 'Pendiente' ? "bg-yellow-500/10 text-yellow-600" :
                             "bg-gray-500/10 text-gray-600"
                           }`}>
                             {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? <Clock className="w-6 h-6" /> : 
-                             app.Estado === 'Aceptada' ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
+                             app.Estado === 'Confirmada' ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
                           </div>
                           <div>
                             <div className="flex items-center gap-3 mb-1">
@@ -396,7 +396,7 @@ export const AdminDashboard: React.FC = () => {
                                 <Button 
                                   size="sm" 
                                   className="bg-green-600 hover:bg-green-700 text-white rounded-full px-4 text-[10px] uppercase tracking-widest font-bold flex items-center gap-2"
-                                  onClick={() => updateStatus(app.cita, 'Aceptada')}
+                                  onClick={() => updateStatus(app.cita, 'Confirmada')}
                                 >
                                   <Check className="w-3 h-3" />
                                   Aceptar
@@ -411,7 +411,7 @@ export const AdminDashboard: React.FC = () => {
                                 </Button>
                               </>
                             )}
-                            {app.Estado === 'Aceptada' && (
+                            {app.Estado === 'Confirmada' && (
                               <Button 
                                 size="sm" 
                                 variant="outline"

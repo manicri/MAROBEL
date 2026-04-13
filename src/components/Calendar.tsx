@@ -65,7 +65,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
 
   const bookedSlots = useMemo(() => {
     return citasDelDia
-      .filter(cita => cita.Estado === 'Aceptada')
+      .filter(cita => cita.Estado === 'Confirmada')
       .map(cita => cita.hora);
   }, [citasDelDia]);
 

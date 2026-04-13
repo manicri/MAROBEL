@@ -141,8 +141,6 @@ export default function ReservationForm() {
     reset();
     setSelectedTime(null);
     clearSelection();
-    const text = `Hola Marobel Studio! Acabo de agendar una cita.%0A%0A*Nombre:* ${data.nombre}%0A*Servicios:* ${serviciosNombres}%0A*Total:* $${total.toFixed(2)}%0A*Fecha:* ${data.date}%0A*Hora:* ${data.time}`;
-    window.open(`https://wa.me/593969272530?text=${text}`, "_blank");
     setIsSuccess(true);
   };
 
@@ -297,9 +295,9 @@ export default function ReservationForm() {
                           <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
                             <CheckCircle2 className="w-10 h-10 text-green-500" />
                           </div>
-                          <h3 className="text-3xl font-serif text-[#5D4037] mb-4">¡Reserva Confirmada!</h3>
+                          <h3 className="text-3xl font-serif text-[#5D4037] mb-4">¡Solicitud Enviada!</h3>
                           <p className="text-[#5D4037]/60 mb-10 font-light text-sm leading-relaxed">
-                            Tu cita ha sido agendada exitosamente. Te esperamos en Marobel Studio.
+                            Tu solicitud ha sido enviada. Espera la confirmación del administrador.
                           </p>
                           <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Button 
@@ -465,12 +463,12 @@ export default function ReservationForm() {
                         <CardContent className="p-8 flex items-center justify-between">
                           <div className="flex items-center gap-6">
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                              app.Estado === 'Aceptada' ? "bg-green-500/10 text-green-600" :
+                              app.Estado === 'Confirmada' ? "bg-green-500/10 text-green-600" :
                               app.Estado === 'Pendiente' ? "bg-yellow-500/10 text-yellow-600" :
                               app.Estado === 'Cancelada' ? "bg-red-500/10 text-red-600" :
                               "bg-gray-500/10 text-gray-600"
                             }`}>
-                              {app.Estado === 'Aceptada' ? <CheckCircle2 className="w-7 h-7" /> : 
+                              {app.Estado === 'Confirmada' ? <CheckCircle2 className="w-7 h-7" /> : 
                                app.Estado === 'Cancelada' ? <AlertCircle className="w-7 h-7" /> : 
                                <Clock className="w-7 h-7" />}
                             </div>
@@ -481,14 +479,14 @@ export default function ReservationForm() {
                           </div>
                           <div className="text-right flex flex-col items-end gap-3">
                             <span className={`px-4 py-1.5 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold ${
-                              app.Estado === 'Aceptada' ? "bg-green-500 text-white" :
+                              app.Estado === 'Confirmada' ? "bg-green-500 text-white" :
                               app.Estado === 'Pendiente' ? "bg-yellow-500 text-white" :
                               app.Estado === 'Cancelada' ? "bg-red-500 text-white" :
                               "bg-gray-400 text-white"
                             }`}>
-                              {app.Estado}
+                              {app.Estado === 'Confirmada' ? 'Cita Agendada' : app.Estado}
                             </span>
-                            {(app.Estado === 'Pendiente' || app.Estado === 'Aceptada') && (
+                            {(app.Estado === 'Pendiente' || app.Estado === 'Confirmada') && (
                               <button 
                                 onClick={() => handleCancelAppointment(app.cita)}
                                 className="text-[10px] uppercase tracking-widest font-bold text-red-500 hover:text-red-700 transition-colors"
