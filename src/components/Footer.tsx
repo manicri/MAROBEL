@@ -15,7 +15,7 @@ export default function Footer() {
               Donde cada detalle está diseñado para tu transformación.
             </p>
             <div className="flex items-center space-x-6">
-              <a href="#" className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#E5D3B3] hover:text-[#5D4037] transition-all duration-500">
+              <a href="https://www.instagram.com/marobel.studio/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#E5D3B3] hover:text-[#5D4037] transition-all duration-500">
                 <Instagram className="w-5 h-5" />
               </a>
               <a href="#" className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#E5D3B3] hover:text-[#5D4037] transition-all duration-500">
