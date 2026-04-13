@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import ServiceCard from '../components/ServiceCard';
 import FloatingReservationButton from '../components/FloatingReservationButton';
 import { ServiceSidebar } from '../components/ServiceSidebar';
@@ -14,6 +16,11 @@ export default function Rituales() {
   return (
     <div className="pt-32 pb-24 px-6 min-h-screen bg-stone-50">
       <div className="container mx-auto max-w-6xl">
+        <div className="mb-8">
+          <Link to="/" className="inline-flex items-center gap-2 text-[#5D4037] hover:text-[#8D6E63] transition-colors text-sm font-bold uppercase tracking-widest">
+            <ArrowLeft className="w-4 h-4" /> Volver al Inicio
+          </Link>
+        </div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

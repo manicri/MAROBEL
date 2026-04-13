@@ -18,7 +18,7 @@ interface AuthContextType {
   isAdmin: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
-  updateProfile: (data: { displayName?: string; phone?: string }) => Promise<void>;
+  updateProfile: (data: { displayName?: string; phone?: string; photoURL?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -189,21 +189,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
-    if (!window.confirm('¿Estás seguro de que deseas cerrar sesión?')) return;
     await supabase.auth.signOut();
   };
 
-  const updateProfile = async (data: { displayName?: string; phone?: string }) => {
+  const updateProfile = async (data: { displayName?: string; phone?: string; photoURL?: string }) => {
     if (!user) throw new Error('No user logged in');
     
-    const updates = {
-      id: user.id,
-      ...(data.displayName !== undefined && { display_name: data.displayName }),
-      ...(data.phone !== undefined && { phone: data.phone }),
-    };
+    const updates: any = {};
+    if (data.displayName !== undefined) updates.display_name = data.displayName;
+    if (data.phone !== undefined) updates.phone = data.phone;
 
-    const { error } = await supabase.from('users').upsert(updates);
-    if (error) throw error;
+    if (Object.keys(updates).length > 0) {
+      const { error } = await supabase.from('users').update(updates).eq('id', user.id);
+      if (error) throw error;
+    }
+
+    const metadataUpdates: any = {};
+    if (data.displayName !== undefined) metadataUpdates.full_name = data.displayName;
+    if (data.photoURL !== undefined) metadataUpdates.avatar_url = data.photoURL;
+
+    if (Object.keys(metadataUpdates).length > 0) {
+      const { error: authError } = await supabase.auth.updateUser({ data: metadataUpdates });
+      if (authError) throw authError;
+    }
 
     setProfile(prev => prev ? { ...prev, ...data } : null);
   };

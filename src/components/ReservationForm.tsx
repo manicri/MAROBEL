@@ -145,33 +145,43 @@ export default function ReservationForm() {
   };
 
   const handleCancelAppointment = async (id_de_la_cita: string) => {
-    if (!confirm('¿Estás seguro de que deseas cancelar esta cita?')) return;
     if (!user) {
       toast.error("Debes iniciar sesión para cancelar una cita");
       return;
     }
 
-    try {
-      const { error } = await supabase
-        .from('citas')
-        .update({ Estado: 'Cancelada' })
-        .eq('cita', id_de_la_cita);
-      
-      if (error) throw error;
-      
-      toast.success('Cita cancelada', {
-        description: 'Tu cita ha sido cancelada exitosamente.',
-      });
-      
-      setMyAppointments(prev => prev.map(app => 
-        app.cita === id_de_la_cita ? { ...app, Estado: 'Cancelada' } : app
-      ));
-    } catch (error) {
-      console.error('Error cancelling appointment:', error);
-      toast.error('Error', {
-        description: 'No se pudo cancelar la cita. Por favor intenta de nuevo.',
-      });
-    }
+    toast('¿Estás seguro de que deseas cancelar esta cita?', {
+      action: {
+        label: 'Cancelar Cita',
+        onClick: async () => {
+          try {
+            const { error } = await supabase
+              .from('citas')
+              .update({ Estado: 'Cancelada' })
+              .eq('cita', id_de_la_cita);
+            
+            if (error) throw error;
+            
+            toast.success('Cita cancelada', {
+              description: 'Tu cita ha sido cancelada exitosamente.',
+            });
+            
+            setMyAppointments(prev => prev.map(app => 
+              app.cita === id_de_la_cita ? { ...app, Estado: 'Cancelada' } : app
+            ));
+          } catch (error) {
+            console.error('Error cancelling appointment:', error);
+            toast.error('Error', {
+              description: 'No se pudo cancelar la cita. Por favor intenta de nuevo.',
+            });
+          }
+        }
+      },
+      cancel: {
+        label: 'Cerrar',
+        onClick: () => {}
+      }
+    });
   };
 
   return (
@@ -484,7 +494,7 @@ export default function ReservationForm() {
                               app.Estado === 'Cancelada' ? "bg-red-500 text-white" :
                               "bg-gray-400 text-white"
                             }`}>
-                              {app.Estado === 'Confirmada' ? 'Cita Agendada' : app.Estado}
+                              {app.Estado === 'Confirmada' ? 'Cita Aceptada' : app.Estado}
                             </span>
                             {(app.Estado === 'Pendiente' || app.Estado === 'Confirmada') && (
                               <button 

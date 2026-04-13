@@ -132,6 +132,11 @@ export const AdminDashboard: React.FC = () => {
   }, []);
 
   const updateStatus = async (id: string, Estado: string) => {
+    // Optimistic UI update
+    setAppointments(prev => prev.map(app => 
+      app.cita === id ? { ...app, Estado } : app
+    ));
+
     const { error } = await supabase
       .from('citas')
       .update({ Estado })
@@ -140,26 +145,37 @@ export const AdminDashboard: React.FC = () => {
     if (error) {
       console.error('Error updating status:', error);
       toast.error(`Error al actualizar: ${error.message}`);
+      // Revert on error
+      fetchAppointments();
     } else {
       toast.success(`Cita ${Estado.toLowerCase()} correctamente`);
     }
   };
 
   const handleDelete = async (id_cita: string) => {
-    if (!window.confirm('¿Estás seguro de eliminar esta cita?')) return;
+    toast('¿Estás seguro de eliminar esta cita?', {
+      action: {
+        label: 'Eliminar',
+        onClick: async () => {
+          const { error } = await supabase
+            .from('citas')
+            .delete()
+            .eq('cita', id_cita);
 
-    const { error } = await supabase
-      .from('citas')
-      .delete()
-      .eq('cita', id_cita);
-
-    if (error) {
-      console.error('Error exacto al eliminar:', error);
-      toast.error(`Error al eliminar: ${error.message}`);
-    } else {
-      toast.success('Cita eliminada correctamente');
-      setAppointments(prev => prev.filter(app => app.cita !== id_cita));
-    }
+          if (error) {
+            console.error('Error exacto al eliminar:', error);
+            toast.error(`Error al eliminar: ${error.message}`);
+          } else {
+            toast.success('Cita eliminada correctamente');
+            setAppointments(prev => prev.filter(app => app.cita !== id_cita));
+          }
+        }
+      },
+      cancel: {
+        label: 'Cancelar',
+        onClick: () => {}
+      }
+    });
   };
 
   const handleBlockTime = async () => {
@@ -212,19 +228,28 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleDeleteService = async (id: string) => {
-    if (!window.confirm('¿Estás seguro de eliminar este servicio?')) return;
+    toast('¿Estás seguro de eliminar este servicio?', {
+      action: {
+        label: 'Eliminar',
+        onClick: async () => {
+          const { error } = await supabase
+            .from('servicios')
+            .delete()
+            .eq('id', id);
 
-    const { error } = await supabase
-      .from('servicios')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast.error('Error al eliminar el servicio');
-    } else {
-      toast.success('Servicio eliminado');
-      fetchServices();
-    }
+          if (error) {
+            toast.error('Error al eliminar el servicio');
+          } else {
+            toast.success('Servicio eliminado');
+            fetchServices();
+          }
+        }
+      },
+      cancel: {
+        label: 'Cancelar',
+        onClick: () => {}
+      }
+    });
   };
 
   const handleSaveCategory = async () => {
@@ -263,19 +288,29 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleDeleteCategory = async (id: string, nombre: string) => {
-    if (!window.confirm(`¿Estás seguro de eliminar la categoría "${nombre}"? Los servicios asociados mantendrán el nombre de la categoría pero ya no aparecerá en la lista principal.`)) return;
+    toast(`¿Estás seguro de eliminar la categoría "${nombre}"?`, {
+      description: 'Los servicios asociados mantendrán el nombre de la categoría pero ya no aparecerá en la lista principal.',
+      action: {
+        label: 'Eliminar',
+        onClick: async () => {
+          const { error } = await supabase
+            .from('categorias')
+            .delete()
+            .eq('id', id);
 
-    const { error } = await supabase
-      .from('categorias')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      toast.error('Error al eliminar la categoría');
-    } else {
-      toast.success('Categoría eliminada');
-      fetchCategories();
-    }
+          if (error) {
+            toast.error('Error al eliminar la categoría');
+          } else {
+            toast.success('Categoría eliminada');
+            fetchCategories();
+          }
+        }
+      },
+      cancel: {
+        label: 'Cancelar',
+        onClick: () => {}
+      }
+    });
   };
 
   const filteredAppointments = appointments.filter(app => {
