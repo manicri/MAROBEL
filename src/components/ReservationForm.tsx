@@ -360,8 +360,24 @@ export default function ReservationForm() {
                           <div className="space-y-4">
                             <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Servicios Seleccionados</Label>
                             {selectedServices.length === 0 ? (
-                              <div className="p-4 bg-[#FAF9F6] rounded-xl text-center text-sm text-[#5D4037]/60">
-                                No has seleccionado ningún servicio. Navega por nuestras categorías para agregar servicios.
+                              <div className="p-8 bg-[#FAF9F6] rounded-xl text-center flex flex-col items-center justify-center border border-dashed border-[#E5D3B3]/50">
+                                <p className="text-sm text-[#5D4037]/60 mb-4">
+                                  No has seleccionado ningún servicio.
+                                </p>
+                                <Button 
+                                  type="button"
+                                  onClick={() => {
+                                    const serviciosSection = document.getElementById('servicios');
+                                    if (serviciosSection) {
+                                      serviciosSection.scrollIntoView({ behavior: 'smooth' });
+                                    } else {
+                                      window.location.href = '/#servicios';
+                                    }
+                                  }}
+                                  className="bg-[#5D4037] text-white rounded-full px-8 h-10 text-xs uppercase tracking-widest font-bold hover:bg-[#4a332c] transition-colors"
+                                >
+                                  Explorar Servicios
+                                </Button>
                               </div>
                             ) : (
                               <div className="space-y-2">
