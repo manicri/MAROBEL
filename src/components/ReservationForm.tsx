@@ -13,6 +13,7 @@ import { Calendar } from "./Calendar";
 import { supabase } from "../supabase";
 import React from 'react';
 import { toast } from "sonner";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 interface Appointment {
   cita: string;
@@ -40,6 +41,7 @@ export default function ReservationForm() {
   const [isSuccess, setIsSuccess] = React.useState(false);
 
   const [showTransferModal, setShowTransferModal] = React.useState(false);
+  const [showCardModal, setShowCardModal] = React.useState(false);
 
   const {
     register,
@@ -414,15 +416,10 @@ export default function ReservationForm() {
                               <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => {
-                                  toast.info('CONSULTA TÉCNICA OBLIGATORIA', {
-                                    description: 'Antes de escribir el código de pago por tarjeta, dime qué credenciales, SDKs o pasarelas de pago (Stripe, Mercado Pago, etc.) necesitas que yo te proporcione para que el botón sea 100% funcional y seguro.',
-                                    duration: 8000
-                                  });
-                                }}
+                                onClick={() => setShowCardModal(true)}
                                 className="h-14 rounded-xl border-[#E5D3B3] text-[#5D4037] hover:bg-[#E5D3B3]/10"
                               >
-                                Tarjeta de Crédito/Débito
+                                Tarjeta / PayPal
                               </Button>
                             </div>
                           </div>
@@ -557,6 +554,71 @@ export default function ReservationForm() {
                 </Button>
                 <Button onClick={() => setShowTransferModal(false)} className="flex-1 rounded-full bg-[#5D4037] text-white">
                   Listo
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Card / PayPal Modal */}
+      <AnimatePresence>
+        {showCardModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowCardModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+            >
+              <h3 className="text-2xl font-serif text-[#5D4037] mb-2">Pago Seguro</h3>
+              <p className="text-sm text-[#5D4037]/60 mb-6">
+                Asegura tu cita pagando un adelanto del 50% (${(total * 0.5).toFixed(2)}).
+              </p>
+              
+              <div className="mb-6">
+                <PayPalScriptProvider options={{ clientId: "test", currency: "USD" }}>
+                  <PayPalButtons 
+                    style={{ layout: "vertical", shape: "rect" }}
+                    createOrder={(data, actions) => {
+                      return actions.order.create({
+                        intent: "CAPTURE",
+                        purchase_units: [
+                          {
+                            amount: {
+                              currency_code: "USD",
+                              value: (total * 0.5).toFixed(2),
+                            },
+                            description: `Adelanto de cita Marobel Studio`,
+                          },
+                        ],
+                      });
+                    }}
+                    onApprove={async (data, actions) => {
+                      if (actions.order) {
+                        const details = await actions.order.capture();
+                        toast.success(`Pago completado por ${details.payer?.name?.given_name}`);
+                        setShowCardModal(false);
+                      }
+                    }}
+                    onError={(err) => {
+                      toast.error("Hubo un error al procesar el pago.");
+                      console.error(err);
+                    }}
+                  />
+                </PayPalScriptProvider>
+              </div>
+
+              <div className="mt-4">
+                <Button onClick={() => setShowCardModal(false)} variant="outline" className="w-full rounded-full border-[#E5D3B3] text-[#5D4037]">
+                  Cancelar
                 </Button>
               </div>
             </motion.div>
