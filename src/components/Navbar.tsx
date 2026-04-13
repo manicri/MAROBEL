@@ -36,6 +36,13 @@ export default function Navbar() {
     });
   };
 
+  const handleHomeClick = (e: React.MouseEvent) => {
+    if (window.location.pathname === '/') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <>
       <nav
@@ -46,7 +53,11 @@ export default function Navbar() {
         }`}
       >
         <div className="container mx-auto px-6 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-serif font-bold text-white flex items-center gap-2">
+          <Link 
+            to="/" 
+            onClick={handleHomeClick}
+            className="text-2xl font-serif font-bold text-white flex items-center gap-2"
+          >
             <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20">
               <img src="/logo.png" alt="Marobel Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             </div>
@@ -55,7 +66,11 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold transition-colors">
+            <Link 
+              to="/" 
+              onClick={handleHomeClick}
+              className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold transition-colors"
+            >
               Inicio
             </Link>
             <a href="/#servicios" className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold transition-colors">
@@ -106,7 +121,14 @@ export default function Navbar() {
                   <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" /> MAROBEL
                 </SheetTitle>
                 <div className="flex flex-col space-y-6 mt-10">
-                  <Link to="/" className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold transition-colors">
+                  <Link 
+                    to="/" 
+                    onClick={(e) => {
+                      handleHomeClick(e);
+                      // Close sheet is handled by the trigger usually, but here we might need to close it manually if it doesn't
+                    }}
+                    className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold transition-colors"
+                  >
                     Inicio
                   </Link>
                   <a href="/#servicios" className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold transition-colors">

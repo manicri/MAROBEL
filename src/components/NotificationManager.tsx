@@ -24,7 +24,7 @@ export function NotificationManager() {
         .from('citas')
         .select('*')
         .eq('cliente_email', user.email)
-        .eq('Estado', 'Aceptada')
+        .eq('estado', 'confirmada')
         .in('fecha', [todayStr, tomorrowStr]);
 
       if (error || !data) return;
@@ -61,11 +61,11 @@ export function NotificationManager() {
           filter: `cliente_email=eq.${user.email}`,
         },
         (payload) => {
-          const newStatus = payload.new.Estado;
+          const newStatus = payload.new.estado;
           const service = payload.new.Servicio;
           
           toast.success(`¡Actualización de Cita!`, {
-            description: `Tu cita para ${service} ahora está: ${newStatus}`,
+            description: `Tu cita para ${service} ahora está: ${newStatus === 'confirmada' ? 'Aceptada' : newStatus}`,
             duration: 6000,
           });
         }

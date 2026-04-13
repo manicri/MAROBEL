@@ -14,7 +14,7 @@ interface Appointment {
   Servicio: string;
   fecha: string;
   hora: string;
-  Estado: 'Pendiente' | 'Aceptada' | 'Cancelada';
+  estado: 'Pendiente' | 'confirmada' | 'Cancelada';
   whatsapp?: string;
   notas?: string;
 }
@@ -131,15 +131,15 @@ export const AdminDashboard: React.FC = () => {
     };
   }, []);
 
-  const updateStatus = async (id: string, Estado: string) => {
+  const updateStatus = async (id: string, estado: string) => {
     // Optimistic UI update
     setAppointments(prev => prev.map(app => 
-      app.cita === id ? { ...app, Estado } : app
+      app.cita === id ? { ...app, estado } : app
     ));
 
     const { error } = await supabase
       .from('citas')
-      .update({ Estado })
+      .update({ estado })
       .eq('cita', id);
     
     if (error) {
@@ -148,7 +148,7 @@ export const AdminDashboard: React.FC = () => {
       // Revert on error
       fetchAppointments();
     } else {
-      toast.success(`Cita ${Estado.toLowerCase()} correctamente`);
+      toast.success(`Cita ${estado.toLowerCase()} correctamente`);
     }
   };
 
@@ -185,7 +185,7 @@ export const AdminDashboard: React.FC = () => {
       Servicio: 'BLOQUEO DE HORARIO',
       fecha: selectedDate,
       hora: blockTime,
-      Estado: 'Aceptada',
+      estado: 'confirmada',
       notas: 'Horario bloqueado por administración'
     };
 
@@ -390,12 +390,12 @@ export const AdminDashboard: React.FC = () => {
                         <div className="flex items-center gap-5">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                             app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? "bg-red-500/10 text-red-600" :
-                            app.Estado === 'Confirmada' ? "bg-green-500/10 text-green-600" :
-                            app.Estado === 'Pendiente' ? "bg-yellow-500/10 text-yellow-600" :
+                            app.estado === 'confirmada' ? "bg-green-500/10 text-green-600" :
+                            app.estado === 'Pendiente' ? "bg-yellow-500/10 text-yellow-600" :
                             "bg-gray-500/10 text-gray-600"
                           }`}>
                             {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? <Clock className="w-6 h-6" /> : 
-                             app.Estado === 'Confirmada' ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
+                             app.estado === 'confirmada' ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
                           </div>
                           <div>
                             <div className="flex items-center gap-3 mb-1">
@@ -405,7 +405,7 @@ export const AdminDashboard: React.FC = () => {
                               <span className={`text-[8px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${
                                 app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? "bg-red-500/20 text-red-700" : "bg-[#E5D3B3]/20 text-[#8D6E63]"
                               }`}>
-                                {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? 'BLOQUEO' : app.Estado}
+                                {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? 'BLOQUEO' : app.estado}
                               </span>
                             </div>
                             <div className="flex items-center gap-4 text-xs text-[#5D4037]/60">
@@ -426,12 +426,12 @@ export const AdminDashboard: React.FC = () => {
                             <p className="text-lg font-serif text-[#8D6E63]">{app.hora}</p>
                           </div>
                           <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                            {app.Estado === 'Pendiente' && (
+                            {app.estado === 'Pendiente' && (
                               <>
                                 <Button 
                                   size="sm" 
                                   className="bg-green-600 hover:bg-green-700 text-white rounded-full px-4 text-[10px] uppercase tracking-widest font-bold flex items-center gap-2"
-                                  onClick={() => updateStatus(app.cita, 'Confirmada')}
+                                  onClick={() => updateStatus(app.cita, 'confirmada')}
                                 >
                                   <Check className="w-3 h-3" />
                                   Aceptar
@@ -446,7 +446,7 @@ export const AdminDashboard: React.FC = () => {
                                 </Button>
                               </>
                             )}
-                            {app.Estado === 'Confirmada' && (
+                            {app.estado === 'confirmada' && (
                               <Button 
                                 size="sm" 
                                 variant="outline"

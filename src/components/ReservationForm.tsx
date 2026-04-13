@@ -20,7 +20,7 @@ interface Appointment {
   Servicio: string;
   fecha: string;
   hora: string;
-  Estado: 'Pendiente' | 'Aceptada' | 'Cancelada';
+  estado: 'Pendiente' | 'confirmada' | 'Cancelada';
 }
 
 const formSchema = z.object({
@@ -117,7 +117,7 @@ export default function ReservationForm() {
       Servicio: serviciosNombres,
       fecha: data.date,
       hora: data.time,
-      Estado: 'Pendiente',
+      estado: 'Pendiente',
       Usuario_id: authUser.id,
       whatsapp: data.whatsapp,
       notas: data.notas
@@ -157,7 +157,7 @@ export default function ReservationForm() {
           try {
             const { error } = await supabase
               .from('citas')
-              .update({ Estado: 'Cancelada' })
+              .update({ estado: 'Cancelada' })
               .eq('cita', id_de_la_cita);
             
             if (error) throw error;
@@ -167,7 +167,7 @@ export default function ReservationForm() {
             });
             
             setMyAppointments(prev => prev.map(app => 
-              app.cita === id_de_la_cita ? { ...app, Estado: 'Cancelada' } : app
+              app.cita === id_de_la_cita ? { ...app, estado: 'Cancelada' } : app
             ));
           } catch (error) {
             console.error('Error cancelling appointment:', error);
@@ -489,13 +489,13 @@ export default function ReservationForm() {
                         <CardContent className="p-8 flex items-center justify-between">
                           <div className="flex items-center gap-6">
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                              app.Estado === 'Confirmada' ? "bg-green-500/10 text-green-600" :
-                              app.Estado === 'Pendiente' ? "bg-yellow-500/10 text-yellow-600" :
-                              app.Estado === 'Cancelada' ? "bg-red-500/10 text-red-600" :
+                              app.estado === 'confirmada' ? "bg-green-500/10 text-green-600" :
+                              app.estado === 'Pendiente' ? "bg-yellow-500/10 text-yellow-600" :
+                              app.estado === 'Cancelada' ? "bg-red-500/10 text-red-600" :
                               "bg-gray-500/10 text-gray-600"
                             }`}>
-                              {app.Estado === 'Confirmada' ? <CheckCircle2 className="w-7 h-7" /> : 
-                               app.Estado === 'Cancelada' ? <AlertCircle className="w-7 h-7" /> : 
+                              {app.estado === 'confirmada' ? <CheckCircle2 className="w-7 h-7" /> : 
+                               app.estado === 'Cancelada' ? <AlertCircle className="w-7 h-7" /> : 
                                <Clock className="w-7 h-7" />}
                             </div>
                             <div>
@@ -505,14 +505,14 @@ export default function ReservationForm() {
                           </div>
                           <div className="text-right flex flex-col items-end gap-3">
                             <span className={`px-4 py-1.5 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold ${
-                              app.Estado === 'Confirmada' ? "bg-green-500 text-white" :
-                              app.Estado === 'Pendiente' ? "bg-yellow-500 text-white" :
-                              app.Estado === 'Cancelada' ? "bg-red-500 text-white" :
+                              app.estado === 'confirmada' ? "bg-green-500 text-white" :
+                              app.estado === 'Pendiente' ? "bg-yellow-500 text-white" :
+                              app.estado === 'Cancelada' ? "bg-red-500 text-white" :
                               "bg-gray-400 text-white"
                             }`}>
-                              {app.Estado === 'Confirmada' ? 'Cita Aceptada' : app.Estado}
+                              {app.estado === 'confirmada' ? 'Cita Aceptada' : app.estado}
                             </span>
-                            {(app.Estado === 'Pendiente' || app.Estado === 'Confirmada') && (
+                            {(app.estado === 'Pendiente' || app.estado === 'confirmada') && (
                               <button 
                                 onClick={() => handleCancelAppointment(app.cita)}
                                 className="text-[10px] uppercase tracking-widest font-bold text-red-500 hover:text-red-700 transition-colors"

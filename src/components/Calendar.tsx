@@ -19,7 +19,7 @@ interface CalendarProps {
 }
 
 export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, selectedTime, isAdmin }) => {
-  const [citasDelDia, setCitasDelDia] = useState<{hora: string, Estado: string}[]>([]);
+  const [citasDelDia, setCitasDelDia] = useState<{hora: string, estado: string}[]>([]);
 
   const getHours = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -35,7 +35,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
     const fetchBookedSlots = async () => {
       const { data, error } = await supabase
         .from('citas')
-        .select('hora, Estado')
+        .select('hora, estado')
         .eq('fecha', selectedDate);
       
       if (error) {
@@ -65,7 +65,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
 
   const bookedSlots = useMemo(() => {
     return citasDelDia
-      .filter(cita => cita.Estado === 'Confirmada')
+      .filter(cita => cita.estado === 'confirmada' || cita.estado === 'Confirmada')
       .map(cita => cita.hora);
   }, [citasDelDia]);
 
