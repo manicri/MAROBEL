@@ -38,6 +38,7 @@ export default function ReservationForm() {
   const [selectedDate, setSelectedDate] = React.useState(new Date().toISOString().split('T')[0]);
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
   const [myAppointments, setMyAppointments] = React.useState<Appointment[]>([]);
+  const [availableServices, setAvailableServices] = React.useState<any[]>([]);
   const [activeTab, setActiveTab] = React.useState<'reserve' | 'my-appointments'>('reserve');
   const [isSuccess, setIsSuccess] = React.useState(false);
 
@@ -58,6 +59,14 @@ export default function ReservationForm() {
       nombre: user?.user_metadata?.full_name || '',
     }
   });
+
+  React.useEffect(() => {
+    const fetchServices = async () => {
+      const { data } = await supabase.from('servicios').select('*');
+      if (data) setAvailableServices(data);
+    };
+    fetchServices();
+  }, []);
 
   React.useEffect(() => {
     setValue('date', selectedDate);
@@ -139,6 +148,13 @@ export default function ReservationForm() {
     }
 
     toast.success('¡Cita agendada con éxito!');
+    
+    // Notificación al administrador vía WhatsApp
+    const adminPhone = "593969272530";
+    const message = `¡Hola! Acabo de solicitar una nueva cita.\n\n*Detalles:*\nNombre: ${data.nombre}\nServicios: ${serviciosNombres}\nFecha: ${data.date}\nHora: ${data.time}\n\nPor favor, confirma mi cita en el panel de administración.`;
+    const whatsappUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+
     reset();
     setSelectedTime(null);
     clearSelection();
@@ -303,8 +319,22 @@ export default function ReservationForm() {
                           </div>
                           <h3 className="text-3xl font-serif text-[#5D4037] mb-4">¡Solicitud Enviada!</h3>
                           <p className="text-[#5D4037]/60 mb-10 font-light text-sm leading-relaxed">
-                            Tu solicitud ha sido enviada. Espera la confirmación del administrador.
+                            Tu solicitud ha sido enviada. Se ha abierto WhatsApp para notificar al administrador. Si no se abrió automáticamente, haz clic en el botón de abajo.
                           </p>
+                          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+                            <Button 
+                              onClick={() => {
+                                const adminPhone = "593969272530";
+                                const message = `¡Hola! Acabo de solicitar una nueva cita y quiero notificarles.\n\nPor favor, revisen el panel de administración.`;
+                                const whatsappUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
+                                window.open(whatsappUrl, '_blank');
+                              }} 
+                              className="bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full px-8 h-12 uppercase tracking-widest text-xs font-bold flex items-center gap-2"
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                              Notificar por WhatsApp
+                            </Button>
+                          </div>
                           <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Button 
                               onClick={() => {
@@ -355,25 +385,39 @@ export default function ReservationForm() {
 
                           <div className="space-y-4">
                             <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Servicios Seleccionados</Label>
+                            
+                            <div className="mb-4">
+                              <select 
+                                className="w-full bg-[#FAF9F6] border-none h-14 rounded-xl text-sm px-4 text-[#5D4037] outline-none cursor-pointer"
+                                onChange={(e) => {
+                                  const serviceId = e.target.value;
+                                  if (!serviceId) return;
+                                  const service = availableServices.find(s => s.id === serviceId);
+                                  if (service && !selectedServices.some(s => s.id === service.id)) {
+                                    addService({
+                                      id: service.id,
+                                      name: service.nombre,
+                                      price: service.precio,
+                                      category: service.categoria
+                                    });
+                                  }
+                                  e.target.value = ""; // reset
+                                }}
+                              >
+                                <option value="">+ Agregar un servicio...</option>
+                                {availableServices.map(service => (
+                                  <option key={service.id} value={service.id} disabled={selectedServices.some(s => s.id === service.id)}>
+                                    {service.nombre} - ${service.precio}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
                             {selectedServices.length === 0 ? (
                               <div className="p-8 bg-[#FAF9F6] rounded-xl text-center flex flex-col items-center justify-center border border-dashed border-[#E5D3B3]/50">
-                                <p className="text-sm text-[#5D4037]/60 mb-4">
-                                  No has seleccionado ningún servicio.
+                                <p className="text-sm text-[#5D4037]/60">
+                                  Selecciona un servicio de la lista desplegable arriba para continuar.
                                 </p>
-                                <Button 
-                                  type="button"
-                                  onClick={() => {
-                                    const serviciosSection = document.getElementById('servicios-anchor');
-                                    if (serviciosSection) {
-                                      serviciosSection.scrollIntoView({ behavior: 'smooth' });
-                                    } else {
-                                      window.location.href = '/#servicios-anchor';
-                                    }
-                                  }}
-                                  className="bg-[#5D4037] text-white rounded-full px-8 h-10 text-xs uppercase tracking-widest font-bold hover:bg-[#4a332c] transition-colors"
-                                >
-                                  Elegir Servicio
-                                </Button>
                               </div>
                             ) : (
                               <div className="space-y-2">
