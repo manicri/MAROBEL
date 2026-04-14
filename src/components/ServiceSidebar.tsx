@@ -1,16 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Scissors, Sparkles, Heart, Droplets } from 'lucide-react';
+import { Scissors, Sparkles, Heart, Droplets, Star } from 'lucide-react';
+import { supabase } from '../supabase';
 
-const services = [
-  { path: '/cabello', name: 'Cabello', icon: Scissors },
-  { path: '/unas', name: 'Uñas', icon: Sparkles },
-  { path: '/estetica-facial', name: 'Estética Facial', icon: Heart },
-  { path: '/rituales', name: 'Rituales', icon: Droplets },
-];
+const defaultIcons: Record<string, any> = {
+  'Cabello': Scissors,
+  'Uñas': Star,
+  'Estética Facial': Sparkles,
+  'Rituales Spa': Heart,
+};
+
+interface Category {
+  id: string;
+  nombre: string;
+}
 
 export const ServiceSidebar: React.FC = () => {
   const location = useLocation();
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase.from('categorias').select('*');
+      if (data) setCategories(data);
+    };
+
+    fetchCategories();
+
+    const channel = supabase.channel('sidebar_categorias')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categorias' }, fetchCategories)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const displayCategories = categories.length > 0 ? categories : [
+    { id: '1', nombre: 'Cabello' },
+    { id: '2', nombre: 'Uñas' },
+    { id: '3', nombre: 'Estética Facial' },
+    { id: '4', nombre: 'Rituales Spa' }
+  ];
 
   return (
     <aside className="w-full md:w-64 bg-white rounded-3xl shadow-xl border border-[#E5D3B3]/20 p-6 h-fit shrink-0">
@@ -18,13 +49,15 @@ export const ServiceSidebar: React.FC = () => {
         Nuestros Servicios
       </h3>
       <nav className="flex flex-col gap-2">
-        {services.map((service) => {
-          const isActive = location.pathname === service.path;
-          const Icon = service.icon;
+        {displayCategories.map((category) => {
+          const path = `/${category.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-')}`;
+          const isActive = location.pathname === path;
+          const Icon = defaultIcons[category.nombre] || Sparkles;
+          
           return (
             <Link
-              key={service.path}
-              to={service.path}
+              key={category.id}
+              to={path}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
                 isActive 
                   ? 'bg-[#5D4037] text-white shadow-md' 
@@ -32,7 +65,7 @@ export const ServiceSidebar: React.FC = () => {
               }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'text-[#E5D3B3]' : ''}`} />
-              <span className="font-medium text-sm">{service.name}</span>
+              <span className="font-medium text-sm">{category.nombre}</span>
             </Link>
           );
         })}

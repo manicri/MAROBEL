@@ -3,6 +3,7 @@ import { supabase } from '../supabase';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Calendar } from './Calendar';
+import { DatePicker } from './DatePicker';
 import { Users, Calendar as CalendarIcon, CheckCircle2, Clock, Phone, Mail, Search, Check, Trash2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
@@ -24,8 +25,10 @@ interface Service {
   nombre: string;
   descripcion: string;
   categoria: string;
+  categoria_id?: string;
   precio: number;
   duracion: string;
+  imagen_url?: string;
 }
 
 interface Category {
@@ -51,13 +54,45 @@ export const AdminDashboard: React.FC = () => {
 
   // Service Form State
   const [isEditingService, setIsEditingService] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [currentService, setCurrentService] = useState<Partial<Service>>({
     nombre: '',
     descripcion: '',
     categoria: '',
     precio: 0,
-    duracion: ''
+    duracion: '',
+    imagen_url: ''
   });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from('servicios-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('servicios-images')
+        .getPublicUrl(filePath);
+
+      setCurrentService(prev => ({ ...prev, imagen_url: data.publicUrl }));
+      toast.success('Imagen subida correctamente');
+    } catch (error: any) {
+      toast.error(`Error al subir imagen: ${error.message}`);
+      console.error(error);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   const fetchAppointments = async () => {
     const { data, error } = await supabase
@@ -202,24 +237,23 @@ export const AdminDashboard: React.FC = () => {
     });
   };
 
-  const handleBlockTime = async () => {
+  const handleBlockTime = async (isFullDay: boolean = false) => {
     const payload = {
-      Nombre_cliente: 'BLOQUEO ADMINISTRATIVO',
-      cliente_email: 'admin@marobel.studio',
-      Servicio: 'BLOQUEO DE HORARIO',
       fecha: selectedDate,
-      hora: blockTime,
-      Estado: 'aceptada',
-      notas: 'Horario bloqueado por administración'
+      hora: isFullDay ? null : blockTime,
+      motivo: 'Bloqueo administrativo'
     };
 
-    const { error } = await supabase.from('citas').insert(payload);
+    const { error } = await supabase.from('bloqueos').insert(payload);
     
     if (error) {
-      toast.error('Error al bloquear horario');
+      toast.error('Error al bloquear horario. ¿Creaste la tabla "bloqueos"?');
+      console.error(error);
     } else {
-      toast.success('Horario bloqueado');
-      fetchAppointments();
+      toast.success(isFullDay ? 'Día completo bloqueado' : 'Horario bloqueado');
+      // Trigger calendar refresh
+      const event = new CustomEvent('marobel-block-added');
+      window.dispatchEvent(event);
     }
   };
 
@@ -237,7 +271,8 @@ export const AdminDashboard: React.FC = () => {
         descripcion: currentService.descripcion,
         categoria: currentService.categoria,
         precio: currentService.precio,
-        duracion: currentService.duracion
+        duracion: currentService.duracion,
+        imagen_url: currentService.imagen_url
       });
 
     if (error) {
@@ -246,7 +281,7 @@ export const AdminDashboard: React.FC = () => {
     } else {
       toast.success(currentService.id ? 'Servicio actualizado' : 'Servicio creado');
       setIsEditingService(false);
-      setCurrentService({ nombre: '', descripcion: '', categoria: '', precio: 0, duracion: '' });
+      setCurrentService({ nombre: '', descripcion: '', categoria: '', precio: 0, duracion: '', imagen_url: '' });
       fetchServices();
     }
   };
@@ -678,6 +713,22 @@ export const AdminDashboard: React.FC = () => {
                           placeholder="Ej: 60 min"
                         />
                       </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-[10px] uppercase tracking-widest font-bold text-[#5D4037]/60">Imagen del Servicio</label>
+                        <div className="flex items-center gap-4">
+                          {currentService.imagen_url && (
+                            <img src={currentService.imagen_url} alt="Preview" className="w-16 h-16 rounded-xl object-cover" />
+                          )}
+                          <Input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            disabled={isUploadingImage}
+                            className="bg-white border-none h-12 rounded-xl flex-1 cursor-pointer"
+                          />
+                          {isUploadingImage && <span className="text-xs text-[#5D4037]/60">Subiendo...</span>}
+                        </div>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] uppercase tracking-widest font-bold text-[#5D4037]/60">Descripción</label>
@@ -747,35 +798,42 @@ export const AdminDashboard: React.FC = () => {
             <div className="space-y-6">
               <div>
                 <label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/40 mb-3 block">Seleccionar Día</label>
-                <input 
-                  type="date" 
-                  value={selectedDate} 
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full bg-[#FAF9F6] border-none rounded-xl p-4 text-sm font-bold text-[#5D4037] outline-none"
+                <DatePicker 
+                  selectedDate={selectedDate} 
+                  onSelectDate={setSelectedDate} 
                 />
               </div>
 
               <div className="pt-4 border-t border-[#E5D3B3]/10">
                 <label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/40 mb-3 block">Bloquear Horario</label>
-                <div className="flex gap-2">
-                  <select 
-                    value={blockTime}
-                    onChange={(e) => setBlockTime(e.target.value)}
-                    className="flex-1 bg-[#FAF9F6] border-none rounded-xl p-3 text-sm font-bold text-[#5D4037] outline-none appearance-none"
-                  >
-                    {Array.from({ length: 10 }, (_, i) => `${i + 9}:00`).map(t => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-2">
+                    <select 
+                      value={blockTime}
+                      onChange={(e) => setBlockTime(e.target.value)}
+                      className="flex-1 bg-[#FAF9F6] border-none rounded-xl p-3 text-sm font-bold text-[#5D4037] outline-none appearance-none"
+                    >
+                      {Array.from({ length: 10 }, (_, i) => `${i + 9}:00`).map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <Button 
+                      onClick={() => handleBlockTime(false)}
+                      className="bg-[#5D4037] text-white rounded-xl px-4 text-[10px] uppercase tracking-widest font-bold"
+                    >
+                      Bloquear Hora
+                    </Button>
+                  </div>
                   <Button 
-                    onClick={handleBlockTime}
-                    className="bg-[#5D4037] text-white rounded-xl px-4 text-[10px] uppercase tracking-widest font-bold"
+                    onClick={() => handleBlockTime(true)}
+                    variant="outline"
+                    className="w-full border-red-200 text-red-600 hover:bg-red-50 rounded-xl text-[10px] uppercase tracking-widest font-bold"
                   >
-                    Bloquear
+                    Bloquear Día Completo
                   </Button>
                 </div>
-                <p className="text-[9px] text-[#5D4037]/40 mt-2 italic font-light">
-                  * Esto marcará el horario como ocupado para los clientes.
+                <p className="text-[9px] text-[#5D4037]/40 mt-3 italic font-light">
+                  * Esto marcará el horario o día como no disponible para los clientes.
                 </p>
               </div>
             </div>

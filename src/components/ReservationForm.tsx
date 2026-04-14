@@ -10,6 +10,7 @@ import { MessageCircle, Calendar as CalendarIcon, Clock, User, LogIn, CheckCircl
 import { useAuth } from "@/context/AuthContext";
 import { useSelection } from "@/context/SelectionContext";
 import { Calendar } from "./Calendar";
+import { DatePicker } from "./DatePicker";
 import { supabase } from "../supabase";
 import React from 'react';
 import { toast } from "sonner";
@@ -236,17 +237,12 @@ export default function ReservationForm() {
                   </div>
                   
                   <div className="bg-white p-8 rounded-3xl shadow-xl border border-[#E5D3B3]/10">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+                    <div className="flex flex-col mb-8 gap-4">
                       <Label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/60">1. Seleccionar Fecha</Label>
-                      <div className="relative">
-                        <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
-                        <input 
-                          type="date" 
-                          value={selectedDate} 
-                          onChange={(e) => setSelectedDate(e.target.value)}
-                          className="bg-[#5D4037] text-white border-none rounded-xl pl-12 pr-4 py-3 text-sm font-bold outline-none shadow-md cursor-pointer hover:bg-[#4a332c] transition-colors w-full sm:w-auto"
-                        />
-                      </div>
+                      <DatePicker 
+                        selectedDate={selectedDate} 
+                        onSelectDate={setSelectedDate} 
+                      />
                     </div>
                     <Calendar 
                       selectedDate={selectedDate} 
