@@ -8,7 +8,7 @@ interface Appointment {
   id: string;
   fecha: string;
   hora: string;
-  estado: string;
+  Estado: string;
 }
 
 interface CalendarProps {
@@ -19,7 +19,7 @@ interface CalendarProps {
 }
 
 export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, selectedTime, isAdmin }) => {
-  const [citasDelDia, setCitasDelDia] = useState<{hora: string, estado: string}[]>([]);
+  const [citasDelDia, setCitasDelDia] = useState<{hora: string, Estado: string}[]>([]);
 
   const getHours = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -35,7 +35,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
     const fetchBookedSlots = async () => {
       const { data, error } = await supabase
         .from('citas')
-        .select('hora, estado')
+        .select('hora, Estado')
         .eq('fecha', selectedDate);
       
       if (error) {
@@ -65,7 +65,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
 
   const bookedSlots = useMemo(() => {
     return citasDelDia
-      .filter(cita => cita.estado === 'aceptada' || cita.estado === 'Aceptada')
+      .filter(cita => cita.Estado === 'aceptada' || cita.Estado === 'Aceptada')
       .map(cita => cita.hora);
   }, [citasDelDia]);
 
@@ -87,7 +87,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
             disabled={isBooked}
             className={cn(
               "relative p-4 rounded-xl border text-sm font-bold transition-all duration-300 flex flex-col items-center justify-center gap-1 overflow-hidden",
-              isBooked ? "bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed opacity-70" : 
+              isBooked ? "bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed opacity-70 pointer-events-none ocupado" : 
               isSelected ? "bg-[#E5D3B3] border-[#5D4037] text-[#5D4037] shadow-lg ring-2 ring-offset-2 ring-[#5D4037] z-10" :
               "bg-white border-[#E5D3B3]/50 text-[#5D4037] hover:border-[#5D4037] hover:shadow-md"
             )}

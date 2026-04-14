@@ -56,11 +56,9 @@ export default function Navbar() {
           <Link 
             to="/" 
             onClick={handleHomeClick}
-            className="text-2xl font-serif font-bold text-white flex items-center gap-2"
+            className="text-2xl font-serif font-bold text-white flex items-center gap-3"
           >
-            <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20">
-              <img src="/logo.png" alt="Marobel Logo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-            </div>
+            <img src="/logo.png" alt="Marobel Logo" className="h-10 w-auto object-contain" referrerPolicy="no-referrer" />
             MAROBEL
           </Link>
 
@@ -117,8 +115,8 @@ export default function Navbar() {
                 <Menu className="w-6 h-6" />
               </SheetTrigger>
               <SheetContent side="right" className="bg-[#5D4037] text-white border-l-[#E5D3B3]/20" aria-describedby={undefined}>
-                <SheetTitle className="text-[#E5D3B3] font-serif text-2xl flex items-center gap-2 mt-4">
-                  <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" /> MAROBEL
+                <SheetTitle className="text-[#E5D3B3] font-serif text-2xl flex items-center gap-3 mt-4">
+                  <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain" referrerPolicy="no-referrer" /> MAROBEL
                 </SheetTitle>
                 <div className="flex flex-col space-y-6 mt-10">
                   <Link 

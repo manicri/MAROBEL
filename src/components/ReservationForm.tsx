@@ -367,16 +367,16 @@ export default function ReservationForm() {
                                 <Button 
                                   type="button"
                                   onClick={() => {
-                                    const serviciosSection = document.getElementById('servicios');
+                                    const serviciosSection = document.getElementById('servicios-anchor');
                                     if (serviciosSection) {
                                       serviciosSection.scrollIntoView({ behavior: 'smooth' });
                                     } else {
-                                      window.location.href = '/#servicios';
+                                      window.location.href = '/#servicios-anchor';
                                     }
                                   }}
                                   className="bg-[#5D4037] text-white rounded-full px-8 h-10 text-xs uppercase tracking-widest font-bold hover:bg-[#4a332c] transition-colors"
                                 >
-                                  Explorar Servicios
+                                  Elegir Servicio
                                 </Button>
                               </div>
                             ) : (

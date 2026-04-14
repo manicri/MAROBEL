@@ -162,6 +162,17 @@ export const AdminDashboard: React.FC = () => {
       fetchAppointments(); // Revert UI to actual DB state
     } else {
       toast.success(`Cita ${Estado.toLowerCase()} correctamente`);
+      
+      // WhatsApp Automation (Protocol v9.0)
+      if (Estado.toLowerCase() === 'aceptada') {
+        const app = appointments.find(a => a.cita === id);
+        if (app && app.whatsapp) {
+          const phone = app.whatsapp.replace(/\D/g, '');
+          const message = `¡Hola ${app.Nombre_cliente}! Marobel confirma tu cita. ✅ Datos de tu reserva: 🗓 Fecha: ${app.fecha} | ⏰ Hora: ${app.hora} | 📍 Lugar: Marobel Studio | 💇‍♀️ Servicios: ${app.Servicio} | 💰 Total: Por confirmar. Gracias por confiar en nosotros.`;
+          const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+          window.open(whatsappUrl, '_blank');
+        }
+      }
     }
   };
 
