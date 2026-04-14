@@ -4,10 +4,10 @@ import { Instagram } from "lucide-react";
 const images = [
   "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=600&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1591343395582-99bf4eb46a44?q=80&w=600&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=600&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1531853121101-da94cda940eb?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1570172619380-4197bfd14f64?q=80&w=600&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1552693673-1bf958298935?q=80&w=600&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=600&auto=format&fit=crop",
 ];
 
 export default function InstagramGallery() {
@@ -42,18 +42,29 @@ export default function InstagramGallery() {
               transition={{ delay: index * 0.1 }}
               className="group relative aspect-square overflow-hidden rounded-[2.5rem] cursor-pointer shadow-2xl"
             >
-              <img
-                src={src}
-                alt={`Gallery image ${index + 1}`}
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-[#5D4037]/60 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-sm">
-                <div className="text-center">
-                  <Instagram className="w-8 h-8 text-white mx-auto mb-3" />
-                  <span className="text-white text-[10px] font-bold tracking-[0.3em] uppercase">Ver Ritual</span>
+              <a 
+                href="https://www.instagram.com/marobel.studio/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block w-full h-full"
+              >
+                <img
+                  src={src}
+                  alt={`Gallery image ${index + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    // Fallback para imágenes rotas
+                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=600&auto=format&fit=crop";
+                  }}
+                />
+                <div className="absolute inset-0 bg-[#5D4037]/60 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-sm">
+                  <div className="text-center">
+                    <Instagram className="w-8 h-8 text-white mx-auto mb-3" />
+                    <span className="text-white text-[10px] font-bold tracking-[0.3em] uppercase">Ver Ritual</span>
+                  </div>
                 </div>
-              </div>
+              </a>
             </motion.div>
           ))}
         </div>
