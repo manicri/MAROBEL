@@ -510,11 +510,11 @@ export default function ReservationForm() {
                               (app.Estado === 'rechazada' || app.Estado === 'Cancelada') ? "bg-red-500 text-white" :
                               "bg-gray-400 text-white"
                             }`}>
-                              {(app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? 'Cita Confirmada' : 
+                              {(app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? 'Cita Confirmada (Ticket)' : 
                                (app.Estado === 'rechazada' || app.Estado === 'Cancelada') ? 'Cita Cancelada' : 
-                               'Esperando confirmación'}
+                               'En espera de aprobación por Marobel'}
                             </span>
-                            {(app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado || app.Estado === 'aceptada' || app.Estado === 'Aceptada') && (
+                            {(app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado) && (
                               <button 
                                 onClick={() => handleCancelAppointment(app.cita)}
                                 className="text-[10px] uppercase tracking-widest font-bold text-red-500 hover:text-red-700 transition-colors"

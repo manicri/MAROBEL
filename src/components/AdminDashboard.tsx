@@ -134,7 +134,7 @@ export const AdminDashboard: React.FC = () => {
   const updateStatus = async (id: string, Estado: string) => {
     // Optimistic UI update
     setAppointments(prev => prev.map(app => 
-      app.cita === id ? { ...app, Estado } : app
+      app.cita === id ? { ...app, Estado: Estado as any } : app
     ));
 
     const { error } = await supabase
@@ -147,6 +147,19 @@ export const AdminDashboard: React.FC = () => {
       toast.error(`Error al actualizar: ${error.message}`);
       // Revert on error
       fetchAppointments();
+      return;
+    } 
+
+    // VERIFICATION STEP (Protocol v6.0)
+    const { data: verifyData, error: verifyError } = await supabase
+      .from('citas')
+      .select('Estado')
+      .eq('cita', id)
+      .single();
+      
+    if (verifyError || (verifyData?.Estado !== Estado && verifyData?.Estado !== Estado.toLowerCase() && verifyData?.Estado !== Estado.charAt(0).toUpperCase() + Estado.slice(1))) {
+      toast.error('Error de Persistencia: Posible bloqueo por RLS (Row Level Security). Verifica las políticas en Supabase.', { duration: 8000 });
+      fetchAppointments(); // Revert UI to actual DB state
     } else {
       toast.success(`Cita ${Estado.toLowerCase()} correctamente`);
     }
