@@ -24,7 +24,7 @@ export function NotificationManager() {
         .from('citas')
         .select('*')
         .eq('cliente_email', user.email)
-        .eq('Estado', 'Aceptada')
+        .in('Estado', ['aceptada', 'Aceptada'])
         .in('fecha', [todayStr, tomorrowStr]);
 
       if (error || !data) return;
