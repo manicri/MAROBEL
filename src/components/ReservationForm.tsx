@@ -85,7 +85,7 @@ export default function ReservationForm() {
 
       const channel = supabase
         .channel('my_citas')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'citas', filter: `cliente_email=eq.${user.email}` }, () => {
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'citas' }, () => {
           fetchMyAppointments();
         })
         .subscribe();

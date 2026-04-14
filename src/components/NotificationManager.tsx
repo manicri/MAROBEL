@@ -58,16 +58,18 @@ export function NotificationManager() {
           event: 'UPDATE',
           schema: 'public',
           table: 'citas',
-          filter: `cliente_email=eq.${user.email}`,
         },
         (payload) => {
-          const newStatus = payload.new.Estado;
-          const service = payload.new.Servicio;
-          
-          toast.success(`¡Actualización de Cita!`, {
-            description: `Tu cita para ${service} ahora está: ${newStatus}`,
-            duration: 6000,
-          });
+          // Filter on the client side since Supabase filters might fail without replica identity
+          if (payload.new.cliente_email === user.email) {
+            const newStatus = payload.new.Estado;
+            const service = payload.new.Servicio;
+            
+            toast.success(`¡Actualización de Cita!`, {
+              description: `Tu cita para ${service} ahora está: ${newStatus}`,
+              duration: 6000,
+            });
+          }
         }
       )
       .subscribe();
