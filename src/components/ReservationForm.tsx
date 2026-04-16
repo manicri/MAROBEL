@@ -439,56 +439,38 @@ export default function ReservationForm() {
                           </div>
 
                           <div className="space-y-4">
-                            <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Servicios Seleccionados</Label>
-                            
-                            <div className="mb-4">
-                              <select 
-                                className="w-full bg-[#FAF9F6] border-none h-14 rounded-xl text-sm px-4 text-[#5D4037] outline-none cursor-pointer"
-                                onChange={(e) => {
-                                  const serviceId = e.target.value;
-                                  if (!serviceId) return;
-                                  const service = availableServices.find(s => s.id === serviceId);
-                                  if (service && !selectedServices.some(s => s.id === service.id)) {
-                                    addService({
-                                      id: service.id,
-                                      name: service.nombre,
-                                      price: service.precio,
-                                      category: service.categoria
-                                    });
-                                  }
-                                  e.target.value = ""; // reset
-                                }}
-                              >
-                                <option value="">+ Agregar un servicio...</option>
-                                {availableServices.map(service => (
-                                  <option key={service.id} value={service.id} disabled={selectedServices.some(s => s.id === service.id)}>
-                                    {service.nombre} - ${service.precio}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
+                            <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Servicio Seleccionado</Label>
 
                             {selectedServices.length === 0 ? (
                               <div className="p-8 bg-[#FAF9F6] rounded-xl text-center flex flex-col items-center justify-center border border-dashed border-[#E5D3B3]/50">
-                                <p className="text-sm text-[#5D4037]/60">
-                                  Selecciona un servicio de la lista desplegable arriba para continuar.
+                                <p className="text-sm text-[#5D4037]/60 mb-4">
+                                  Por favor selecciona un servicio primero.
                                 </p>
+                                <Button 
+                                  type="button"
+                                  onClick={() => {
+                                    const element = document.getElementById('servicios');
+                                    if (element) element.scrollIntoView({ behavior: 'smooth' });
+                                  }}
+                                  className="bg-[#E5D3B3] text-[#5D4037] hover:bg-[#d4c2a3] rounded-full text-xs uppercase tracking-widest font-bold"
+                                >
+                                  Ver Servicios
+                                </Button>
                               </div>
                             ) : (
                               <div className="space-y-2">
                                 {selectedServices.map(service => (
-                                  <div key={service.id} className="flex items-center justify-between p-3 bg-[#FAF9F6] rounded-xl">
-                                    <span className="text-sm text-[#5D4037] font-medium">{service.name}</span>
-                                    <div className="flex items-center gap-4">
-                                      <span className="text-sm font-bold text-[#8D6E63]">${service.price.toFixed(2)}</span>
-                                      <button 
-                                        type="button" 
-                                        onClick={() => removeService(service.id)}
-                                        className="text-red-400 hover:text-red-600 transition-colors"
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </button>
+                                  <div key={service.id} className="flex items-center justify-between p-4 bg-[#FAF9F6] rounded-xl border border-[#E5D3B3]/30">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 rounded-full bg-[#E5D3B3]/20 flex items-center justify-center">
+                                        <CheckCircle2 className="w-5 h-5 text-[#8D6E63]" />
+                                      </div>
+                                      <div>
+                                        <span className="text-sm text-[#5D4037] font-bold block">{service.name}</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-[#5D4037]/60">{service.category}</span>
+                                      </div>
                                     </div>
+                                    <span className="text-lg font-bold text-[#8D6E63]">${service.price.toFixed(2)}</span>
                                   </div>
                                 ))}
                                 <div className="flex items-center justify-between p-4 bg-[#5D4037] text-white rounded-xl mt-4">

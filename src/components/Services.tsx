@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Scissors, Sparkles, Heart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "../supabase";
+import { useSelection } from "../context/SelectionContext";
 
 interface Category {
   id: string;
@@ -34,6 +35,7 @@ const defaultImages: Record<string, string> = {
 };
 
 export default function Services() {
+  const { addService } = useSelection();
   const [categories, setCategories] = useState<Category[]>([]);
   const [services, setServices] = useState<Service[]>([]);
 
@@ -199,9 +201,9 @@ export default function Services() {
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { name: 'Balayage', desc: 'Iluminación natural y elegante para tu cabello.', price: 120, img: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=2069&auto=format&fit=crop' },
-              { name: 'Acrílicas', desc: 'Uñas perfectas y duraderas con diseños exclusivos.', price: 40, img: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=1974&auto=format&fit=crop' },
-              { name: 'Masaje Relajante', desc: 'Desconexión total para aliviar el estrés.', price: 70, img: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1920&auto=format&fit=crop' }
+              { id: 'fav1', name: 'Balayage', desc: 'Iluminación natural y elegante para tu cabello.', price: 120, img: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=2069&auto=format&fit=crop', category: 'Cabello' },
+              { id: 'fav2', name: 'Acrílicas', desc: 'Uñas perfectas y duraderas con diseños exclusivos.', price: 40, img: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=1974&auto=format&fit=crop', category: 'Uñas' },
+              { id: 'fav3', name: 'Masaje Relajante', desc: 'Desconexión total para aliviar el estrés.', price: 70, img: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1920&auto=format&fit=crop', category: 'Rituales Spa' }
             ].map((item, i) => (
               <motion.div 
                 key={i}
@@ -220,9 +222,16 @@ export default function Services() {
                     <span className="text-lg font-bold text-[#8D6E63]">${item.price}</span>
                   </div>
                   <p className="text-sm text-[#5D4037]/70 mb-6 flex-grow">{item.desc}</p>
-                  <a href="#reservas" className="w-full text-center py-3 rounded-full bg-[#E5D3B3] text-[#5D4037] font-bold text-xs uppercase tracking-widest hover:bg-[#d4c2a3] transition-colors">
+                  <button 
+                    onClick={() => {
+                      addService({ id: item.id, name: item.name, price: item.price, category: item.category });
+                      const element = document.getElementById('reservas');
+                      if (element) element.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="w-full text-center py-3 rounded-full bg-[#E5D3B3] text-[#5D4037] font-bold text-xs uppercase tracking-widest hover:bg-[#d4c2a3] transition-colors"
+                  >
                     Reservar
-                  </a>
+                  </button>
                 </div>
               </motion.div>
             ))}
