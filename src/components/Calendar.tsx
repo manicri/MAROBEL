@@ -161,10 +161,19 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
           <p className="text-gray-500 text-xs">No hay horarios disponibles para la duración de tu servicio este día. Te sugerimos buscar en el día siguiente.</p>
         </div>
       ) : (
-        hours.map((time) => {
+        hours.map((time, index) => {
           const isAvailable = isSlotAvailable(time);
           const isBooked = !isAvailable;
           const isSelected = selectedTime === time;
+          
+          // Logic for recommended slot: adjacent to a booked slot or first slot of the day
+          const prevTime = index > 0 ? hours[index - 1] : null;
+          const nextTime = index < hours.length - 1 ? hours[index + 1] : null;
+          const isRecommended = isAvailable && (
+            index === 0 || 
+            (prevTime && !isSlotAvailable(prevTime)) || 
+            (nextTime && !isSlotAvailable(nextTime))
+          );
 
           return (
             <motion.button
@@ -180,6 +189,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
                 "relative p-4 rounded-xl border text-sm font-bold transition-all duration-300 flex flex-col items-center justify-center gap-1 overflow-hidden",
                 isBooked ? "bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed opacity-70 pointer-events-none ocupado" : 
                 isSelected ? "bg-[#E5D3B3] border-[#5D4037] text-[#5D4037] shadow-lg ring-2 ring-offset-2 ring-[#5D4037] z-10" :
+                isRecommended ? "bg-[#FAF9F6] border-[#8D6E63] text-[#5D4037] shadow-sm" :
                 "bg-white border-[#E5D3B3]/50 text-[#5D4037] hover:border-[#5D4037] hover:shadow-md"
               )}
             >
@@ -188,7 +198,12 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
                   <div className="w-full h-[1px] bg-gray-800 rotate-45 absolute"></div>
                 </div>
               )}
-              <span className="text-xs uppercase tracking-tighter opacity-60 flex items-center gap-1">
+              {isRecommended && !isSelected && !isBooked && (
+                <div className="absolute top-0 left-0 w-full bg-[#8D6E63] text-white text-[8px] uppercase tracking-widest py-0.5 text-center">
+                  Recomendado
+                </div>
+              )}
+              <span className={cn("text-xs uppercase tracking-tighter opacity-60 flex items-center gap-1", isRecommended && !isSelected && "mt-2")}>
                 {isBooked ? <Lock className="w-3 h-3" /> : isSelected ? <Check className="w-3 h-3" /> : 'Slot'}
               </span>
               <span className={cn("text-base", isBooked && "line-through opacity-70")}>{time}</span>

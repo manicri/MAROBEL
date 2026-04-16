@@ -32,6 +32,7 @@ const formSchema = z.object({
   time: z.string().min(1, "Selecciona una hora"),
   professional: z.string().optional(),
   notas: z.string().optional(),
+  confirmacionAsistencia: z.boolean().refine(val => val === true, "Debes confirmar tu compromiso de asistencia")
 });
 
 export const professionalsList = [
@@ -504,6 +505,35 @@ export default function ReservationForm() {
                           </div>
 
                           <div className="space-y-4 pt-4 border-t border-[#E5D3B3]/20">
+                            <Label className="text-[#5D4037] font-serif text-lg block">Completa tu experiencia</Label>
+                            <p className="text-xs text-[#5D4037]/60 mb-4">Agrega estos servicios rápidos para un momento perfecto.</p>
+                            
+                            <div className="grid sm:grid-cols-2 gap-4">
+                              {availableServices
+                                .filter(s => !selectedServices.some(sel => sel.id === s.id) && s.precio <= 30)
+                                .slice(0, 2)
+                                .map(addon => (
+                                  <div key={addon.id} className="p-4 rounded-xl border border-[#E5D3B3]/30 bg-white flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-bold text-[#5D4037]">{addon.nombre}</p>
+                                      <p className="text-xs text-[#8D6E63]">+${addon.precio}</p>
+                                    </div>
+                                    <Button 
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => addService({ id: addon.id, name: addon.nombre, price: addon.precio, category: addon.categoria })}
+                                      className="rounded-full text-[10px] uppercase tracking-widest"
+                                    >
+                                      Agregar
+                                    </Button>
+                                  </div>
+                                ))
+                              }
+                            </div>
+                          </div>
+
+                          <div className="space-y-4 pt-4 border-t border-[#E5D3B3]/20">
                             <Label className="text-[#5D4037] font-serif text-lg block">¿Deseas asegurar tu cita con un adelanto?</Label>
                             <p className="text-xs text-[#5D4037]/60 mb-4">Asegura tu espacio realizando un abono previo.</p>
                             
@@ -538,6 +568,24 @@ export default function ReservationForm() {
                               <p><strong>Total:</strong> ${total.toFixed(2)} ({totalDuration} min)</p>
                             </div>
                             <p className="text-xs text-[#5D4037]/60 italic mt-4">✨ Te esperamos con mucha emoción. Recuerda llegar 5 minutos antes de tu cita.</p>
+                          </div>
+
+                          <div className="flex items-start gap-3 p-4 bg-white border border-[#E5D3B3]/30 rounded-xl">
+                            <input 
+                              type="checkbox" 
+                              id="confirmacionAsistencia" 
+                              {...register("confirmacionAsistencia")}
+                              className="mt-1 w-4 h-4 text-[#5D4037] rounded border-gray-300 focus:ring-[#5D4037]"
+                            />
+                            <div className="flex-1">
+                              <label htmlFor="confirmacionAsistencia" className="text-sm font-bold text-[#5D4037] cursor-pointer">
+                                Confirmo que asistiré a mi cita
+                              </label>
+                              <p className="text-xs text-[#5D4037]/60 mt-1">
+                                Al marcar esta casilla, te comprometes a asistir en el horario seleccionado. Las cancelaciones de último minuto afectan la agenda de nuestros profesionales.
+                              </p>
+                              {errors.confirmacionAsistencia && <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter mt-1">{errors.confirmacionAsistencia.message}</p>}
+                            </div>
                           </div>
 
                           <Button 
@@ -600,19 +648,41 @@ export default function ReservationForm() {
                               (app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? "bg-green-500 text-white" :
                               (app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado) ? "bg-yellow-500 text-white" :
                               (app.Estado === 'rechazada' || app.Estado === 'Cancelada') ? "bg-red-500 text-white" :
-                              "bg-gray-400 text-white"
+                              "bg-gray-500 text-white"
                             }`}>
-                              {(app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? 'Cita Confirmada (Ticket)' : 
-                               (app.Estado === 'rechazada' || app.Estado === 'Cancelada') ? 'Cita Cancelada' : 
-                               'En espera de aprobación por Marobel'}
+                              {app.Estado || 'Pendiente'}
                             </span>
+                            
                             {(app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado) && (
-                              <button 
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-red-400 hover:text-red-600 hover:bg-red-50 text-[10px] uppercase tracking-widest font-bold"
                                 onClick={() => handleCancelAppointment(app.cita)}
-                                className="text-[10px] uppercase tracking-widest font-bold text-red-500 hover:text-red-700 transition-colors"
                               >
                                 Cancelar Cita
-                              </button>
+                              </Button>
+                            )}
+
+                            {(app.Estado === 'aceptada' || app.Estado === 'Aceptada') && (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="border-[#E5D3B3] text-[#5D4037] hover:bg-[#E5D3B3]/10 text-[10px] uppercase tracking-widest font-bold mt-2"
+                                onClick={() => {
+                                  // Find the service to rebook
+                                  const serviceName = app.Servicio.split(',')[0].trim();
+                                  const serviceToRebook = availableServices.find(s => s.nombre.includes(serviceName));
+                                  if (serviceToRebook) {
+                                    clearSelection();
+                                    addService({ id: serviceToRebook.id, name: serviceToRebook.nombre, price: serviceToRebook.precio, category: serviceToRebook.categoria });
+                                    setActiveTab('reserve');
+                                    toast.success('Servicio preseleccionado', { description: 'Elige tu nueva fecha y hora.' });
+                                  }
+                                }}
+                              >
+                                Volver a Reservar
+                              </Button>
                             )}
                           </div>
                         </CardContent>
