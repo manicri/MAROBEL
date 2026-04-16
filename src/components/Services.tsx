@@ -39,11 +39,34 @@ export default function Services() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: catData } = await supabase.from('categorias').select('*');
-      const { data: servData } = await supabase.from('servicios').select('*');
+      const { data: catData, error: catError } = await supabase.from('categorias').select('*');
+      const { data: servData, error: servError } = await supabase.from('servicios').select('*');
       
-      if (catData) setCategories(catData);
-      if (servData) setServices(servData);
+      if (catData && catData.length > 0 && !catError) {
+        setCategories(catData);
+      }
+      if (servData && servData.length > 0 && !servError) {
+        setServices(servData);
+      } else {
+        // Fallback services
+        setServices([
+          { id: 'c1', nombre: 'Balayage', descripcion: '', precio: 120, duracion: '120 min', categoria: 'Cabello' },
+          { id: 'c2', nombre: 'Corte Dama', descripcion: '', precio: 35, duracion: '45 min', categoria: 'Cabello' },
+          { id: 'c3', nombre: 'Alisados', descripcion: '', precio: 150, duracion: '180 min', categoria: 'Cabello' },
+          { id: 'c4', nombre: 'Hidratación', descripcion: '', precio: 45, duracion: '60 min', categoria: 'Cabello' },
+          { id: 'u1', nombre: 'Acrílicas', descripcion: '', precio: 40, duracion: '90 min', categoria: 'Uñas' },
+          { id: 'u2', nombre: 'Gelish', descripcion: '', precio: 25, duracion: '45 min', categoria: 'Uñas' },
+          { id: 'u3', nombre: 'SPA Pedicura', descripcion: '', precio: 35, duracion: '60 min', categoria: 'Uñas' },
+          { id: 'u4', nombre: 'Nail Art', descripcion: '', precio: 15, duracion: '30 min', categoria: 'Uñas' },
+          { id: 'f1', nombre: 'Limpieza Profunda', descripcion: '', precio: 60, duracion: '60 min', categoria: 'Estética Facial' },
+          { id: 'f2', nombre: 'Peeling', descripcion: '', precio: 85, duracion: '60 min', categoria: 'Estética Facial' },
+          { id: 'f3', nombre: 'Microdermabrasión', descripcion: '', precio: 75, duracion: '60 min', categoria: 'Estética Facial' },
+          { id: 'r1', nombre: 'Masaje Relajante', descripcion: '', precio: 70, duracion: '60 min', categoria: 'Rituales Spa' },
+          { id: 'r2', nombre: 'Piedras Volcánicas', descripcion: '', precio: 90, duracion: '90 min', categoria: 'Rituales Spa' },
+          { id: 'r3', nombre: 'Exfoliación', descripcion: '', precio: 50, duracion: '45 min', categoria: 'Rituales Spa' },
+          { id: 'r4', nombre: 'Peeling Corporal', descripcion: 'Renovación profunda de la piel con exfoliación y hidratación intensa.', precio: 80, duracion: '90 min', categoria: 'Rituales Spa', imagen_url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1920&auto=format&fit=crop' }
+        ]);
+      }
     };
 
     fetchData();
@@ -71,28 +94,43 @@ export default function Services() {
   ];
 
   return (
-    <section id="servicios" className="py-32 bg-white">
+    <section id="servicios" className="py-32 bg-stone-50">
       <div className="container mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto mb-24">
+        <div className="text-center max-w-4xl mx-auto mb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
             <span className="text-[#8D6E63] font-medium tracking-[0.4em] uppercase text-xs mb-4 block">
-              Nuestra Colección
+              Experiencia Premium
             </span>
-            <h2 className="text-5xl md:text-6xl font-serif text-[#5D4037] mb-8">
-              Servicios Exclusivos
-            </h2>
-            <p className="text-[#5D4037]/60 font-light leading-relaxed">
-              Cada tratamiento es un ritual diseñado para realzar tu belleza natural 
-              y brindarte un momento de desconexión total.
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-[#5D4037] mb-6 leading-tight">
+              Nuestros Servicios de Belleza en Marobel Beauty Studio
+            </h1>
+            <p className="text-[#5D4037]/70 font-light leading-relaxed text-lg mb-10 max-w-2xl mx-auto">
+              Descubre nuestros tratamientos diseñados para realzar tu belleza natural y brindarte un momento de desconexión total en La Alborada, Guayaquil.
             </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <a 
+                href="#reserva" 
+                className="bg-[#5D4037] text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-[#4a332c] transition-all shadow-lg hover:shadow-xl w-full sm:w-auto"
+              >
+                Reservar cita
+              </a>
+              <a 
+                href="https://wa.me/593969272530" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="bg-white text-[#5D4037] border border-[#E5D3B3] px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-[#FAF9F6] transition-all w-full sm:w-auto"
+              >
+                Contactar por WhatsApp
+              </a>
+            </div>
           </motion.div>
         </div>
 
-        <div id="servicios-anchor" className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div id="servicios-anchor" className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-32">
           {displayCategories.map((category, index) => {
             const categoryServices = services.filter(s => s.categoria === category.nombre);
             const Icon = defaultIcons[category.nombre] || Sparkles;
@@ -111,7 +149,7 @@ export default function Services() {
                 <div className="relative h-[400px] rounded-3xl overflow-hidden mb-6 shadow-2xl">
                   <img
                     src={firstImage}
-                    alt={category.nombre}
+                    alt={`Servicios de ${category.nombre} en Guayaquil`}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     referrerPolicy="no-referrer"
                   />
@@ -147,6 +185,89 @@ export default function Services() {
               </motion.div>
             );
           })}
+        </div>
+
+        {/* Servicios más solicitados */}
+        <div className="mb-32">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-[#8D6E63] font-medium tracking-[0.4em] uppercase text-xs mb-4 block">
+              Los Favoritos
+            </span>
+            <h2 className="text-3xl md:text-4xl font-serif text-[#5D4037] mb-6">
+              Servicios Más Solicitados
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { name: 'Balayage', desc: 'Iluminación natural y elegante para tu cabello.', price: 120, img: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=2069&auto=format&fit=crop' },
+              { name: 'Acrílicas', desc: 'Uñas perfectas y duraderas con diseños exclusivos.', price: 40, img: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=1974&auto=format&fit=crop' },
+              { name: 'Masaje Relajante', desc: 'Desconexión total para aliviar el estrés.', price: 70, img: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1920&auto=format&fit=crop' }
+            ].map((item, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-white rounded-3xl overflow-hidden shadow-lg border border-[#E5D3B3]/20 flex flex-col"
+              >
+                <div className="h-48 overflow-hidden">
+                  <img src={item.img} alt={item.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                </div>
+                <div className="p-6 flex flex-col flex-grow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-serif font-bold text-[#5D4037]">{item.name}</h3>
+                    <span className="text-lg font-bold text-[#8D6E63]">${item.price}</span>
+                  </div>
+                  <p className="text-sm text-[#5D4037]/70 mb-6 flex-grow">{item.desc}</p>
+                  <a href="#reservas" className="w-full text-center py-3 rounded-full bg-[#E5D3B3] text-[#5D4037] font-bold text-xs uppercase tracking-widest hover:bg-[#d4c2a3] transition-colors">
+                    Reservar
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Confianza y Prueba Social */}
+        <div className="bg-[#FAF9F6] rounded-[3rem] p-8 md:p-16 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+            {[
+              { number: '+100', label: 'Clientas Atendidas' },
+              { number: '+5', label: 'Años de Experiencia' },
+              { number: '100%', label: 'Atención Profesional' },
+              { number: '5.0', label: 'Resultados de Calidad' }
+            ].map((stat, i) => (
+              <div key={i}>
+                <div className="text-3xl md:text-4xl font-serif text-[#5D4037] font-bold mb-2">{stat.number}</div>
+                <div className="text-[10px] uppercase tracking-widest text-[#5D4037]/60 font-bold">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+          
+          <h2 className="text-3xl md:text-4xl font-serif text-[#5D4037] mb-12">Lo que dicen nuestras clientas</h2>
+          <div className="grid md:grid-cols-3 gap-8 text-left">
+            {[
+              { name: 'María Fernanda', text: 'El mejor spa en Guayaquil. La atención es increíble y los resultados en mi cabello fueron espectaculares. ¡100% recomendado!' },
+              { name: 'Andrea Gómez', text: 'Me hice las uñas acrílicas y quedé fascinada. El ambiente es súper relajante y el personal muy profesional.' },
+              { name: 'Carla Ruiz', text: 'Los masajes relajantes son de otro mundo. Salí renovada. Definitivamente volveré a Marobel.' }
+            ].map((testimonial, i) => (
+              <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-[#E5D3B3]/20">
+                <div className="flex text-[#E5D3B3] mb-4">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 fill-current" />)}
+                </div>
+                <p className="text-[#5D4037]/70 italic mb-6 text-sm leading-relaxed">"{testimonial.text}"</p>
+                <div className="font-bold text-[#5D4037] text-sm uppercase tracking-wider">{testimonial.name}</div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-16">
+            <p className="text-[#5D4037] font-serif text-2xl mb-6">¿Lista para tu momento de belleza?</p>
+            <a href="#reservas" className="inline-block bg-[#5D4037] text-white px-10 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-[#4a332c] transition-all shadow-lg hover:shadow-xl">
+              Agenda tu cita hoy
+            </a>
+          </div>
         </div>
       </div>
     </section>

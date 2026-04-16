@@ -31,6 +31,13 @@ CREATE TABLE IF NOT EXISTS public.servicios (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+-- Insertar servicio inicial (Peeling Corporal)
+INSERT INTO public.servicios (nombre, descripcion, precio, duracion, categoria, imagen_url)
+SELECT 'Peeling Corporal', 'Renovación profunda de la piel con exfoliación y hidratación intensa.', 80.00, '90 min', 'Rituales Spa', 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1920&auto=format&fit=crop'
+WHERE NOT EXISTS (
+    SELECT 1 FROM public.servicios WHERE nombre = 'Peeling Corporal'
+);
+
 -- 3. Tabla de Bloqueos (Calendario)
 CREATE TABLE IF NOT EXISTS public.bloqueos (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

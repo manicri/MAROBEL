@@ -28,7 +28,7 @@ export default function ServiceCard({ service, imageUrl }: ServiceCardProps) {
     <div
       className={twMerge(
         clsx(
-          "bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 border-2 cursor-pointer",
+          "bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 border-2 cursor-pointer flex flex-col h-full",
           isSelected ? "border-[#5D4037]" : "border-transparent hover:shadow-lg"
         )
       )}
@@ -39,15 +39,25 @@ export default function ServiceCard({ service, imageUrl }: ServiceCardProps) {
       ) : (
         <ServicePlaceholder />
       )}
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
+      <div className="p-6 flex flex-col flex-grow">
+        <div className="flex justify-between items-start mb-2">
           <h3 className="text-xl font-serif font-bold text-[#5D4037]">{service.name}</h3>
           <span className="text-lg font-bold text-[#8D6E63]">${service.price.toFixed(2)}</span>
         </div>
+        {service.duration && (
+          <p className="text-xs text-[#5D4037]/60 font-medium uppercase tracking-widest mb-3">
+            ⏱ {service.duration}
+          </p>
+        )}
+        {service.description && (
+          <p className="text-sm text-[#5D4037]/70 mb-6 flex-grow">
+            {service.description}
+          </p>
+        )}
         <button
           className={twMerge(
             clsx(
-              "w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2",
+              "w-full py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 mt-auto",
               isSelected
                 ? "bg-[#E5D3B3] text-[#5D4037]"
                 : "bg-stone-100 text-stone-600 hover:bg-stone-200"

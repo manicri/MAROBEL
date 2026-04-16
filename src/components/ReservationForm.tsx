@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircle, Calendar as CalendarIcon, Clock, User, LogIn, CheckCircle2, AlertCircle, Lock, Check, Trash2 } from "lucide-react";
+import { MessageCircle, Calendar as CalendarIcon, Clock, User, LogIn, CheckCircle2, AlertCircle, Lock, Check, Trash2, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSelection } from "@/context/SelectionContext";
 import { Calendar } from "./Calendar";
@@ -27,6 +27,7 @@ interface Appointment {
 const formSchema = z.object({
   nombre: z.string().min(2, "El nombre es requerido"),
   whatsapp: z.string().min(10, "Número de WhatsApp inválido"),
+  email: z.string().email("Correo inválido").optional().or(z.literal('')),
   date: z.string().min(1, "Selecciona una fecha"),
   time: z.string().min(1, "Selecciona una hora"),
   notas: z.string().optional(),
@@ -34,7 +35,7 @@ const formSchema = z.object({
 
 export default function ReservationForm() {
   const { user, login } = useAuth();
-  const { selectedServices, total, removeService, clearSelection } = useSelection();
+  const { selectedServices, total, addService, removeService, clearSelection } = useSelection();
   const [selectedDate, setSelectedDate] = React.useState(new Date().toISOString().split('T')[0]);
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
   const [myAppointments, setMyAppointments] = React.useState<Appointment[]>([]);
@@ -62,8 +63,29 @@ export default function ReservationForm() {
 
   React.useEffect(() => {
     const fetchServices = async () => {
-      const { data } = await supabase.from('servicios').select('*');
-      if (data) setAvailableServices(data);
+      const { data, error } = await supabase.from('servicios').select('*');
+      if (data && data.length > 0 && !error) {
+        setAvailableServices(data);
+      } else {
+        // Fallback services
+        setAvailableServices([
+          { id: 'c1', nombre: 'Balayage', precio: 120, categoria: 'Cabello' },
+          { id: 'c2', nombre: 'Corte Dama', precio: 35, categoria: 'Cabello' },
+          { id: 'c3', nombre: 'Alisados', precio: 150, categoria: 'Cabello' },
+          { id: 'c4', nombre: 'Hidratación', precio: 45, categoria: 'Cabello' },
+          { id: 'u1', nombre: 'Acrílicas', precio: 40, categoria: 'Uñas' },
+          { id: 'u2', nombre: 'Gelish', precio: 25, categoria: 'Uñas' },
+          { id: 'u3', nombre: 'SPA Pedicura', precio: 35, categoria: 'Uñas' },
+          { id: 'u4', nombre: 'Nail Art', precio: 15, categoria: 'Uñas' },
+          { id: 'f1', nombre: 'Limpieza Profunda', precio: 60, categoria: 'Estética Facial' },
+          { id: 'f2', nombre: 'Peeling', precio: 85, categoria: 'Estética Facial' },
+          { id: 'f3', nombre: 'Microdermabrasión', precio: 75, categoria: 'Estética Facial' },
+          { id: 'r1', nombre: 'Masaje Relajante', precio: 70, categoria: 'Rituales Spa' },
+          { id: 'r2', nombre: 'Piedras Volcánicas', precio: 90, categoria: 'Rituales Spa' },
+          { id: 'r3', nombre: 'Exfoliación', precio: 50, categoria: 'Rituales Spa' },
+          { id: 'r4', nombre: 'Peeling Corporal', precio: 80, categoria: 'Rituales Spa' }
+        ]);
+      }
     };
     fetchServices();
   }, []);
@@ -380,6 +402,14 @@ export default function ReservationForm() {
                                 <Input {...register("whatsapp")} className="pl-12 bg-[#FAF9F6] border-none h-14 rounded-xl text-sm" placeholder="0987654321" />
                               </div>
                               {errors.whatsapp && <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">{errors.whatsapp.message}</p>}
+                            </div>
+                            <div className="space-y-3 md:col-span-2">
+                              <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Correo Electrónico (Opcional)</Label>
+                              <div className="relative">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5D4037]/30" />
+                                <Input {...register("email")} type="email" className="pl-12 bg-[#FAF9F6] border-none h-14 rounded-xl text-sm" placeholder="tu@correo.com" />
+                              </div>
+                              {errors.email && <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">{errors.email.message}</p>}
                             </div>
                           </div>
 
