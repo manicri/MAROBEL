@@ -155,6 +155,11 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
         <div className="col-span-full py-8 text-center text-[#5D4037]/60 font-medium italic">
           Cerrado los domingos. Por favor selecciona otro día.
         </div>
+      ) : hours.every(time => !isSlotAvailable(time)) ? (
+        <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl border border-gray-200">
+          <p className="text-[#5D4037] font-bold uppercase tracking-widest text-sm mb-2">Día Sin Disponibilidad</p>
+          <p className="text-gray-500 text-xs">No hay horarios disponibles para la duración de tu servicio este día. Te sugerimos buscar en el día siguiente.</p>
+        </div>
       ) : (
         hours.map((time) => {
           const isAvailable = isSlotAvailable(time);

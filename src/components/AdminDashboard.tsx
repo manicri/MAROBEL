@@ -478,138 +478,126 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid gap-4">
-                {filteredAppointments.map((app) => (
-                  <Card 
-                    key={app.cita} 
-                    className={`border-none shadow-sm bg-white rounded-2xl overflow-hidden hover:shadow-md transition-all cursor-pointer ${expandedId === app.cita ? 'ring-2 ring-[#E5D3B3]' : ''}`}
-                    onClick={() => setExpandedId(expandedId === app.cita ? null : app.cita)}
-                  >
-                    <CardContent className="p-0">
-                      <div className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                        <div className="flex items-center gap-5">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                            app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? "bg-red-500/10 text-red-600" :
-                            (app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? "bg-green-500/10 text-green-600" :
-                            (app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado) ? "bg-yellow-500/10 text-yellow-600" :
-                            "bg-gray-500/10 text-gray-600"
-                          }`}>
-                            {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? <Clock className="w-6 h-6" /> : 
-                             (app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-3 mb-1">
-                              <h3 className="text-lg font-serif text-[#5D4037]">
-                                {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? 'HORARIO BLOQUEADO' : app.Servicio}
-                              </h3>
-                              <span className={`text-[8px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${
-                                app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? "bg-red-500/20 text-red-700" : "bg-[#E5D3B3]/20 text-[#8D6E63]"
-                              }`}>
-                                {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? 'BLOQUEO' : (app.Estado || 'pendiente')}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-4 text-xs text-[#5D4037]/60">
-                              <span className="flex items-center gap-1">
-                                <Users className="w-3 h-3" /> 
-                                {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? 'Administración' : app.Nombre_cliente}
-                              </span>
-                              {app.Nombre_cliente !== 'BLOQUEO ADMINISTRATIVO' && (
-                                <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {app.cliente_email}</span>
-                              )}
-                            </div>
-                          </div>
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-[#E5D3B3]/20">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xl font-serif text-[#5D4037]">Agenda del Día</h3>
+                  <span className="text-sm font-bold text-[#8D6E63]">{selectedDate}</span>
+                </div>
+                
+                {todayAppointments.length === 0 ? (
+                  <div className="text-center py-12 text-[#5D4037]/50 italic">
+                    No hay citas programadas para este día.
+                  </div>
+                ) : (
+                  <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-[#E5D3B3] before:to-transparent">
+                    {todayAppointments.sort((a, b) => a.hora.localeCompare(b.hora)).map((app) => (
+                      <div key={app.cita} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-[#E5D3B3] text-[#5D4037] shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                          <Clock className="w-4 h-4" />
                         </div>
-                        
-                        <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 border-[#E5D3B3]/10">
-                          <div className="text-right">
-                            <p className="text-xs font-bold text-[#5D4037] uppercase tracking-tighter">{app.fecha}</p>
-                            <p className="text-lg font-serif text-[#8D6E63]">{app.hora}</p>
+                        <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-[#E5D3B3]/30 bg-white shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={() => setExpandedId(expandedId === app.cita ? null : app.cita)}>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-bold text-[#8D6E63]">{app.hora}</span>
+                            <span className={`text-[10px] uppercase tracking-widest px-2 py-1 rounded-full font-bold ${
+                              app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? "bg-red-500/10 text-red-600" :
+                              (app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? "bg-green-500/10 text-green-600" :
+                              (app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado) ? "bg-yellow-500/10 text-yellow-600" :
+                              "bg-gray-500/10 text-gray-600"
+                            }`}>
+                              {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? 'Bloqueo' : app.Estado || 'Pendiente'}
+                            </span>
                           </div>
-                          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                            {(app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado) && (
-                              <>
+                          <h4 className="font-bold text-[#5D4037] text-sm mb-1">{app.Nombre_cliente}</h4>
+                          <p className="text-xs text-[#5D4037]/70 truncate">{app.Servicio}</p>
+                          
+                          {expandedId === app.cita && app.Nombre_cliente !== 'BLOQUEO ADMINISTRATIVO' && (
+                            <div className="mt-4 pt-4 border-t border-[#E5D3B3]/20 space-y-3">
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                  <span className="text-[#5D4037]/50 block mb-1">Email</span>
+                                  <span className="text-[#5D4037]">{app.cliente_email || 'N/A'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-[#5D4037]/50 block mb-1">WhatsApp</span>
+                                  <span className="text-[#5D4037]">{app.whatsapp || 'N/A'}</span>
+                                </div>
+                              </div>
+                              {app.notas && (
+                                <div>
+                                  <span className="text-[#5D4037]/50 block mb-1 text-xs">Notas</span>
+                                  <p className="text-xs text-[#5D4037] bg-gray-50 p-2 rounded">{app.notas}</p>
+                                </div>
+                              )}
+                              <div className="flex gap-2 pt-2">
                                 <Button 
                                   size="sm" 
-                                  className="bg-green-600 hover:bg-green-700 text-white rounded-full px-4 text-[10px] uppercase tracking-widest font-bold flex items-center gap-2"
-                                  onClick={() => updateStatus(app.cita, 'aceptada')}
+                                  className="w-full bg-green-600 hover:bg-green-700 text-white text-[10px] uppercase tracking-widest"
+                                  onClick={(e) => { e.stopPropagation(); updateStatus(app.cita, 'aceptada'); }}
                                 >
-                                  <Check className="w-3 h-3" />
                                   Aceptar
                                 </Button>
                                 <Button 
                                   size="sm" 
-                                  variant="outline"
-                                  className="rounded-full px-4 text-[10px] uppercase tracking-widest font-bold border-[#E5D3B3]/30 text-[#5D4037]/60"
-                                  onClick={() => updateStatus(app.cita, 'rechazada')}
+                                  variant="destructive" 
+                                  className="w-full text-[10px] uppercase tracking-widest"
+                                  onClick={(e) => { e.stopPropagation(); updateStatus(app.cita, 'rechazada'); }}
                                 >
                                   Rechazar
                                 </Button>
-                              </>
-                            )}
-                            {(app.Estado === 'aceptada' || app.Estado === 'Aceptada') && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                className="rounded-full px-4 text-[10px] uppercase tracking-widest font-bold border-[#E5D3B3]/30 text-[#5D4037]/60"
-                                onClick={() => updateStatus(app.cita, 'rechazada')}
-                              >
-                                Rechazar
-                              </Button>
-                            )}
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full px-3"
-                              onClick={() => handleDelete(app.cita)}
-                              title="Eliminar cita"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-                      {expandedId === app.cita && (
-                        <div className="px-6 pb-6 pt-2 border-t border-[#E5D3B3]/10 bg-[#FAF9F6]/50 animate-in fade-in slide-in-from-top-2 duration-200">
-                          <div className="grid md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                                  <Phone className="w-4 h-4 text-[#E5D3B3]" />
-                                </div>
-                                <div>
-                                  <p className="text-[8px] uppercase tracking-widest font-bold text-[#5D4037]/40">WhatsApp / Teléfono</p>
-                                  <a 
-                                    href={`https://wa.me/${app.whatsapp?.replace(/\D/g, '')}`} 
-                                    target="_blank" 
-                                    rel="noreferrer"
-                                    className="text-sm font-medium text-[#5D4037] hover:text-[#8D6E63] transition-colors"
-                                  >
-                                    {app.whatsapp || 'No proporcionado'}
-                                  </a>
-                                </div>
+              {searchTerm && (
+                <div className="mt-8">
+                  <h3 className="text-lg font-serif text-[#5D4037] mb-4">Resultados de búsqueda</h3>
+                  <div className="grid gap-4">
+                    {filteredAppointments.filter(app => app.fecha !== selectedDate).map((app) => (
+                      <Card 
+                        key={app.cita} 
+                        className={`border-none shadow-sm bg-white rounded-2xl overflow-hidden hover:shadow-md transition-all cursor-pointer ${expandedId === app.cita ? 'ring-2 ring-[#E5D3B3]' : ''}`}
+                        onClick={() => setExpandedId(expandedId === app.cita ? null : app.cita)}
+                      >
+                        <CardContent className="p-0">
+                          <div className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div className="flex items-center gap-5">
+                              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                                app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? "bg-red-500/10 text-red-600" :
+                                (app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? "bg-green-500/10 text-green-600" :
+                                (app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado) ? "bg-yellow-500/10 text-yellow-600" :
+                                "bg-gray-500/10 text-gray-600"
+                              }`}>
+                                {app.Nombre_cliente === 'BLOQUEO ADMINISTRATIVO' ? <Clock className="w-6 h-6" /> : 
+                                 (app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
+                              </div>
+                              <div>
+                                <h3 className="font-bold text-[#5D4037] text-lg">{app.Nombre_cliente}</h3>
+                                <p className="text-sm text-[#5D4037]/60">{app.Servicio}</p>
                               </div>
                             </div>
-                            <div className="space-y-4">
-                              <div className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm mt-1">
-                                  <Search className="w-4 h-4 text-[#E5D3B3]" />
-                                </div>
-                                <div className="flex-1">
-                                  <p className="text-[8px] uppercase tracking-widest font-bold text-[#5D4037]/40">Notas del Cliente</p>
-                                  <p className="text-sm text-[#5D4037]/70 italic leading-relaxed">
-                                    {app.notas || 'Sin notas adicionales.'}
-                                  </p>
-                                </div>
+                            <div className="flex items-center gap-8 w-full md:w-auto">
+                              <div className="flex items-center gap-2 text-[#5D4037]/80 bg-[#FAF9F6] px-4 py-2 rounded-lg">
+                                <CalendarIcon className="w-4 h-4 text-[#8D6E63]" />
+                                <span className="text-sm font-medium">{app.fecha}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-[#5D4037]/80 bg-[#FAF9F6] px-4 py-2 rounded-lg">
+                                <Clock className="w-4 h-4 text-[#8D6E63]" />
+                                <span className="text-sm font-medium">{app.hora}</span>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           ) : activeTab === 'services' ? (
             <div className="space-y-8">

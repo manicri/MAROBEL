@@ -528,6 +528,18 @@ export default function ReservationForm() {
                             </div>
                           </div>
 
+                          <div className="bg-[#E5D3B3]/10 p-6 rounded-2xl border border-[#E5D3B3]/30 space-y-4">
+                            <h4 className="font-serif text-lg text-[#5D4037]">Resumen de tu Reserva</h4>
+                            <div className="space-y-2 text-sm text-[#5D4037]/80">
+                              <p><strong>Servicios:</strong> {selectedServices.map(s => s.name).join(', ')}</p>
+                              <p><strong>Profesional:</strong> {professionalsList.find(p => p.id === selectedProfessional)?.name || 'Cualquiera'}</p>
+                              <p><strong>Fecha:</strong> {selectedDate}</p>
+                              <p><strong>Hora:</strong> {selectedTime || 'Por seleccionar'}</p>
+                              <p><strong>Total:</strong> ${total.toFixed(2)} ({totalDuration} min)</p>
+                            </div>
+                            <p className="text-xs text-[#5D4037]/60 italic mt-4">✨ Te esperamos con mucha emoción. Recuerda llegar 5 minutos antes de tu cita.</p>
+                          </div>
+
                           <Button 
                             type="submit" 
                             disabled={isSubmitting || !selectedTime || selectedServices.length === 0} 
