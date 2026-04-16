@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabase';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -383,6 +383,21 @@ export const AdminDashboard: React.FC = () => {
 
   const todayAppointments = appointments.filter(app => app.fecha === selectedDate);
 
+  const mostUsedServices = useMemo(() => {
+    const counts: Record<string, number> = {};
+    appointments.forEach(app => {
+      if (app.Servicio) {
+        const servs = app.Servicio.split(', ');
+        servs.forEach(s => {
+          counts[s] = (counts[s] || 0) + 1;
+        });
+      }
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+  }, [appointments]);
+
   return (
     <div className="space-y-16">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -429,6 +444,22 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       </header>
+
+      {mostUsedServices.length > 0 && activeTab === 'appointments' && (
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {mostUsedServices.map(([name, count]) => (
+            <div key={name} className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-[#E5D3B3]/20 flex items-center gap-4 min-w-max">
+              <div className="w-10 h-10 rounded-full bg-[#E5D3B3]/20 flex items-center justify-center">
+                <span className="text-[#8D6E63] font-bold">{count}</span>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-widest font-bold text-[#5D4037]/40">Top Servicio</p>
+                <p className="text-sm font-bold text-[#5D4037]">{name}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-12">
         <section className="lg:col-span-2 space-y-8">

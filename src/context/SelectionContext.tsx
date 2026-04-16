@@ -14,6 +14,7 @@ interface SelectionContextType {
   addService: (service: ServiceItem) => void;
   removeService: (id: string) => void;
   total: number;
+  totalDuration: number;
   clearSelection: () => void;
 }
 
@@ -38,9 +39,15 @@ export function SelectionProvider({ children }: { children: ReactNode }) {
   };
 
   const total = selectedServices.reduce((sum, service) => sum + service.price, 0);
+  
+  const totalDuration = selectedServices.reduce((sum, service) => {
+    if (!service.duration) return sum + 60; // Default 60 min
+    const match = service.duration.match(/\d+/);
+    return sum + (match ? parseInt(match[0]) : 60);
+  }, 0);
 
   return (
-    <SelectionContext.Provider value={{ selectedServices, addService, removeService, total, clearSelection }}>
+    <SelectionContext.Provider value={{ selectedServices, addService, removeService, total, totalDuration, clearSelection }}>
       {children}
     </SelectionContext.Provider>
   );

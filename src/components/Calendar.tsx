@@ -16,10 +16,12 @@ interface CalendarProps {
   onSelectSlot: (time: string) => void;
   selectedTime: string | null;
   isAdmin?: boolean;
+  totalDuration?: number;
+  selectedProfessional?: string;
 }
 
-export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, selectedTime, isAdmin }) => {
-  const [citasDelDia, setCitasDelDia] = useState<{hora: string, Estado: string}[]>([]);
+export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, selectedTime, isAdmin, totalDuration = 60, selectedProfessional = 'any' }) => {
+  const [citasDelDia, setCitasDelDia] = useState<{hora: string, Estado: string, profesional?: string}[]>([]);
   const [bloqueosDelDia, setBloqueosDelDia] = useState<{hora: string | null}[]>([]);
   const [isFullDayBlocked, setIsFullDayBlocked] = useState(false);
 
@@ -28,7 +30,14 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
     const day = date.getUTCDay(); // 0 = Sun, 6 = Sat
     if (day === 0) return []; // Sunday closed
     const start = day === 6 ? 10 : 9; // Sat starts at 10
-    return Array.from({ length: 18 - start + 1 }, (_, i) => `${i + start}:00`);
+    
+    // Generate 30-min intervals for better granularity
+    const slots = [];
+    for (let i = start; i <= 18; i++) {
+      slots.push(`${i}:00`);
+      if (i !== 18) slots.push(`${i}:30`);
+    }
+    return slots;
   };
 
   const hours = useMemo(() => getHours(selectedDate), [selectedDate]);
@@ -42,7 +51,14 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
         .eq('fecha', selectedDate);
       
       if (citasError) console.error('Error fetching booked slots:', citasError);
-      else if (citasData) setCitasDelDia(citasData);
+      else if (citasData) {
+        // Simulate professional assignment for existing data if needed
+        const simulatedData = citasData.map(c => ({
+          ...c,
+          profesional: 'any' // In a real app, this would come from DB
+        }));
+        setCitasDelDia(simulatedData);
+      }
 
       // Fetch Bloqueos
       const { data: bloqueosData, error: bloqueosError } = await supabase
@@ -85,23 +101,47 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
       supabase.removeChannel(channelBloqueos);
       window.removeEventListener('marobel-block-added', handleBlockAdded);
     };
-  }, [selectedDate]);
+  }, [selectedDate, selectedProfessional]);
 
   const bookedSlots = useMemo(() => {
     const citasBooked = citasDelDia
       .filter(cita => cita.Estado === 'aceptada' || cita.Estado === 'Aceptada')
-      .map(cita => cita.hora);
+      .map(cita => {
+        const [h, m] = cita.hora.split(':');
+        return `${parseInt(h)}:${m === '00' ? '00' : '30'}`; // Normalize
+      });
     
     const bloqueosBooked = bloqueosDelDia
       .filter(b => b.hora !== null)
       .map(b => {
-        // Format time from DB (e.g., "09:00:00") to match hours array (e.g., "9:00")
         const [h, m] = b.hora!.split(':');
-        return `${parseInt(h)}:${m}`;
+        return `${parseInt(h)}:${m === '00' ? '00' : '30'}`;
       });
 
     return [...citasBooked, ...bloqueosBooked];
   }, [citasDelDia, bloqueosDelDia]);
+
+  // Calculate if a slot is available based on totalDuration
+  const isSlotAvailable = (time: string) => {
+    if (isFullDayBlocked) return false;
+    
+    const startIndex = hours.indexOf(time);
+    if (startIndex === -1) return false;
+
+    const slotsNeeded = Math.ceil(totalDuration / 30);
+    
+    // Check if there are enough slots left in the day
+    if (startIndex + slotsNeeded > hours.length) return false;
+
+    // Check if any of the required slots are booked
+    for (let i = 0; i < slotsNeeded; i++) {
+      if (bookedSlots.includes(hours[startIndex + i])) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   return (
     <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
@@ -117,7 +157,8 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
         </div>
       ) : (
         hours.map((time) => {
-          const isBooked = bookedSlots.includes(time);
+          const isAvailable = isSlotAvailable(time);
+          const isBooked = !isAvailable;
           const isSelected = selectedTime === time;
 
           return (

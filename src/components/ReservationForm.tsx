@@ -30,14 +30,23 @@ const formSchema = z.object({
   email: z.string().email("Correo inválido").optional().or(z.literal('')),
   date: z.string().min(1, "Selecciona una fecha"),
   time: z.string().min(1, "Selecciona una hora"),
+  professional: z.string().optional(),
   notas: z.string().optional(),
 });
 
+export const professionalsList = [
+  { id: 'any', name: 'Cualquier profesional' },
+  { id: 'ana', name: 'Ana (Estilista)' },
+  { id: 'maria', name: 'María (Cosmetóloga)' },
+  { id: 'sofia', name: 'Sofía (Manicurista)' }
+];
+
 export default function ReservationForm() {
   const { user, login } = useAuth();
-  const { selectedServices, total, addService, removeService, clearSelection } = useSelection();
+  const { selectedServices, total, totalDuration, addService, removeService, clearSelection } = useSelection();
   const [selectedDate, setSelectedDate] = React.useState(new Date().toISOString().split('T')[0]);
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
+  const [selectedProfessional, setSelectedProfessional] = React.useState<string>('any');
   const [myAppointments, setMyAppointments] = React.useState<Appointment[]>([]);
   const [availableServices, setAvailableServices] = React.useState<any[]>([]);
   const [activeTab, setActiveTab] = React.useState<'reserve' | 'my-appointments'>('reserve');
@@ -142,6 +151,8 @@ export default function ReservationForm() {
     }
 
     const serviciosNombres = selectedServices.map(s => s.name).join(', ');
+    const profName = professionalsList.find(p => p.id === selectedProfessional)?.name || 'Cualquiera';
+    const notasConProfesional = `Profesional: ${profName}\n${data.notas || ''}`;
 
     const payload = {
       Nombre_cliente: data.nombre,
@@ -152,7 +163,7 @@ export default function ReservationForm() {
       Estado: 'pendiente',
       Usuario_id: authUser.id,
       whatsapp: data.whatsapp,
-      notas: data.notas
+      notas: notasConProfesional
     };
 
     const { error } = await supabase.from('citas').insert(payload);
@@ -173,7 +184,7 @@ export default function ReservationForm() {
     
     // Notificación al administrador vía WhatsApp
     const adminPhone = "593969272530";
-    const message = `¡Hola! Acabo de solicitar una nueva cita.\n\n*Detalles:*\nNombre: ${data.nombre}\nServicios: ${serviciosNombres}\nFecha: ${data.date}\nHora: ${data.time}\n\nPor favor, confirma mi cita en el panel de administración.`;
+    const message = `¡Hola! Acabo de solicitar una nueva cita.\n\n*Detalles:*\nNombre: ${data.nombre}\nServicios: ${serviciosNombres}\nProfesional: ${profName}\nFecha: ${data.date}\nHora: ${data.time}\nDuración aprox: ${totalDuration} min\n\nPor favor, confirma mi cita en el panel de administración.`;
     const whatsappUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
 
@@ -276,7 +287,19 @@ export default function ReservationForm() {
                   
                   <div className="bg-white p-8 rounded-3xl shadow-xl border border-[#E5D3B3]/10">
                     <div className="flex flex-col mb-8 gap-4">
-                      <Label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/60">1. Seleccionar Fecha</Label>
+                      <Label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/60">1. Seleccionar Profesional</Label>
+                      <select 
+                        value={selectedProfessional}
+                        onChange={(e) => setSelectedProfessional(e.target.value)}
+                        className="w-full bg-[#FAF9F6] border-none h-14 rounded-xl text-sm px-4 text-[#5D4037] outline-none cursor-pointer"
+                      >
+                        {professionalsList.map(p => (
+                          <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col mb-8 gap-4">
+                      <Label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/60">2. Seleccionar Fecha</Label>
                       <DatePicker 
                         selectedDate={selectedDate} 
                         onSelectDate={setSelectedDate} 
@@ -286,6 +309,8 @@ export default function ReservationForm() {
                       selectedDate={selectedDate} 
                       selectedTime={selectedTime} 
                       onSelectSlot={setSelectedTime} 
+                      totalDuration={totalDuration}
+                      selectedProfessional={selectedProfessional}
                     />
                     <div className="mt-8 flex flex-wrap gap-6 text-[10px] uppercase tracking-widest font-bold opacity-80 border-t border-[#E5D3B3]/20 pt-6">
                       <div className="flex items-center gap-2">
@@ -467,7 +492,10 @@ export default function ReservationForm() {
                                   </div>
                                 ))}
                                 <div className="flex items-center justify-between p-4 bg-[#5D4037] text-white rounded-xl mt-4">
-                                  <span className="font-bold uppercase tracking-wider text-xs">Total</span>
+                                  <div>
+                                    <span className="font-bold uppercase tracking-wider text-xs block">Total</span>
+                                    <span className="text-[10px] text-white/70 font-light">Duración aprox: {totalDuration} min</span>
+                                  </div>
                                   <span className="font-bold text-lg">${total.toFixed(2)}</span>
                                 </div>
                               </div>
