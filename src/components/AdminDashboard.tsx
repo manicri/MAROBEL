@@ -36,11 +36,13 @@ interface Category {
   nombre: string;
 }
 
+import { AdminPromotions } from './AdminPromotions';
+
 export const AdminDashboard: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [activeTab, setActiveTab] = useState<'appointments' | 'services'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'services' | 'promotions'>('appointments');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -406,6 +408,14 @@ export const AdminDashboard: React.FC = () => {
             >
               Servicios
             </button>
+            <button 
+              onClick={() => setActiveTab('promotions')}
+              className={`px-6 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold transition-all ${
+                activeTab === 'promotions' ? 'bg-[#5D4037] text-white shadow-md' : 'text-[#5D4037]/60 hover:text-[#5D4037]'
+              }`}
+            >
+              Promos
+            </button>
           </div>
           <div className="flex bg-white p-1 rounded-full shadow-md border border-[#E5D3B3]/20">
             <div className="px-6 py-2 flex items-center gap-2 border-r border-[#E5D3B3]/20">
@@ -570,7 +580,7 @@ export const AdminDashboard: React.FC = () => {
                 ))}
               </div>
             </>
-          ) : (
+          ) : activeTab === 'services' ? (
             <div className="space-y-8">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <h2 className="text-2xl font-serif text-[#5D4037]">Gestión de Servicios</h2>
@@ -789,7 +799,9 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               )}
             </div>
-          )}
+          ) : activeTab === 'promotions' ? (
+            <AdminPromotions services={services} />
+          ) : null}
         </section>
 
         <aside className="space-y-8">
