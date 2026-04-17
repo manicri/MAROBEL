@@ -1,3 +1,4 @@
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -6,13 +7,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircle, Calendar as CalendarIcon, Clock, User, LogIn, CheckCircle2, AlertCircle, Lock, Check, Trash2, Mail } from "lucide-react";
+import {
+  MessageCircle,
+  Calendar as CalendarIcon,
+  Clock,
+  User,
+  LogIn,
+  CheckCircle2,
+  AlertCircle,
+  Lock,
+  Check,
+  Mail,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSelection } from "@/context/SelectionContext";
 import { Calendar } from "./Calendar";
 import { DatePicker } from "./DatePicker";
 import { supabase } from "../supabase";
-import React from 'react';
 import { toast } from "sonner";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
@@ -21,38 +32,54 @@ interface Appointment {
   Servicio: string;
   fecha: string;
   hora: string;
-  Estado: 'pendiente' | 'aceptada' | 'rechazada';
+  Estado: "pendiente" | "aceptada" | "rechazada" | string;
+  cliente_email?: string;
+  Usuario_id?: string;
+  whatsapp?: string;
+  notas?: string;
 }
 
 const formSchema = z.object({
   nombre: z.string().min(2, "El nombre es requerido"),
   whatsapp: z.string().min(10, "Número de WhatsApp inválido"),
-  email: z.string().email("Correo inválido").optional().or(z.literal('')),
+  email: z.string().email("Correo inválido").optional().or(z.literal("")),
   date: z.string().min(1, "Selecciona una fecha"),
   time: z.string().min(1, "Selecciona una hora"),
   professional: z.string().optional(),
   notas: z.string().optional(),
-  confirmacionAsistencia: z.boolean().refine(val => val === true, "Debes confirmar tu compromiso de asistencia")
+  confirmacionAsistencia: z
+    .boolean()
+    .refine((val) => val === true, "Debes confirmar tu compromiso de asistencia"),
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 export const professionalsList = [
-  { id: 'any', name: 'Cualquier profesional' },
-  { id: 'ana', name: 'Ana (Estilista)' },
-  { id: 'maria', name: 'María (Cosmetóloga)' },
-  { id: 'sofia', name: 'Sofía (Manicurista)' }
+  { id: "any", name: "Cualquier profesional" },
+  { id: "ana", name: "Ana (Estilista)" },
+  { id: "maria", name: "María (Cosmetóloga)" },
+  { id: "sofia", name: "Sofía (Manicurista)" },
 ];
+
+const normalizeStatus = (status?: string) => (status ?? "pendiente").toLowerCase();
 
 export default function ReservationForm() {
   const { user, login } = useAuth();
-  const { selectedServices, total, totalDuration, addService, removeService, clearSelection } = useSelection();
-  const [selectedDate, setSelectedDate] = React.useState(new Date().toISOString().split('T')[0]);
+  const { selectedServices, total, totalDuration, addService, clearSelection } =
+    useSelection();
+
+  const [selectedDate, setSelectedDate] = React.useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [selectedTime, setSelectedTime] = React.useState<string | null>(null);
-  const [selectedProfessional, setSelectedProfessional] = React.useState<string>('any');
+  const [selectedProfessional, setSelectedProfessional] =
+    React.useState<string>("any");
   const [myAppointments, setMyAppointments] = React.useState<Appointment[]>([]);
   const [availableServices, setAvailableServices] = React.useState<any[]>([]);
-  const [activeTab, setActiveTab] = React.useState<'reserve' | 'my-appointments'>('reserve');
+  const [activeTab, setActiveTab] = React.useState<"reserve" | "my-appointments">(
+    "reserve"
+  );
   const [isSuccess, setIsSuccess] = React.useState(false);
-
   const [showTransferModal, setShowTransferModal] = React.useState(false);
   const [showCardModal, setShowCardModal] = React.useState(false);
 
@@ -62,85 +89,124 @@ export default function ReservationForm() {
     setValue,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<z.infer<typeof formSchema>>({
+  } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
       date: selectedDate,
-      nombre: user?.user_metadata?.full_name || '',
-    }
+      nombre: user?.user_metadata?.full_name || "",
+      whatsapp: "",
+      email: "",
+      time: "",
+      notas: "",
+      confirmacionAsistencia: false,
+      professional: "any",
+    },
   });
 
   React.useEffect(() => {
     const fetchServices = async () => {
-      const { data, error } = await supabase.from('servicios').select('*');
+      const { data, error } = await supabase.from("servicios").select("*");
+
       if (data && data.length > 0 && !error) {
         setAvailableServices(data);
       } else {
-        // Fallback services
         setAvailableServices([
-          { id: 'c1', nombre: 'Balayage', precio: 120, categoria: 'Cabello' },
-          { id: 'c2', nombre: 'Corte Dama', precio: 35, categoria: 'Cabello' },
-          { id: 'c3', nombre: 'Alisados', precio: 150, categoria: 'Cabello' },
-          { id: 'c4', nombre: 'Hidratación', precio: 45, categoria: 'Cabello' },
-          { id: 'u1', nombre: 'Acrílicas', precio: 40, categoria: 'Uñas' },
-          { id: 'u2', nombre: 'Gelish', precio: 25, categoria: 'Uñas' },
-          { id: 'u3', nombre: 'SPA Pedicura', precio: 35, categoria: 'Uñas' },
-          { id: 'u4', nombre: 'Nail Art', precio: 15, categoria: 'Uñas' },
-          { id: 'f1', nombre: 'Limpieza Profunda', precio: 60, categoria: 'Estética Facial' },
-          { id: 'f2', nombre: 'Peeling', precio: 85, categoria: 'Estética Facial' },
-          { id: 'f3', nombre: 'Microdermabrasión', precio: 75, categoria: 'Estética Facial' },
-          { id: 'r1', nombre: 'Masaje Relajante', precio: 70, categoria: 'Rituales Spa' },
-          { id: 'r2', nombre: 'Piedras Volcánicas', precio: 90, categoria: 'Rituales Spa' },
-          { id: 'r3', nombre: 'Exfoliación', precio: 50, categoria: 'Rituales Spa' },
-          { id: 'r4', nombre: 'Peeling Corporal', precio: 80, categoria: 'Rituales Spa' }
+          { id: "c1", nombre: "Balayage", precio: 120, categoria: "Cabello" },
+          { id: "c2", nombre: "Corte Dama", precio: 35, categoria: "Cabello" },
+          { id: "c3", nombre: "Alisados", precio: 150, categoria: "Cabello" },
+          { id: "c4", nombre: "Hidratación", precio: 45, categoria: "Cabello" },
+          { id: "u1", nombre: "Acrílicas", precio: 40, categoria: "Uñas" },
+          { id: "u2", nombre: "Gelish", precio: 25, categoria: "Uñas" },
+          { id: "u3", nombre: "SPA Pedicura", precio: 35, categoria: "Uñas" },
+          { id: "u4", nombre: "Nail Art", precio: 15, categoria: "Uñas" },
+          {
+            id: "f1",
+            nombre: "Limpieza Profunda",
+            precio: 60,
+            categoria: "Estética Facial",
+          },
+          { id: "f2", nombre: "Peeling", precio: 85, categoria: "Estética Facial" },
+          {
+            id: "f3",
+            nombre: "Microdermabrasión",
+            precio: 75,
+            categoria: "Estética Facial",
+          },
+          {
+            id: "r1",
+            nombre: "Masaje Relajante",
+            precio: 70,
+            categoria: "Rituales Spa",
+          },
+          {
+            id: "r2",
+            nombre: "Piedras Volcánicas",
+            precio: 90,
+            categoria: "Rituales Spa",
+          },
+          { id: "r3", nombre: "Exfoliación", precio: 50, categoria: "Rituales Spa" },
+          {
+            id: "r4",
+            nombre: "Peeling Corporal",
+            precio: 80,
+            categoria: "Rituales Spa",
+          },
         ]);
       }
     };
+
     fetchServices();
   }, []);
 
   React.useEffect(() => {
-    setValue('date', selectedDate);
+    setValue("date", selectedDate);
   }, [selectedDate, setValue]);
 
   React.useEffect(() => {
-    if (selectedTime) setValue('time', selectedTime);
+    if (selectedTime) {
+      setValue("time", selectedTime);
+    }
   }, [selectedTime, setValue]);
 
   React.useEffect(() => {
-    if (user) {
-      const fetchMyAppointments = async () => {
-        const { data, error } = await supabase
-          .from('citas')
-          .select('*')
-          .eq('cliente_email', user.email);
-        
-        if (error) {
-          console.error('Error fetching appointments:', error);
-        } else {
-          setMyAppointments(data as Appointment[]);
-        }
-      };
+    if (!user) return;
 
-      fetchMyAppointments();
+    const fetchMyAppointments = async () => {
+      const { data, error } = await supabase
+        .from("citas")
+        .select("*")
+        .eq("cliente_email", user.email);
 
-      const channel = supabase
-        .channel('my_citas')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'citas' }, () => {
+      if (error) {
+        console.error("Error fetching appointments:", error);
+        return;
+      }
+
+      setMyAppointments((data ?? []) as Appointment[]);
+    };
+
+    fetchMyAppointments();
+
+    const channel = supabase
+      .channel("my_citas")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "citas" },
+        () => {
           fetchMyAppointments();
-        })
-        .subscribe();
+        }
+      )
+      .subscribe();
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: FormValues) => {
     const authUser = (await supabase.auth.getUser()).data.user;
-    
+
     if (!user || !authUser) {
       toast.error("Debes iniciar sesión para agendar una cita");
       return;
@@ -151,9 +217,17 @@ export default function ReservationForm() {
       return;
     }
 
-    const serviciosNombres = selectedServices.map(s => s.name).join(', ');
-    const profName = professionalsList.find(p => p.id === selectedProfessional)?.name || 'Cualquiera';
-    const notasConProfesional = `Profesional: ${profName}\n${data.notas || ''}`;
+    if (!selectedTime) {
+      toast.error("Selecciona una hora disponible");
+      return;
+    }
+
+    const serviciosNombres = selectedServices.map((s) => s.name).join(", ");
+    const profName =
+      professionalsList.find((p) => p.id === selectedProfessional)?.name ||
+      "Cualquier profesional";
+
+    const notasConProfesional = `Profesional: ${profName}\n${data.notas || ""}`;
 
     const payload = {
       Nombre_cliente: data.nombre,
@@ -161,35 +235,50 @@ export default function ReservationForm() {
       Servicio: serviciosNombres,
       fecha: data.date,
       hora: data.time,
-      Estado: 'pendiente',
+      Estado: "pendiente",
       Usuario_id: authUser.id,
       whatsapp: data.whatsapp,
-      notas: notasConProfesional
+      notas: notasConProfesional,
     };
 
-    const { error } = await supabase.from('citas').insert(payload);
+    const { error } = await supabase.from("citas").insert(payload);
 
     if (error) {
       console.error("Error detallado de Supabase:", error);
-      if (error.code === '23505' || error.message.toLowerCase().includes('unique')) {
-        toast.error('Este horario acaba de ser reservado, elige otro', {
-          description: 'El horario seleccionado ya no está disponible.',
+
+      if (
+        error.code === "23505" ||
+        (error.message && error.message.toLowerCase().includes("unique"))
+      ) {
+        toast.error("Este horario acaba de ser reservado", {
+          description: "El horario seleccionado ya no está disponible.",
         });
       } else {
-        toast.error(`Error BD: ${error.message || 'Revisa la consola para más detalles'}`);
+        toast.error(`Error BD: ${error.message || "Revisa la consola para más detalles"}`);
       }
       return;
     }
 
-    toast.success('¡Cita agendada con éxito!');
-    
-    // Notificación al administrador vía WhatsApp
+    toast.success("¡Cita agendada con éxito!");
+
     const adminPhone = "593969272530";
     const message = `¡Hola! Acabo de solicitar una nueva cita.\n\n*Detalles:*\nNombre: ${data.nombre}\nServicios: ${serviciosNombres}\nProfesional: ${profName}\nFecha: ${data.date}\nHora: ${data.time}\nDuración aprox: ${totalDuration} min\n\nPor favor, confirma mi cita en el panel de administración.`;
-    const whatsappUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    const whatsappUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(
+      message
+    )}`;
+    window.open(whatsappUrl, "_blank");
 
-    reset();
+    reset({
+      date: selectedDate,
+      nombre: user?.user_metadata?.full_name || "",
+      whatsapp: "",
+      email: "",
+      time: "",
+      notas: "",
+      confirmacionAsistencia: false,
+      professional: "any",
+    });
+
     setSelectedTime(null);
     clearSelection();
     setIsSuccess(true);
@@ -201,43 +290,45 @@ export default function ReservationForm() {
       return;
     }
 
-    toast('¿Estás seguro de que deseas cancelar esta cita?', {
+    toast("¿Estás seguro de que deseas cancelar esta cita?", {
       action: {
-        label: 'Cancelar Cita',
+        label: "Cancelar Cita",
         onClick: async () => {
           try {
             const { error } = await supabase
-              .from('citas')
-              .update({ Estado: 'rechazada' })
-              .eq('cita', id_de_la_cita);
-            
+              .from("citas")
+              .update({ Estado: "rechazada" })
+              .eq("cita", id_de_la_cita);
+
             if (error) throw error;
-            
-            toast.success('Cita cancelada', {
-              description: 'Tu cita ha sido cancelada exitosamente.',
+
+            toast.success("Cita cancelada", {
+              description: "Tu cita ha sido cancelada exitosamente.",
             });
-            
-            setMyAppointments(prev => prev.map(app => 
-              app.cita === id_de_la_cita ? { ...app, Estado: 'rechazada' } : app
-            ));
+
+            setMyAppointments((prev) =>
+              prev.map((app) =>
+                app.cita === id_de_la_cita ? { ...app, Estado: "rechazada" } : app
+              )
+            );
           } catch (error) {
-            console.error('Error cancelling appointment:', error);
-            toast.error('Error', {
-              description: 'No se pudo cancelar la cita. Por favor intenta de nuevo.',
+            console.error("Error cancelling appointment:", error);
+            toast.error("Error", {
+              description: "No se pudo cancelar la cita. Por favor intenta de nuevo.",
             });
           }
-        }
+        },
       },
       cancel: {
-        label: 'Cerrar',
-        onClick: () => {}
-      }
+        label: "Cerrar",
+        onClick: () => {},
+      },
     });
   };
 
   return (
-    <motion.section 
-      id="reservas" 
+    <motion.section
+      id="reservas"
       className="py-32 bg-[#FAF9F6]"
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -248,27 +339,36 @@ export default function ReservationForm() {
         <div className="max-w-5xl mx-auto">
           <div className="flex justify-center mb-16">
             <div className="bg-white p-1 rounded-full shadow-lg border border-[#E5D3B3]/20 flex">
-              <button 
-                onClick={() => setActiveTab('reserve')}
+              <button
+                onClick={() => setActiveTab("reserve")}
                 className={`px-8 py-3 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold transition-all ${
-                  activeTab === 'reserve' ? "bg-[#5D4037] text-white" : "text-[#5D4037]/60 hover:text-[#5D4037]"
+                  activeTab === "reserve"
+                    ? "bg-[#5D4037] text-white"
+                    : "text-[#5D4037]/60 hover:text-[#5D4037]"
                 }`}
               >
                 Agendar Cita
               </button>
-              <button 
-                onClick={() => setActiveTab('my-appointments')}
+              <button
+                onClick={() => setActiveTab("my-appointments")}
                 className={`px-8 py-3 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold transition-all ${
-                  activeTab === 'my-appointments' ? "bg-[#5D4037] text-white" : "text-[#5D4037]/60 hover:text-[#5D4037]"
+                  activeTab === "my-appointments"
+                    ? "bg-[#5D4037] text-white"
+                    : "text-[#5D4037]/60 hover:text-[#5D4037]"
                 }`}
               >
-                Mis Citas {myAppointments.length > 0 && <span className="ml-2 bg-yellow-500 text-white px-2 py-0.5 rounded-full text-[8px]">{myAppointments.length}</span>}
+                Mis Citas{" "}
+                {myAppointments.length > 0 && (
+                  <span className="ml-2 bg-yellow-500 text-white px-2 py-0.5 rounded-full text-[8px]">
+                    {myAppointments.length}
+                  </span>
+                )}
               </button>
             </div>
           </div>
 
           <AnimatePresence mode="wait">
-            {activeTab === 'reserve' ? (
+            {activeTab === "reserve" ? (
               <motion.div
                 key="reserve"
                 initial={{ opacity: 0, y: 20 }}
@@ -285,49 +385,58 @@ export default function ReservationForm() {
                       Reserva tu ritual <br /> de bienestar
                     </h2>
                   </div>
-                  
+
                   <div className="bg-white p-8 rounded-3xl shadow-xl border border-[#E5D3B3]/10">
                     <div className="flex flex-col mb-8 gap-4">
-                      <Label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/60">1. Seleccionar Profesional</Label>
-                      <select 
+                      <Label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/60">
+                        1. Seleccionar Profesional
+                      </Label>
+                      <select
                         value={selectedProfessional}
                         onChange={(e) => setSelectedProfessional(e.target.value)}
                         className="w-full bg-[#FAF9F6] border-none h-14 rounded-xl text-sm px-4 text-[#5D4037] outline-none cursor-pointer"
                       >
-                        {professionalsList.map(p => (
-                          <option key={p.id} value={p.id}>{p.name}</option>
+                        {professionalsList.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
                         ))}
                       </select>
                     </div>
+
                     <div className="flex flex-col mb-8 gap-4">
-                      <Label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/60">2. Seleccionar Fecha</Label>
-                      <DatePicker 
-                        selectedDate={selectedDate} 
-                        onSelectDate={setSelectedDate} 
+                      <Label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/60">
+                        2. Seleccionar Fecha
+                      </Label>
+                      <DatePicker
+                        selectedDate={selectedDate}
+                        onSelectDate={setSelectedDate}
                       />
                     </div>
-                    <Calendar 
-                      selectedDate={selectedDate} 
-                      selectedTime={selectedTime} 
-                      onSelectSlot={setSelectedTime} 
+
+                    <Calendar
+                      selectedDate={selectedDate}
+                      selectedTime={selectedTime}
+                      onSelectSlot={setSelectedTime}
                       totalDuration={totalDuration}
                       selectedProfessional={selectedProfessional}
                     />
+
                     <div className="mt-8 flex flex-wrap gap-6 text-[10px] uppercase tracking-widest font-bold opacity-80 border-t border-[#E5D3B3]/20 pt-6">
                       <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-white border-2 border-[#E5D3B3]/50 shadow-sm"></span> 
+                        <span className="w-5 h-5 rounded-full bg-white border-2 border-[#E5D3B3]/50 shadow-sm"></span>
                         <span className="text-[#5D4037]">Libre</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="w-5 h-5 rounded-full bg-gray-50 border-2 border-gray-200 flex items-center justify-center">
                           <Lock className="w-2.5 h-2.5 text-gray-400" />
-                        </span> 
+                        </span>
                         <span className="text-gray-500">Ocupado</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="w-5 h-5 rounded-full bg-[#E5D3B3] border-2 border-[#5D4037] flex items-center justify-center shadow-md">
                           <Check className="w-2.5 h-2.5 text-[#5D4037]" />
-                        </span> 
+                        </span>
                         <span className="text-[#5D4037]">Tu Selección</span>
                       </div>
                     </div>
@@ -349,9 +458,19 @@ export default function ReservationForm() {
                           <div className="w-20 h-20 bg-[#FAF9F6] rounded-full flex items-center justify-center mx-auto mb-8">
                             <LogIn className="w-8 h-8 text-[#E5D3B3]" />
                           </div>
-                          <h3 className="text-2xl font-serif text-[#5D4037] mb-4">Inicia sesión para continuar</h3>
-                          <p className="text-[#5D4037]/60 mb-10 font-light text-sm leading-relaxed">Para ofrecerte un servicio personalizado y gestionar tus citas, por favor ingresa con tu cuenta de Google.</p>
-                          <Button onClick={login} className="bg-[#5D4037] text-white rounded-full px-12 h-14 uppercase tracking-widest text-xs font-bold hover:scale-105 transition-transform">Ingresar con Google</Button>
+                          <h3 className="text-2xl font-serif text-[#5D4037] mb-4">
+                            Inicia sesión para continuar
+                          </h3>
+                          <p className="text-[#5D4037]/60 mb-10 font-light text-sm leading-relaxed">
+                            Para ofrecerte un servicio personalizado y gestionar tus citas,
+                            por favor ingresa con tu cuenta de Google.
+                          </p>
+                          <Button
+                            onClick={login}
+                            className="bg-[#5D4037] text-white rounded-full px-12 h-14 uppercase tracking-widest text-xs font-bold hover:scale-105 transition-transform"
+                          >
+                            Ingresar con Google
+                          </Button>
                         </motion.div>
                       ) : isSuccess ? (
                         <motion.div
@@ -365,18 +484,24 @@ export default function ReservationForm() {
                           <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
                             <CheckCircle2 className="w-10 h-10 text-green-500" />
                           </div>
-                          <h3 className="text-3xl font-serif text-[#5D4037] mb-4">¡Solicitud Enviada!</h3>
+                          <h3 className="text-3xl font-serif text-[#5D4037] mb-4">
+                            ¡Solicitud Enviada!
+                          </h3>
                           <p className="text-[#5D4037]/60 mb-10 font-light text-sm leading-relaxed">
-                            Tu solicitud ha sido enviada. Se ha abierto WhatsApp para notificar al administrador. Si no se abrió automáticamente, haz clic en el botón de abajo.
+                            Tu solicitud ha sido enviada. Se ha abierto WhatsApp para
+                            notificar al administrador. Si no se abrió automáticamente, haz
+                            clic en el botón de abajo.
                           </p>
                           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-                            <Button 
+                            <Button
                               onClick={() => {
                                 const adminPhone = "593969272530";
                                 const message = `¡Hola! Acabo de solicitar una nueva cita y quiero notificarles.\n\nPor favor, revisen el panel de administración.`;
-                                const whatsappUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`;
-                                window.open(whatsappUrl, '_blank');
-                              }} 
+                                const whatsappUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(
+                                  message
+                                )}`;
+                                window.open(whatsappUrl, "_blank");
+                              }}
                               className="bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full px-8 h-12 uppercase tracking-widest text-xs font-bold flex items-center gap-2"
                             >
                               <MessageCircle className="w-4 h-4" />
@@ -384,17 +509,17 @@ export default function ReservationForm() {
                             </Button>
                           </div>
                           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button 
+                            <Button
                               onClick={() => {
                                 setIsSuccess(false);
-                                setActiveTab('my-appointments');
-                              }} 
+                                setActiveTab("my-appointments");
+                              }}
                               className="bg-[#5D4037] text-white rounded-full px-8 h-12 uppercase tracking-widest text-xs font-bold"
                             >
                               Ver mis citas
                             </Button>
-                            <Button 
-                              onClick={() => setIsSuccess(false)} 
+                            <Button
+                              onClick={() => setIsSuccess(false)}
                               variant="outline"
                               className="border-[#E5D3B3] text-[#5D4037] rounded-full px-8 h-12 uppercase tracking-widest text-xs font-bold"
                             >
@@ -403,55 +528,90 @@ export default function ReservationForm() {
                           </div>
                         </motion.div>
                       ) : (
-                        <motion.form 
+                        <motion.form
                           key="form"
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.3 }}
-                          onSubmit={handleSubmit(onSubmit)} 
+                          onSubmit={handleSubmit(onSubmit)}
                           className="space-y-8"
                         >
                           <div className="grid md:grid-cols-2 gap-8">
                             <div className="space-y-3">
-                              <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Nombre</Label>
+                              <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">
+                                Nombre
+                              </Label>
                               <div className="relative">
                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5D4037]/30" />
-                                <Input {...register("nombre")} className="pl-12 bg-[#FAF9F6] border-none h-14 rounded-xl text-sm" placeholder="Tu nombre" />
+                                <Input
+                                  {...register("nombre")}
+                                  className="pl-12 bg-[#FAF9F6] border-none h-14 rounded-xl text-sm"
+                                  placeholder="Tu nombre"
+                                />
                               </div>
-                              {errors.nombre && <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">{errors.nombre.message}</p>}
+                              {errors.nombre && (
+                                <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">
+                                  {errors.nombre.message}
+                                </p>
+                              )}
                             </div>
+
                             <div className="space-y-3">
-                              <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">WhatsApp</Label>
+                              <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">
+                                WhatsApp
+                              </Label>
                               <div className="relative">
                                 <MessageCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5D4037]/30" />
-                                <Input {...register("whatsapp")} className="pl-12 bg-[#FAF9F6] border-none h-14 rounded-xl text-sm" placeholder="0987654321" />
+                                <Input
+                                  {...register("whatsapp")}
+                                  className="pl-12 bg-[#FAF9F6] border-none h-14 rounded-xl text-sm"
+                                  placeholder="0987654321"
+                                />
                               </div>
-                              {errors.whatsapp && <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">{errors.whatsapp.message}</p>}
+                              {errors.whatsapp && (
+                                <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">
+                                  {errors.whatsapp.message}
+                                </p>
+                              )}
                             </div>
+
                             <div className="space-y-3 md:col-span-2">
-                              <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Correo Electrónico (Opcional)</Label>
+                              <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">
+                                Correo Electrónico (Opcional)
+                              </Label>
                               <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5D4037]/30" />
-                                <Input {...register("email")} type="email" className="pl-12 bg-[#FAF9F6] border-none h-14 rounded-xl text-sm" placeholder="tu@correo.com" />
+                                <Input
+                                  {...register("email")}
+                                  type="email"
+                                  className="pl-12 bg-[#FAF9F6] border-none h-14 rounded-xl text-sm"
+                                  placeholder="tu@correo.com"
+                                />
                               </div>
-                              {errors.email && <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">{errors.email.message}</p>}
+                              {errors.email && (
+                                <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter">
+                                  {errors.email.message}
+                                </p>
+                              )}
                             </div>
                           </div>
 
                           <div className="space-y-4">
-                            <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Servicio Seleccionado</Label>
+                            <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">
+                              Servicio Seleccionado
+                            </Label>
 
                             {selectedServices.length === 0 ? (
                               <div className="p-8 bg-[#FAF9F6] rounded-xl text-center flex flex-col items-center justify-center border border-dashed border-[#E5D3B3]/50">
                                 <p className="text-sm text-[#5D4037]/60 mb-4">
                                   Por favor selecciona un servicio primero.
                                 </p>
-                                <Button 
+                                <Button
                                   type="button"
                                   onClick={() => {
-                                    const element = document.getElementById('servicios');
-                                    if (element) element.scrollIntoView({ behavior: 'smooth' });
+                                    const element = document.getElementById("servicios");
+                                    if (element) element.scrollIntoView({ behavior: "smooth" });
                                   }}
                                   className="bg-[#E5D3B3] text-[#5D4037] hover:bg-[#d4c2a3] rounded-full text-xs uppercase tracking-widest font-bold"
                                 >
@@ -460,26 +620,42 @@ export default function ReservationForm() {
                               </div>
                             ) : (
                               <div className="space-y-2">
-                                {selectedServices.map(service => (
-                                  <div key={service.id} className="flex items-center justify-between p-4 bg-[#FAF9F6] rounded-xl border border-[#E5D3B3]/30">
+                                {selectedServices.map((service: any) => (
+                                  <div
+                                    key={service.id}
+                                    className="flex items-center justify-between p-4 bg-[#FAF9F6] rounded-xl border border-[#E5D3B3]/30"
+                                  >
                                     <div className="flex items-center gap-3">
                                       <div className="w-10 h-10 rounded-full bg-[#E5D3B3]/20 flex items-center justify-center">
                                         <CheckCircle2 className="w-5 h-5 text-[#8D6E63]" />
                                       </div>
                                       <div>
-                                        <span className="text-sm text-[#5D4037] font-bold block">{service.name}</span>
-                                        <span className="text-[10px] uppercase tracking-widest text-[#5D4037]/60">{service.category}</span>
+                                        <span className="text-sm text-[#5D4037] font-bold block">
+                                          {service.name}
+                                        </span>
+                                        <span className="text-[10px] uppercase tracking-widest text-[#5D4037]/60">
+                                          {service.category}
+                                        </span>
                                       </div>
                                     </div>
-                                    <span className="text-lg font-bold text-[#8D6E63]">${service.price.toFixed(2)}</span>
+                                    <span className="text-lg font-bold text-[#8D6E63]">
+                                      ${Number(service.price).toFixed(2)}
+                                    </span>
                                   </div>
                                 ))}
+
                                 <div className="flex items-center justify-between p-4 bg-[#5D4037] text-white rounded-xl mt-4">
                                   <div>
-                                    <span className="font-bold uppercase tracking-wider text-xs block">Total</span>
-                                    <span className="text-[10px] text-white/70 font-light">Duración aprox: {totalDuration} min</span>
+                                    <span className="font-bold uppercase tracking-wider text-xs block">
+                                      Total
+                                    </span>
+                                    <span className="text-[10px] text-white/70 font-light">
+                                      Duración aprox: {totalDuration} min
+                                    </span>
                                   </div>
-                                  <span className="font-bold text-lg">${total.toFixed(2)}</span>
+                                  <span className="font-bold text-lg">
+                                    ${total.toFixed(2)}
+                                  </span>
                                 </div>
                               </div>
                             )}
@@ -487,8 +663,15 @@ export default function ReservationForm() {
 
                           <div className="p-6 bg-[#E5D3B3]/10 rounded-2xl border border-[#E5D3B3]/30 flex items-center justify-between">
                             <div>
-                              <p className="text-[10px] text-[#5D4037]/50 uppercase tracking-[0.2em] font-bold mb-1">Cita Seleccionada</p>
-                              <p className="text-[#5D4037] font-serif text-lg">{selectedDate} — <span className="text-[#8D6E63]">{selectedTime || '...'}</span></p>
+                              <p className="text-[10px] text-[#5D4037]/50 uppercase tracking-[0.2em] font-bold mb-1">
+                                Cita Seleccionada
+                              </p>
+                              <p className="text-[#5D4037] font-serif text-lg">
+                                {selectedDate} —{" "}
+                                <span className="text-[#8D6E63]">
+                                  {selectedTime || "..."}
+                                </span>
+                              </p>
                             </div>
                             <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
                               <CalendarIcon className="w-5 h-5 text-[#E5D3B3]" />
@@ -496,47 +679,72 @@ export default function ReservationForm() {
                           </div>
 
                           <div className="space-y-3">
-                            <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Notas Adicionales (Opcional)</Label>
-                            <textarea 
-                              {...register("notas")} 
+                            <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">
+                              Notas Adicionales (Opcional)
+                            </Label>
+                            <textarea
+                              {...register("notas")}
                               className="w-full bg-[#FAF9F6] border-none rounded-xl p-4 text-sm min-h-[100px] outline-none resize-none"
                               placeholder="Cuéntanos algún detalle especial..."
                             />
                           </div>
 
                           <div className="space-y-4 pt-4 border-t border-[#E5D3B3]/20">
-                            <Label className="text-[#5D4037] font-serif text-lg block">Completa tu experiencia</Label>
-                            <p className="text-xs text-[#5D4037]/60 mb-4">Agrega estos servicios rápidos para un momento perfecto.</p>
-                            
+                            <Label className="text-[#5D4037] font-serif text-lg block">
+                              Completa tu experiencia
+                            </Label>
+                            <p className="text-xs text-[#5D4037]/60 mb-4">
+                              Agrega estos servicios rápidos para un momento perfecto.
+                            </p>
+
                             <div className="grid sm:grid-cols-2 gap-4">
                               {availableServices
-                                .filter(s => !selectedServices.some(sel => sel.id === s.id) && s.precio <= 30)
+                                .filter(
+                                  (s) =>
+                                    !selectedServices.some((sel: any) => sel.id === s.id) &&
+                                    Number(s.precio) <= 30
+                                )
                                 .slice(0, 2)
-                                .map(addon => (
-                                  <div key={addon.id} className="p-4 rounded-xl border border-[#E5D3B3]/30 bg-white flex items-center justify-between">
+                                .map((addon) => (
+                                  <div
+                                    key={addon.id}
+                                    className="p-4 rounded-xl border border-[#E5D3B3]/30 bg-white flex items-center justify-between"
+                                  >
                                     <div>
-                                      <p className="text-sm font-bold text-[#5D4037]">{addon.nombre}</p>
+                                      <p className="text-sm font-bold text-[#5D4037]">
+                                        {addon.nombre}
+                                      </p>
                                       <p className="text-xs text-[#8D6E63]">+${addon.precio}</p>
                                     </div>
-                                    <Button 
+                                    <Button
                                       type="button"
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => addService({ id: addon.id, name: addon.nombre, price: addon.precio, category: addon.categoria })}
+                                      onClick={() =>
+                                        addService({
+                                          id: addon.id,
+                                          name: addon.nombre,
+                                          price: addon.precio,
+                                          category: addon.categoria,
+                                        })
+                                      }
                                       className="rounded-full text-[10px] uppercase tracking-widest"
                                     >
                                       Agregar
                                     </Button>
                                   </div>
-                                ))
-                              }
+                                ))}
                             </div>
                           </div>
 
                           <div className="space-y-4 pt-4 border-t border-[#E5D3B3]/20">
-                            <Label className="text-[#5D4037] font-serif text-lg block">¿Deseas asegurar tu cita con un adelanto?</Label>
-                            <p className="text-xs text-[#5D4037]/60 mb-4">Asegura tu espacio realizando un abono previo.</p>
-                            
+                            <Label className="text-[#5D4037] font-serif text-lg block">
+                              ¿Deseas asegurar tu cita con un adelanto?
+                            </Label>
+                            <p className="text-xs text-[#5D4037]/60 mb-4">
+                              Asegura tu espacio realizando un abono previo.
+                            </p>
+
                             <div className="grid sm:grid-cols-2 gap-4">
                               <Button
                                 type="button"
@@ -546,7 +754,7 @@ export default function ReservationForm() {
                               >
                                 Transferencia Bancaria
                               </Button>
-                              
+
                               <Button
                                 type="button"
                                 variant="outline"
@@ -559,41 +767,71 @@ export default function ReservationForm() {
                           </div>
 
                           <div className="bg-[#E5D3B3]/10 p-6 rounded-2xl border border-[#E5D3B3]/30 space-y-4">
-                            <h4 className="font-serif text-lg text-[#5D4037]">Resumen de tu Reserva</h4>
+                            <h4 className="font-serif text-lg text-[#5D4037]">
+                              Resumen de tu Reserva
+                            </h4>
                             <div className="space-y-2 text-sm text-[#5D4037]/80">
-                              <p><strong>Servicios:</strong> {selectedServices.map(s => s.name).join(', ')}</p>
-                              <p><strong>Profesional:</strong> {professionalsList.find(p => p.id === selectedProfessional)?.name || 'Cualquiera'}</p>
-                              <p><strong>Fecha:</strong> {selectedDate}</p>
-                              <p><strong>Hora:</strong> {selectedTime || 'Por seleccionar'}</p>
-                              <p><strong>Total:</strong> ${total.toFixed(2)} ({totalDuration} min)</p>
+                              <p>
+                                <strong>Servicios:</strong>{" "}
+                                {selectedServices.map((s: any) => s.name).join(", ")}
+                              </p>
+                              <p>
+                                <strong>Profesional:</strong>{" "}
+                                {professionalsList.find((p) => p.id === selectedProfessional)
+                                  ?.name || "Cualquier profesional"}
+                              </p>
+                              <p>
+                                <strong>Fecha:</strong> {selectedDate}
+                              </p>
+                              <p>
+                                <strong>Hora:</strong> {selectedTime || "Por seleccionar"}
+                              </p>
+                              <p>
+                                <strong>Total:</strong> ${total.toFixed(2)} (
+                                {totalDuration} min)
+                              </p>
                             </div>
-                            <p className="text-xs text-[#5D4037]/60 italic mt-4">✨ Te esperamos con mucha emoción. Recuerda llegar 5 minutos antes de tu cita.</p>
+                            <p className="text-xs text-[#5D4037]/60 italic mt-4">
+                              ✨ Te esperamos con mucha emoción. Recuerda llegar 5 minutos
+                              antes de tu cita.
+                            </p>
                           </div>
 
                           <div className="flex items-start gap-3 p-4 bg-white border border-[#E5D3B3]/30 rounded-xl">
-                            <input 
-                              type="checkbox" 
-                              id="confirmacionAsistencia" 
+                            <input
+                              type="checkbox"
+                              id="confirmacionAsistencia"
                               {...register("confirmacionAsistencia")}
                               className="mt-1 w-4 h-4 text-[#5D4037] rounded border-gray-300 focus:ring-[#5D4037]"
                             />
                             <div className="flex-1">
-                              <label htmlFor="confirmacionAsistencia" className="text-sm font-bold text-[#5D4037] cursor-pointer">
+                              <label
+                                htmlFor="confirmacionAsistencia"
+                                className="text-sm font-bold text-[#5D4037] cursor-pointer"
+                              >
                                 Confirmo que asistiré a mi cita
                               </label>
                               <p className="text-xs text-[#5D4037]/60 mt-1">
-                                Al marcar esta casilla, te comprometes a asistir en el horario seleccionado. Las cancelaciones de último minuto afectan la agenda de nuestros profesionales.
+                                Al marcar esta casilla, te comprometes a asistir en el
+                                horario seleccionado. Las cancelaciones de último minuto
+                                afectan la agenda de nuestros profesionales.
                               </p>
-                              {errors.confirmacionAsistencia && <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter mt-1">{errors.confirmacionAsistencia.message}</p>}
+                              {errors.confirmacionAsistencia && (
+                                <p className="text-[10px] text-red-500 font-bold uppercase tracking-tighter mt-1">
+                                  {errors.confirmacionAsistencia.message}
+                                </p>
+                              )}
                             </div>
                           </div>
 
-                          <Button 
-                            type="submit" 
-                            disabled={isSubmitting || !selectedTime || selectedServices.length === 0} 
+                          <Button
+                            type="submit"
+                            disabled={
+                              isSubmitting || !selectedTime || selectedServices.length === 0
+                            }
                             className="w-full bg-[#5D4037] hover:bg-[#4a332c] text-white h-16 rounded-full text-xs uppercase tracking-[0.3em] font-bold shadow-2xl transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
                           >
-                            {isSubmitting ? 'Procesando...' : 'Confirmar Reserva'}
+                            {isSubmitting ? "Procesando..." : "Confirmar Reserva"}
                           </Button>
                         </motion.form>
                       )}
@@ -612,82 +850,137 @@ export default function ReservationForm() {
                 {!user ? (
                   <div className="text-center py-24 bg-white rounded-3xl shadow-xl">
                     <LogIn className="w-12 h-12 text-[#E5D3B3] mx-auto mb-6" />
-                    <h3 className="text-2xl font-serif text-[#5D4037] mb-4">Inicia sesión para ver tus citas</h3>
-                    <Button onClick={login} className="bg-[#5D4037] text-white rounded-full px-10 h-12">Ingresar con Google</Button>
+                    <h3 className="text-2xl font-serif text-[#5D4037] mb-4">
+                      Inicia sesión para ver tus citas
+                    </h3>
+                    <Button
+                      onClick={login}
+                      className="bg-[#5D4037] text-white rounded-full px-10 h-12"
+                    >
+                      Ingresar con Google
+                    </Button>
                   </div>
                 ) : myAppointments.length === 0 ? (
                   <div className="text-center py-24 bg-white rounded-3xl shadow-xl">
                     <CalendarIcon className="w-12 h-12 text-[#E5D3B3] mx-auto mb-6" />
-                    <h3 className="text-2xl font-serif text-[#5D4037] mb-4">No tienes citas agendadas</h3>
-                    <p className="text-[#5D4037]/60 mb-8">¡Es el momento perfecto para consentirte!</p>
-                    <Button onClick={() => setActiveTab('reserve')} className="bg-[#5D4037] text-white rounded-full px-10 h-12">Agendar Ahora</Button>
+                    <h3 className="text-2xl font-serif text-[#5D4037] mb-4">
+                      No tienes citas agendadas
+                    </h3>
+                    <p className="text-[#5D4037]/60 mb-8">
+                      ¡Es el momento perfecto para consentirte!
+                    </p>
+                    <Button
+                      onClick={() => setActiveTab("reserve")}
+                      className="bg-[#5D4037] text-white rounded-full px-10 h-12"
+                    >
+                      Agendar Ahora
+                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {myAppointments.map((app) => (
-                      <Card key={app.cita} className="border-none shadow-lg bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
-                        <CardContent className="p-8 flex items-center justify-between">
-                          <div className="flex items-center gap-6">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                              (app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? "bg-green-500/10 text-green-600" :
-                              (app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado) ? "bg-yellow-500/10 text-yellow-600" :
-                              (app.Estado === 'rechazada' || app.Estado === 'Cancelada') ? "bg-red-500/10 text-red-600" :
-                              "bg-gray-500/10 text-gray-600"
-                            }`}>
-                              {(app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? <CheckCircle2 className="w-7 h-7" /> : 
-                               (app.Estado === 'rechazada' || app.Estado === 'Cancelada') ? <AlertCircle className="w-7 h-7" /> : 
-                               <Clock className="w-7 h-7" />}
-                            </div>
-                            <div>
-                              <h4 className="text-xl font-serif text-[#5D4037] mb-1">{app.Servicio}</h4>
-                              <p className="text-sm text-[#5D4037]/60 font-medium">{app.fecha} a las {app.hora}</p>
-                            </div>
-                          </div>
-                          <div className="text-right flex flex-col items-end gap-3">
-                            <span className={`px-4 py-1.5 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold ${
-                              (app.Estado === 'aceptada' || app.Estado === 'Aceptada') ? "bg-green-500 text-white" :
-                              (app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado) ? "bg-yellow-500 text-white" :
-                              (app.Estado === 'rechazada' || app.Estado === 'Cancelada') ? "bg-red-500 text-white" :
-                              "bg-gray-500 text-white"
-                            }`}>
-                              {app.Estado || 'Pendiente'}
-                            </span>
-                            
-                            {(app.Estado === 'pendiente' || app.Estado === 'Pendiente' || !app.Estado) && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-red-400 hover:text-red-600 hover:bg-red-50 text-[10px] uppercase tracking-widest font-bold"
-                                onClick={() => handleCancelAppointment(app.cita)}
-                              >
-                                Cancelar Cita
-                              </Button>
-                            )}
+                    {myAppointments.map((app) => {
+                      const status = normalizeStatus(app.Estado);
+                      const isAccepted = status === "aceptada";
+                      const isPending = status === "pendiente";
+                      const isRejected = status === "rechazada";
 
-                            {(app.Estado === 'aceptada' || app.Estado === 'Aceptada') && (
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="border-[#E5D3B3] text-[#5D4037] hover:bg-[#E5D3B3]/10 text-[10px] uppercase tracking-widest font-bold mt-2"
-                                onClick={() => {
-                                  // Find the service to rebook
-                                  const serviceName = app.Servicio.split(',')[0].trim();
-                                  const serviceToRebook = availableServices.find(s => s.nombre.includes(serviceName));
-                                  if (serviceToRebook) {
-                                    clearSelection();
-                                    addService({ id: serviceToRebook.id, name: serviceToRebook.nombre, price: serviceToRebook.precio, category: serviceToRebook.categoria });
-                                    setActiveTab('reserve');
-                                    toast.success('Servicio preseleccionado', { description: 'Elige tu nueva fecha y hora.' });
-                                  }
-                                }}
+                      return (
+                        <Card
+                          key={app.cita}
+                          className="border-none shadow-lg bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow"
+                        >
+                          <CardContent className="p-8 flex items-center justify-between">
+                            <div className="flex items-center gap-6">
+                              <div
+                                className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
+                                  isAccepted
+                                    ? "bg-green-500/10 text-green-600"
+                                    : isPending
+                                    ? "bg-yellow-500/10 text-yellow-600"
+                                    : isRejected
+                                    ? "bg-red-500/10 text-red-600"
+                                    : "bg-gray-500/10 text-gray-600"
+                                }`}
                               >
-                                Volver a Reservar
-                              </Button>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                                {isAccepted ? (
+                                  <CheckCircle2 className="w-7 h-7" />
+                                ) : isRejected ? (
+                                  <AlertCircle className="w-7 h-7" />
+                                ) : (
+                                  <Clock className="w-7 h-7" />
+                                )}
+                              </div>
+
+                              <div>
+                                <h4 className="text-xl font-serif text-[#5D4037] mb-1">
+                                  {app.Servicio}
+                                </h4>
+                                <p className="text-sm text-[#5D4037]/60 font-medium">
+                                  {app.fecha} a las {app.hora}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="text-right flex flex-col items-end gap-3">
+                              <span
+                                className={`px-4 py-1.5 rounded-full text-[10px] uppercase tracking-[0.2em] font-bold ${
+                                  isAccepted
+                                    ? "bg-green-500 text-white"
+                                    : isPending
+                                    ? "bg-yellow-500 text-white"
+                                    : isRejected
+                                    ? "bg-red-500 text-white"
+                                    : "bg-gray-500 text-white"
+                                }`}
+                              >
+                                {app.Estado || "Pendiente"}
+                              </span>
+
+                              {isPending && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-400 hover:text-red-600 hover:bg-red-50 text-[10px] uppercase tracking-widest font-bold"
+                                  onClick={() => handleCancelAppointment(app.cita)}
+                                >
+                                  Cancelar Cita
+                                </Button>
+                              )}
+
+                              {isAccepted && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-[#E5D3B3] text-[#5D4037] hover:bg-[#E5D3B3]/10 text-[10px] uppercase tracking-widest font-bold mt-2"
+                                  onClick={() => {
+                                    const serviceName = app.Servicio.split(",")[0].trim();
+                                    const serviceToRebook = availableServices.find((s) =>
+                                      String(s.nombre).includes(serviceName)
+                                    );
+
+                                    if (serviceToRebook) {
+                                      clearSelection();
+                                      addService({
+                                        id: serviceToRebook.id,
+                                        name: serviceToRebook.nombre,
+                                        price: serviceToRebook.precio,
+                                        category: serviceToRebook.categoria,
+                                      });
+                                      setActiveTab("reserve");
+                                      toast.success("Servicio preseleccionado", {
+                                        description: "Elige tu nueva fecha y hora.",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  Volver a Reservar
+                                </Button>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </motion.div>
@@ -696,7 +989,6 @@ export default function ReservationForm() {
         </div>
       </div>
 
-      {/* Transfer Modal */}
       <AnimatePresence>
         {showTransferModal && (
           <motion.div
@@ -713,34 +1005,66 @@ export default function ReservationForm() {
               onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
             >
-              <h3 className="text-2xl font-serif text-[#5D4037] mb-2">Datos Bancarios</h3>
-              <p className="text-sm text-[#5D4037]/60 mb-6">Realiza tu transferencia para asegurar la cita.</p>
-              
+              <h3 className="text-2xl font-serif text-[#5D4037] mb-2">
+                Datos Bancarios
+              </h3>
+              <p className="text-sm text-[#5D4037]/60 mb-6">
+                Realiza tu transferencia para asegurar la cita.
+              </p>
+
               <div className="bg-[#FAF9F6] p-4 rounded-xl space-y-2 mb-6 text-sm text-[#5D4037]">
-                <p><span className="font-bold">Banco:</span> Pichincha</p>
-                <p><span className="font-bold">Cuenta Ahorros:</span> 2200000000</p>
-                <p><span className="font-bold">Nombre:</span> Marobel Studio</p>
-                <p><span className="font-bold">CI/RUC:</span> 1700000000</p>
+                <p>
+                  <span className="font-bold">Banco:</span> Pichincha
+                </p>
+                <p>
+                  <span className="font-bold">Cuenta Ahorros:</span> 2200000000
+                </p>
+                <p>
+                  <span className="font-bold">Nombre:</span> Marobel Studio
+                </p>
+                <p>
+                  <span className="font-bold">CI/RUC:</span> 1700000000
+                </p>
               </div>
 
               <div className="space-y-4">
-                <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">Comprobante de Pago</Label>
-                <div className="border-2 border-dashed border-[#E5D3B3] rounded-xl p-6 text-center hover:bg-[#FAF9F6] transition-colors cursor-pointer" onClick={() => document.getElementById('modal-comprobante')?.click()}>
-                  <p className="text-sm text-[#5D4037]/60">Haz clic para subir tu comprobante (JPG, PNG, PDF)</p>
-                  <input type="file" id="modal-comprobante" className="hidden" accept="image/*,.pdf" onChange={(e) => {
-                    if (e.target.files?.[0]) {
-                      toast.success('Comprobante adjuntado correctamente');
-                      setShowTransferModal(false);
-                    }
-                  }} />
+                <Label className="text-[#5D4037]/80 uppercase text-[10px] tracking-[0.2em] font-bold">
+                  Comprobante de Pago
+                </Label>
+                <div
+                  className="border-2 border-dashed border-[#E5D3B3] rounded-xl p-6 text-center hover:bg-[#FAF9F6] transition-colors cursor-pointer"
+                  onClick={() => document.getElementById("modal-comprobante")?.click()}
+                >
+                  <p className="text-sm text-[#5D4037]/60">
+                    Haz clic para subir tu comprobante (JPG, PNG, PDF)
+                  </p>
+                  <input
+                    type="file"
+                    id="modal-comprobante"
+                    className="hidden"
+                    accept="image/*,.pdf"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        toast.success("Comprobante adjuntado correctamente");
+                        setShowTransferModal(false);
+                      }
+                    }}
+                  />
                 </div>
               </div>
 
               <div className="mt-8 flex gap-3">
-                <Button onClick={() => setShowTransferModal(false)} variant="outline" className="flex-1 rounded-full border-[#E5D3B3] text-[#5D4037]">
+                <Button
+                  onClick={() => setShowTransferModal(false)}
+                  variant="outline"
+                  className="flex-1 rounded-full border-[#E5D3B3] text-[#5D4037]"
+                >
                   Cancelar
                 </Button>
-                <Button onClick={() => setShowTransferModal(false)} className="flex-1 rounded-full bg-[#5D4037] text-white">
+                <Button
+                  onClick={() => setShowTransferModal(false)}
+                  className="flex-1 rounded-full bg-[#5D4037] text-white"
+                >
                   Listo
                 </Button>
               </div>
@@ -749,7 +1073,6 @@ export default function ReservationForm() {
         )}
       </AnimatePresence>
 
-      {/* Card / PayPal Modal */}
       <AnimatePresence>
         {showCardModal && (
           <motion.div
@@ -766,14 +1089,17 @@ export default function ReservationForm() {
               onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
             >
-              <h3 className="text-2xl font-serif text-[#5D4037] mb-2">Pago Seguro</h3>
+              <h3 className="text-2xl font-serif text-[#5D4037] mb-2">
+                Pago Seguro
+              </h3>
               <p className="text-sm text-[#5D4037]/60 mb-6">
-                Asegura tu cita pagando un adelanto del 50% (${(total * 0.5).toFixed(2)}).
+                Asegura tu cita pagando un adelanto del 50% ($
+                {(total * 0.5).toFixed(2)}).
               </p>
-              
+
               <div className="mb-6">
                 <PayPalScriptProvider options={{ clientId: "test", currency: "USD" }}>
-                  <PayPalButtons 
+                  <PayPalButtons
                     style={{ layout: "vertical", shape: "rect" }}
                     createOrder={(data, actions) => {
                       return actions.order.create({
@@ -792,7 +1118,9 @@ export default function ReservationForm() {
                     onApprove={async (data, actions) => {
                       if (actions.order) {
                         const details = await actions.order.capture();
-                        toast.success(`Pago completado por ${details.payer?.name?.given_name}`);
+                        toast.success(
+                          `Pago completado por ${details.payer?.name?.given_name}`
+                        );
                         setShowCardModal(false);
                       }
                     }}
@@ -805,7 +1133,11 @@ export default function ReservationForm() {
               </div>
 
               <div className="mt-4">
-                <Button onClick={() => setShowCardModal(false)} variant="outline" className="w-full rounded-full border-[#E5D3B3] text-[#5D4037]">
+                <Button
+                  onClick={() => setShowCardModal(false)}
+                  variant="outline"
+                  className="w-full rounded-full border-[#E5D3B3] text-[#5D4037]"
+                >
                   Cancelar
                 </Button>
               </div>
