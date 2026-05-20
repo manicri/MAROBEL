@@ -72,3 +72,156 @@
 
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+
+/* Estilos adicionales personalizados */
+@layer components {
+  /* Efecto hover elegante para botones */
+  .btn-elegant {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-300 ease-in-out;
+    @apply bg-brand-brown text-brand-offwhite hover:bg-opacity-90;
+    @apply hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  /* Tarjetas con efecto de elevación */
+  .card-elevated {
+    @apply bg-white rounded-xl shadow-md transition-all duration-300;
+    @apply hover:shadow-xl hover:-translate-y-1;
+  }
+
+  /* Efecto de brillo suave */
+  .glow-effect {
+    @apply relative overflow-hidden;
+  }
+  
+  .glow-effect::before {
+    @apply content-[''] absolute inset-0 opacity-0 transition-opacity duration-300;
+    @apply bg-gradient-to-r from-transparent via-white/20 to-transparent;
+  }
+  
+  .glow-effect:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Animación de entrada suave */
+  .fade-in-up {
+    @apply opacity-0 translate-y-4 animate-fadeInUp;
+  }
+
+  /* Gradiente decorativo */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-brown to-brand-brown/70 bg-clip-text text-transparent;
+  }
+
+  /* Borde decorativo animado */
+  .border-animated {
+    @apply relative border-2 border-brand-cream;
+  }
+  
+  .border-animated::after {
+    @apply content-[''] absolute -inset-0.5 rounded-lg;
+    @apply bg-gradient-to-r from-brand-cream via-brand-brown to-brand-cream;
+    @apply opacity-0 transition-opacity duration-300 blur-sm;
+  }
+  
+  .border-animated:hover::after {
+    @apply opacity-30;
+  }
+
+  /* Efecto de imagen con overlay */
+  .image-overlay {
+    @apply relative overflow-hidden rounded-lg;
+  }
+  
+  .image-overlay img {
+    @apply transition-transform duration-500;
+  }
+  
+  .image-overlay:hover img {
+    @apply scale-105;
+  }
+  
+  .image-overlay::after {
+    @apply content-[''] absolute inset-0 bg-gradient-to-t from-black/30 to-transparent;
+    @apply opacity-0 transition-opacity duration-300;
+  }
+  
+  .image-overlay:hover::after {
+    @apply opacity-100;
+  }
+}
+
+/* Animaciones personalizadas */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.shimmer {
+  @apply relative overflow-hidden;
+}
+
+.shimmer::after {
+  @apply content-[''] absolute inset-0;
+  @apply bg-gradient-to-r from-transparent via-white/10 to-transparent;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Utilidades adicionales */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.backdrop-blur-custom {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-brand-offwhite;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-brand-cream rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-brand-brown;
+}
