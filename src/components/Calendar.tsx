@@ -27,16 +27,15 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
 
   const getHours = (dateStr: string) => {
     const date = new Date(dateStr);
-    const day = date.getUTCDay(); // 0 = Sun, 6 = Sat
+    const day = date.getUTCDay(); // 0 = Sun
     if (day === 0) return []; // Sunday closed
-    const start = day === 6 ? 10 : 9; // Sat starts at 10
-    
-    // Generate 30-min intervals for better granularity
     const slots = [];
-    for (let i = start; i <= 18; i++) {
-      slots.push(`${i}:00`);
-      if (i !== 18) slots.push(`${i}:30`);
+
+    for (let hour = 9; hour <= 17; hour++) {
+      slots.push(`${hour}:00`);
+      slots.push(`${hour}:30`);
     }
+
     return slots;
   };
 
