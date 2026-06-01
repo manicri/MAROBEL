@@ -9,6 +9,7 @@ import { SelectionProvider } from "./context/SelectionContext";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import CategoriaPage from "./pages/CategoriaPage";
+import ReservationForm from "./components/ReservationForm";
 import { AdminDashboard } from "./components/AdminDashboard";
 import { NotificationManager } from "./components/NotificationManager";
 import { Toaster } from "sonner";
@@ -28,6 +29,7 @@ export default function App() {
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<Home />} />
+                <Route path="/reserva" element={<ReservationForm />} />
                 <Route path="/:slug" element={<CategoriaPage />} />
                 <Route path="/admin" element={
                   <div className="min-h-screen bg-brand-offwhite pt-32 pb-24 px-6">
