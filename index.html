@@ -13,6 +13,34 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      (() => {
+        const times = [];
+        for (let hour = 9; hour <= 18; hour += 1) {
+          times.push(`${hour}:00`);
+          times.push(`${hour}:30`);
+        }
+
+        const patchAdminTimeSelect = () => {
+          const labels = Array.from(document.querySelectorAll('label'));
+          const label = labels.find((item) => item.textContent?.trim().toLowerCase() === 'bloquear horario');
+          const select = label?.parentElement?.querySelector('select');
+
+          if (!select || select.dataset.marobelTimeOptions === 'true') return;
+
+          const currentValue = select.value || '09:00';
+          select.innerHTML = times
+            .map((time) => `<option value="${time}">${time}</option>`)
+            .join('');
+          select.value = times.includes(currentValue) ? currentValue : '09:00';
+          select.dataset.marobelTimeOptions = 'true';
+        };
+
+        const observer = new MutationObserver(patchAdminTimeSelect);
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        window.addEventListener('load', patchAdminTimeSelect);
+        patchAdminTimeSelect();
+      })();
+    </script>
   </body>
 </html>
-
