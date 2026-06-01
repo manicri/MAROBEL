@@ -15,9 +15,11 @@ import { Toaster } from "sonner";
 import WhatsAppButton from "./components/WhatsAppButton";
 import Footer from "./components/Footer";
 
+const routerBasename = import.meta.env.BASE_URL;
+
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename}>
       <AuthProvider>
         <SelectionProvider>
           <NotificationManager />
