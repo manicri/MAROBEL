@@ -32,7 +32,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
     if (day === 0) return []; // Sunday closed
     const slots = [];
 
-    for (let hour = 9; hour <= 17; hour++) {
+    for (let hour = 9; hour <= 18; hour++) {
       slots.push(`${hour}:00`);
       slots.push(`${hour}:30`);
     }
