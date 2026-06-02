@@ -6,10 +6,13 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { useAuth } from "@/context/AuthContext";
 import { ProfileModal } from "./ProfileModal";
 import { toast } from "sonner";
+import CartButton from "./CartButton";
+import CartDrawer from "./CartDrawer";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const { user, profile, login, logout, isAdmin } = useAuth();
 
   useEffect(() => {
@@ -47,14 +50,14 @@ export default function Navbar() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? "bg-[#5D4037] py-3 shadow-xl" 
+          isScrolled
+            ? "bg-[#5D4037] py-3 shadow-xl"
             : "bg-black/40 py-6"
         }`}
       >
         <div className="container mx-auto px-6 flex items-center justify-between">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             onClick={handleHomeClick}
             className="text-2xl font-serif font-bold text-white flex items-center gap-3"
           >
@@ -64,8 +67,8 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               onClick={handleHomeClick}
               className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold transition-colors"
             >
@@ -74,13 +77,17 @@ export default function Navbar() {
             <a href="/#servicios" className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold transition-colors">
               Ver Servicios
             </a>
-            
+
+            {/* Cart Button — Desktop */}
+            <CartButton onClick={() => setIsCartOpen(true)} />
+
             {isAdmin && (
               <Link to="/admin" className="text-xs uppercase tracking-widest text-yellow-500 hover:text-yellow-400 font-bold transition-colors">Admin</Link>
             )}
+
             {user ? (
               <div className="flex items-center gap-4">
-                <button 
+                <button
                   onClick={() => setIsProfileModalOpen(true)}
                   className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                 >
@@ -99,7 +106,10 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Nav */}
-          <div className="md:hidden flex items-center gap-3">
+          <div className="md:hidden flex items-center gap-4">
+            {/* Cart Button — Mobile */}
+            <CartButton onClick={() => setIsCartOpen(true)} />
+
             {!user && (
               <Button onClick={login} className="bg-[#E5D3B3] text-[#5D4037] hover:bg-white rounded-full h-8 px-4 text-[10px] uppercase tracking-widest font-bold transition-colors">
                 Ingresar
@@ -119,12 +129,9 @@ export default function Navbar() {
                   <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain" referrerPolicy="no-referrer" /> MAROBEL
                 </SheetTitle>
                 <div className="flex flex-col space-y-6 mt-10">
-                  <Link 
-                    to="/" 
-                    onClick={(e) => {
-                      handleHomeClick(e);
-                      // Close sheet is handled by the trigger usually, but here we might need to close it manually if it doesn't
-                    }}
+                  <Link
+                    to="/"
+                    onClick={handleHomeClick}
                     className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold transition-colors"
                   >
                     Inicio
@@ -145,10 +152,14 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <ProfileModal 
-        isOpen={isProfileModalOpen} 
-        onClose={() => setIsProfileModalOpen(false)} 
+      {/* Cart Drawer */}
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
     </>
   );
 }
+
