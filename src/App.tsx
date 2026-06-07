@@ -11,7 +11,6 @@ import Home from "./pages/Home";
 import ServiciosPage from "./pages/ServiciosPage";
 import ReservationForm from "./components/ReservationForm";
 import { AdminDashboard } from "./components/AdminDashboard";
-import { NotificationManager } from "./components/NotificationManager";
 import { Toaster } from "sonner";
 import WhatsAppButton from "./components/WhatsAppButton";
 import Footer from "./components/Footer";
@@ -23,7 +22,6 @@ export default function App() {
     <BrowserRouter basename={routerBasename}>
       <AuthProvider>
         <SelectionProvider>
-          <NotificationManager />
           <Toaster position="top-right" richColors closeButton />
           <div className="selection:bg-brand-cream selection:text-brand-brown">
             <Routes>
