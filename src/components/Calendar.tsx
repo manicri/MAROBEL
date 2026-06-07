@@ -5,164 +5,66 @@ import { cn } from '@/lib/utils';
 import { Check, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface CalendarProps {
-  selectedDate: string;
-  onSelectSlot: (time: string | null) => void;
-  selectedTime: string | null;
-  isAdmin?: boolean;
-  totalDuration?: number;
-  selectedProfessional?: string;
-}
-
-const normalizeTime = (time: string) => {
-  const [hours, minutes] = time.split(':');
-  return `${Number(hours)}:${minutes?.slice(0, 2) === '00' ? '00' : '30'}`;
-};
+interface CalendarProps { selectedDate: string; onSelectSlot: (time: string | null) => void; selectedTime: string | null; isAdmin?: boolean; totalDuration?: number; selectedProfessional?: string; }
+const normalizeTime = (time: string) => { const [h, m] = time.split(':'); return `${Number(h)}:${m?.slice(0, 2) === '00' ? '00' : '30'}`; };
 
 export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, selectedTime, isAdmin = false, totalDuration = 60, selectedProfessional = 'any' }) => {
   const [appointments, setAppointments] = useState<{ hora: string; Estado: string }[]>([]);
   const [blocks, setBlocks] = useState<{ id: string; hora: string | null }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
-
-  const hours = useMemo(() => {
-    const date = new Date(selectedDate);
-    if (date.getUTCDay() === 0) return [];
-    return Array.from({ length: 20 }, (_, index) => {
-      const totalMinutes = 9 * 60 + index * 30;
-      return `${Math.floor(totalMinutes / 60)}:${totalMinutes % 60 === 0 ? '00' : '30'}`;
-    });
-  }, [selectedDate]);
+  const hours = useMemo(() => new Date(selectedDate).getUTCDay() === 0 ? [] : Array.from({ length: 20 }, (_, i) => { const value = 540 + i * 30; return `${Math.floor(value / 60)}:${value % 60 ? '30' : '00'}`; }), [selectedDate]);
 
   const fetchAvailability = React.useCallback(async () => {
-    setIsLoading(true);
-    setAvailabilityError(null);
-    const [appointmentsResult, blocksResult] = await Promise.all([
-      supabase.from('citas').select('hora, Estado').eq('fecha', selectedDate),
-      supabase.from('bloqueos').select('id, hora').eq('fecha', selectedDate),
-    ]);
-
-    if (appointmentsResult.error || blocksResult.error) {
-      console.error(appointmentsResult.error || blocksResult.error);
-      setAvailabilityError('No se pudo confirmar la disponibilidad. Intenta nuevamente.');
-      setIsLoading(false);
-      return;
-    }
-
-    setAppointments(appointmentsResult.data ?? []);
-    setBlocks(blocksResult.data ?? []);
-    setIsLoading(false);
+    setIsLoading(true); setAvailabilityError(null);
+    const [citas, bloqueos] = await Promise.all([supabase.from('citas').select('hora, Estado').eq('fecha', selectedDate), supabase.from('bloqueos').select('id, hora').eq('fecha', selectedDate)]);
+    if (citas.error || bloqueos.error) { console.error(citas.error || bloqueos.error); setAvailabilityError('No se pudo confirmar la disponibilidad. Intenta nuevamente.'); setIsLoading(false); return; }
+    setAppointments(citas.data ?? []); setBlocks(bloqueos.data ?? []); setIsLoading(false);
   }, [selectedDate]);
 
   useEffect(() => {
     fetchAvailability();
-    const appointmentsChannel = supabase.channel(`citas_${selectedDate}_${selectedProfessional}`).on('postgres_changes', { event: '*', schema: 'public', table: 'citas', filter: `fecha=eq.${selectedDate}` }, fetchAvailability).subscribe();
-    const blocksChannel = supabase.channel(`bloqueos_${selectedDate}`).on('postgres_changes', { event: '*', schema: 'public', table: 'bloqueos', filter: `fecha=eq.${selectedDate}` }, fetchAvailability).subscribe();
-    const refresh = () => fetchAvailability();
-    window.addEventListener('marobel-block-added', refresh);
-    return () => {
-      supabase.removeChannel(appointmentsChannel);
-      supabase.removeChannel(blocksChannel);
-      window.removeEventListener('marobel-block-added', refresh);
-    };
+    const citas = supabase.channel(`citas_${selectedDate}_${selectedProfessional}`).on('postgres_changes', { event: '*', schema: 'public', table: 'citas', filter: `fecha=eq.${selectedDate}` }, fetchAvailability).subscribe();
+    const bloqueos = supabase.channel(`bloqueos_${selectedDate}`).on('postgres_changes', { event: '*', schema: 'public', table: 'bloqueos', filter: `fecha=eq.${selectedDate}` }, fetchAvailability).subscribe();
+    const refresh = () => fetchAvailability(); window.addEventListener('marobel-block-added', refresh);
+    return () => { supabase.removeChannel(citas); supabase.removeChannel(bloqueos); window.removeEventListener('marobel-block-added', refresh); };
   }, [fetchAvailability, selectedDate, selectedProfessional]);
 
   const fullDayBlocks = blocks.filter((block) => block.hora === null);
-  const isFullDayBlocked = fullDayBlocks.length > 0;
-  const adminBlockedSlots = useMemo(() => blocks.filter((block) => block.hora !== null).map((block) => normalizeTime(block.hora!)), [blocks]);
-  const appointmentSlots = useMemo(() => appointments.filter((appointment) => appointment.Estado?.toLowerCase() === 'aceptada').map((appointment) => normalizeTime(appointment.hora)), [appointments]);
-  const occupiedSlots = useMemo(() => [...adminBlockedSlots, ...appointmentSlots], [adminBlockedSlots, appointmentSlots]);
+  const fullDay = fullDayBlocks.length > 0;
+  const adminBlocks = useMemo(() => blocks.filter((block) => block.hora).map((block) => normalizeTime(block.hora!)), [blocks]);
+  const appointmentSlots = useMemo(() => appointments.filter((item) => item.Estado?.toLowerCase() === 'aceptada').map((item) => normalizeTime(item.hora)), [appointments]);
+  const occupied = useMemo(() => [...adminBlocks, ...appointmentSlots], [adminBlocks, appointmentSlots]);
+  const available = React.useCallback((time: string) => {
+    if (isLoading || availabilityError || fullDay) return false;
+    const start = hours.indexOf(time); const count = Math.ceil(totalDuration / 30);
+    return start >= 0 && start + count <= hours.length && Array.from({ length: count }, (_, i) => hours[start + i]).every((slot) => !occupied.includes(slot));
+  }, [availabilityError, fullDay, hours, isLoading, occupied, totalDuration]);
 
-  const isSlotAvailable = React.useCallback((time: string) => {
-    if (isLoading || availabilityError || isFullDayBlocked) return false;
-    const startIndex = hours.indexOf(time);
-    const slotsNeeded = Math.ceil(totalDuration / 30);
-    if (startIndex < 0 || startIndex + slotsNeeded > hours.length) return false;
-    return Array.from({ length: slotsNeeded }, (_, index) => hours[startIndex + index]).every((slot) => !occupiedSlots.includes(slot));
-  }, [availabilityError, hours, isFullDayBlocked, isLoading, occupiedSlots, totalDuration]);
-
-  useEffect(() => {
-    if (isAdmin || !selectedTime || isLoading) return;
-    if (!isSlotAvailable(normalizeTime(selectedTime))) {
-      onSelectSlot(null);
-      toast.info('El horario seleccionado ya no esta disponible. Elige otro horario.');
-    }
-  }, [isAdmin, isLoading, isSlotAvailable, onSelectSlot, selectedTime]);
-
-  const refreshAll = () => window.dispatchEvent(new CustomEvent('marobel-block-added'));
-
-  const toggleBlock = async (time: string, isBlocked: boolean, hasAppointment: boolean) => {
-    if (!isAdmin || hasAppointment) return;
-    if (isBlocked) {
-      const block = blocks.find((item) => item.hora && normalizeTime(item.hora) === time);
-      if (!block) return;
-      const { error } = await supabase.from('bloqueos').delete().eq('id', block.id);
-      if (error) return toast.error(`Error al desbloquear: ${error.message}`);
-      toast.success(`Horario ${time} desbloqueado`);
-    } else {
-      const { error } = await supabase.from('bloqueos').insert({ fecha: selectedDate, hora: time, motivo: 'Bloqueo administrativo' });
-      if (error) return toast.error(`Error al bloquear: ${error.message}`);
-      toast.success(`Horario ${time} bloqueado`);
-    }
-    refreshAll();
+  useEffect(() => { if (!isAdmin && selectedTime && !isLoading && !available(normalizeTime(selectedTime))) { onSelectSlot(null); toast.info('El horario seleccionado ya no esta disponible. Elige otro horario.'); } }, [available, isAdmin, isLoading, onSelectSlot, selectedTime]);
+  const refresh = () => window.dispatchEvent(new CustomEvent('marobel-block-added'));
+  const toggleBlock = async (time: string, blocked: boolean, booked: boolean) => {
+    if (!isAdmin || booked) return;
+    const result = blocked ? await supabase.from('bloqueos').delete().eq('id', blocks.find((item) => item.hora && normalizeTime(item.hora) === time)?.id) : await supabase.from('bloqueos').insert({ fecha: selectedDate, hora: time, motivo: 'Bloqueo administrativo' });
+    if (result.error) return void toast.error(`Error al ${blocked ? 'desbloquear' : 'bloquear'}: ${result.error.message}`);
+    toast.success(`Horario ${time} ${blocked ? 'desbloqueado' : 'bloqueado'}`); refresh();
+  };
+  const toggleDay = async () => {
+    const result = fullDay ? await supabase.from('bloqueos').delete().in('id', fullDayBlocks.map((item) => item.id)) : await supabase.from('bloqueos').insert({ fecha: selectedDate, hora: null, motivo: 'Bloqueo administrativo de dia completo' });
+    if (result.error) return void toast.error(`Error al ${fullDay ? 'desbloquear' : 'bloquear'} el dia: ${result.error.message}`);
+    toast.success(fullDay ? 'Dia desbloqueado' : 'Dia completo bloqueado'); refresh();
   };
 
-  const blockDay = async () => {
-    const { error } = await supabase.from('bloqueos').insert({ fecha: selectedDate, hora: null, motivo: 'Bloqueo administrativo de dia completo' });
-    if (error) return toast.error(`Error al bloquear el dia: ${error.message}`);
-    toast.success('Dia completo bloqueado');
-    refreshAll();
-  };
+  if (isLoading) return <div className="rounded-xl border border-[#E5D3B3]/40 bg-[#FAF9F6] py-7 text-center text-xs font-bold uppercase tracking-widest text-[#5D4037]">Validando disponibilidad...</div>;
+  if (availabilityError) return <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-7 text-center"><Lock className="mx-auto mb-2 h-6 w-6 text-red-400" /><p className="text-xs font-bold uppercase tracking-widest text-red-700">Disponibilidad no confirmada</p><p className="mt-2 text-xs text-red-500">{availabilityError}</p></div>;
 
-  const unblockDay = async () => {
-    const ids = fullDayBlocks.map((block) => block.id);
-    if (!ids.length) return;
-    const { error } = await supabase.from('bloqueos').delete().in('id', ids);
-    if (error) return toast.error(`Error al desbloquear el dia: ${error.message}`);
-    toast.success('Dia desbloqueado');
-    refreshAll();
-  };
-
-  if (isLoading) return <div className="py-10 text-center bg-[#FAF9F6] rounded-2xl border border-[#E5D3B3]/40"><p className="text-[#5D4037] font-bold uppercase tracking-widest text-sm">Validando disponibilidad...</p></div>;
-  if (availabilityError) return <div className="py-10 text-center bg-red-50 rounded-2xl border border-red-100 px-4"><Lock className="w-7 h-7 text-red-400 mx-auto mb-3" /><p className="text-red-700 font-bold uppercase tracking-widest text-sm">Disponibilidad no confirmada</p><p className="text-red-500 text-xs mt-2">{availabilityError}</p></div>;
-
-  return (
-    <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-      {isAdmin && !isFullDayBlocked && hours.length > 0 && <button type="button" onClick={blockDay} className="col-span-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-700 hover:bg-red-100">Bloquear dia completo</button>}
-      {isFullDayBlocked ? (
-        <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl border border-gray-200 px-4">
-          <Lock className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-          <p className="text-[#5D4037] font-bold uppercase tracking-widest text-sm">Dia no disponible</p>
-          <p className="text-gray-500 text-xs mt-1">Este dia ha sido bloqueado por administracion.</p>
-          {isAdmin && <button type="button" onClick={unblockDay} className="mt-5 rounded-xl border border-green-200 bg-white px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-green-700 hover:bg-green-50">Desbloquear dia</button>}
-        </div>
-      ) : hours.length === 0 ? (
-        <div className="col-span-full py-8 text-center text-[#5D4037]/60 font-medium italic">Cerrado los domingos. Selecciona otro dia.</div>
-      ) : hours.every((time) => !isSlotAvailable(time)) && !isAdmin ? (
-        <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl border border-gray-200"><p className="text-[#5D4037] font-bold uppercase tracking-widest text-sm mb-2">Dia sin disponibilidad</p><p className="text-gray-500 text-xs">No hay horarios disponibles para la duracion seleccionada.</p></div>
-      ) : hours.map((time, index) => {
-        const blockedByAdmin = adminBlockedSlots.includes(time);
-        const bookedByAppointment = appointmentSlots.includes(time);
-        const available = isSlotAvailable(time);
-        const selected = selectedTime === time;
-        const recommended = available && !isAdmin && (index === 0 || (index > 0 && !isSlotAvailable(hours[index - 1])));
-        return (
-          <motion.button
-            key={time}
-            type="button"
-            whileHover={{ scale: !available && !isAdmin ? 1 : 1.05 }}
-            whileTap={{ scale: !available && !isAdmin ? 1 : 0.95 }}
-            onClick={() => isAdmin ? toggleBlock(time, blockedByAdmin, bookedByAppointment) : available && !blockedByAdmin && onSelectSlot(time)}
-            disabled={!isAdmin && !available || isAdmin && bookedByAppointment}
-            className={cn('relative min-h-[92px] p-3 rounded-xl border text-sm font-bold transition-all flex flex-col items-center justify-center gap-1 overflow-hidden', bookedByAppointment ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed opacity-70' : blockedByAdmin ? 'bg-red-50 border-red-200 text-red-600' : selected ? 'bg-[#E5D3B3] border-[#5D4037] text-[#5D4037] shadow-lg ring-2 ring-offset-2 ring-[#5D4037]' : recommended ? 'bg-[#FAF9F6] border-[#8D6E63] text-[#5D4037]' : 'bg-white border-[#E5D3B3]/50 text-[#5D4037] hover:border-[#5D4037]')}
-          >
-            {recommended && !selected && <div className="absolute top-0 left-0 w-full bg-[#8D6E63] text-white text-[8px] uppercase tracking-widest py-0.5">Recomendado</div>}
-            <span className="text-xs uppercase opacity-60 flex items-center gap-1">{!available ? <Lock className="w-3 h-3" /> : selected ? <Check className="w-3 h-3" /> : isAdmin ? 'Admin' : 'Libre'}</span>
-            <span className={cn('text-base', !available && 'line-through opacity-70')}>{time}</span>
-            <span className="text-[8px] uppercase tracking-widest mt-1">{bookedByAppointment ? 'Con cita' : blockedByAdmin ? 'Desbloquear' : isAdmin ? 'Bloquear' : 'Disponible'}</span>
-          </motion.button>
-        );
-      })}
-    </div>
-  );
+  return <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+    {isAdmin && !fullDay && hours.length > 0 && <button type="button" onClick={toggleDay} className="col-span-full rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-red-700">Bloquear dia completo</button>}
+    {fullDay ? <div className="col-span-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-8 text-center"><Lock className="mx-auto mb-2 h-7 w-7 text-gray-400" /><p className="text-xs font-bold uppercase tracking-widest text-[#5D4037]">Dia no disponible</p><p className="mt-1 text-xs text-gray-500">Este dia ha sido bloqueado por administracion.</p>{isAdmin && <button type="button" onClick={toggleDay} className="mt-4 rounded-xl border border-green-200 bg-white px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-green-700">Desbloquear dia</button>}</div> : !hours.length ? <div className="col-span-full py-6 text-center text-sm italic text-[#5D4037]/60">Cerrado los domingos. Selecciona otro dia.</div> : hours.map((time, index) => {
+      const blocked = adminBlocks.includes(time); const booked = appointmentSlots.includes(time); const free = available(time); const selected = selectedTime === time; const recommended = free && !isAdmin && (index === 0 || !available(hours[index - 1]));
+      return <motion.button key={time} type="button" whileHover={{ scale: !free && !isAdmin ? 1 : 1.03 }} whileTap={{ scale: !free && !isAdmin ? 1 : 0.97 }} onClick={() => isAdmin ? toggleBlock(time, blocked, booked) : free && onSelectSlot(time)} disabled={(!isAdmin && !free) || (isAdmin && booked)} className={cn('relative flex min-h-[70px] flex-col items-center justify-center gap-0.5 overflow-hidden rounded-xl border p-2 text-xs font-bold transition-all', booked ? 'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-400 opacity-70' : blocked ? 'border-red-200 bg-red-50 text-red-600' : selected ? 'border-[#5D4037] bg-[#E5D3B3] text-[#5D4037] shadow-md ring-1 ring-[#5D4037]' : recommended ? 'border-[#8D6E63] bg-[#FAF9F6] text-[#5D4037]' : 'border-[#E5D3B3]/50 bg-white text-[#5D4037] hover:border-[#5D4037]')}>
+        {recommended && !selected && <span className="absolute left-0 top-0 w-full bg-[#8D6E63] py-0.5 text-[7px] uppercase tracking-wide text-white">Recomendado</span>}<span className="flex items-center gap-1 text-[9px] uppercase opacity-60">{!free ? <Lock className="h-2.5 w-2.5" /> : selected ? <Check className="h-2.5 w-2.5" /> : isAdmin ? 'Admin' : 'Libre'}</span><span className={cn('text-sm', !free && 'line-through opacity-70')}>{time}</span><span className="text-[7px] uppercase tracking-wide">{booked ? 'Con cita' : blocked ? 'Desbloquear' : isAdmin ? 'Bloquear' : 'Disponible'}</span>
+      </motion.button>;
+    })}
+  </div>;
 };
