@@ -8,7 +8,6 @@ import { AuthProvider } from "./context/AuthContext";
 import { SelectionProvider } from "./context/SelectionContext";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
-import CategoriaPage from "./pages/CategoriaPage";
 import ServiciosPage from "./pages/ServiciosPage";
 import ReservationForm from "./components/ReservationForm";
 import { AdminDashboard } from "./components/AdminDashboard";
@@ -39,7 +38,6 @@ export default function App() {
                     </div>
                   </div>
                 } />
-                <Route path="/:slug" element={<CategoriaPage />} />
               </Route>
             </Routes>
             <Footer />
