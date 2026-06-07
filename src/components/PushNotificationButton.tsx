@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Bell, BellRing, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
-import { enablePushNotifications, isInstalledApp, isIosDevice } from "@/lib/pushNotifications";
+import { enablePushNotifications } from "@/lib/pushNotifications";
 
 type PushNotificationButtonProps = {
   mobile?: boolean;
@@ -17,14 +17,6 @@ export default function PushNotificationButton({ mobile = false, onComplete }: P
   if (!user) return null;
 
   const activate = async () => {
-    if (isIosDevice() && !isInstalledApp()) {
-      toast.info("Instala Marobel en tu iPhone", {
-        description: "Pulsa Compartir, elige ‘Agregar a pantalla de inicio’, abre Marobel desde el icono y activa las notificaciones.",
-        duration: 10000,
-      });
-      return;
-    }
-
     setLoading(true);
     try {
       await enablePushNotifications();
@@ -36,6 +28,7 @@ export default function PushNotificationButton({ mobile = false, onComplete }: P
     } catch (error) {
       toast.error("No se pudieron activar", {
         description: error instanceof Error ? error.message : "Revisa los permisos del teléfono.",
+        duration: 8000,
       });
     } finally {
       setLoading(false);
