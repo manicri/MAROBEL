@@ -11,11 +11,11 @@ export default function Home() {
       <Hero />
       <PublicPromotions />
       <About />
+      <InstagramGallery />
       <Services />
       <section id="reservas">
         <ReservationForm />
       </section>
-      <InstagramGallery />
     </main>
   );
 }
