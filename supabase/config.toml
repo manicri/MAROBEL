@@ -1,2 +1,2 @@
-[functions.send-push]
+[functions.send-whatsapp]
 verify_jwt = false
