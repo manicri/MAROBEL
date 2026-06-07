@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.svg" />
-    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#5D4037" />
     <title>Marobel Beauty Studio | Spa y Servicios de Belleza en Guayaquil</title>
     <meta name="description" content="Descubre Marobel Beauty Studio en La Alborada, Guayaquil. Ofrecemos servicios premium de spa, uñas, cabello, faciales y masajes. Reserva tu cita hoy." />
@@ -29,13 +28,10 @@
           const labels = Array.from(document.querySelectorAll('label'));
           const label = labels.find((item) => item.textContent?.trim().toLowerCase() === 'bloquear horario');
           const select = label?.parentElement?.querySelector('select');
-
           if (!select || select.dataset.marobelTimeOptions === 'true') return;
 
           const currentValue = select.value || '09:00';
-          select.innerHTML = times
-            .map((time) => `<option value="${time}">${time}</option>`)
-            .join('');
+          select.innerHTML = times.map((time) => `<option value="${time}">${time}</option>`).join('');
           select.value = times.includes(currentValue) ? currentValue : '09:00';
           select.dataset.marobelTimeOptions = 'true';
         };
