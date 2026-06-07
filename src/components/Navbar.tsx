@@ -54,7 +54,7 @@ export default function Navbar() {
 
           <div className="hidden items-center gap-2 md:flex">
             <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 p-1 shadow-lg">
-              <a href="/#servicios" className={navLinkClass}>Servicios</a>
+              <Link to="/servicios" className={navLinkClass}>Servicios</Link>
               <a href="/#promociones" className={navLinkClass}>Promociones</a>
               {isAdmin && <Link to="/admin" className="rounded-full bg-[#E5D3B3] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#5D4037] transition hover:bg-white">Admin</Link>}
             </div>
@@ -84,7 +84,7 @@ export default function Navbar() {
                 <SheetTitle className="mt-4 flex items-center gap-2 font-serif text-2xl text-[#E5D3B3]"><Sparkles className="h-5 w-5" />Menu</SheetTitle>
                 <div className="mt-10 flex flex-col space-y-4">
                   <Link to="/" onClick={handleHomeClick} className="rounded-2xl bg-white/10 px-5 py-4 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white/15">Inicio</Link>
-                  <a href="/#servicios" className="rounded-2xl bg-white/10 px-5 py-4 text-sm font-bold uppercase tracking-widest text-white/85 transition hover:bg-white/15 hover:text-white">Servicios</a>
+                  <Link to="/servicios" className="rounded-2xl bg-white/10 px-5 py-4 text-sm font-bold uppercase tracking-widest text-white/85 transition hover:bg-white/15 hover:text-white">Servicios</Link>
                   <a href="/#promociones" className="rounded-2xl bg-white/10 px-5 py-4 text-sm font-bold uppercase tracking-widest text-white/85 transition hover:bg-white/15 hover:text-white">Promociones</a>
                   {isAdmin && <Link to="/admin" className="rounded-2xl bg-[#E5D3B3] px-5 py-4 text-sm font-bold uppercase tracking-widest text-[#5D4037]">Admin</Link>}
                   {user && <Button onClick={handleLogout} variant="outline" className="mt-4 w-full border-white/20 text-white hover:bg-white/10">Cerrar sesion</Button>}
