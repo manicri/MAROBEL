@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, LogIn, LogOut } from "lucide-react";
+import { Home, LogIn, LogOut, Menu, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import { ProfileModal } from "./ProfileModal";
 import { toast } from "sonner";
@@ -16,135 +16,78 @@ export default function Navbar() {
   const { user, profile, login, logout, isAdmin } = useAuth();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = () => {
-    toast('¿Estás seguro de que deseas cerrar sesión?', {
+    toast("Estas seguro de que deseas cerrar sesion?", {
       action: {
-        label: 'Cerrar Sesión',
+        label: "Cerrar sesion",
         onClick: async () => {
           await logout();
-          toast.success('Sesión cerrada correctamente');
-        }
+          toast.success("Sesion cerrada correctamente");
+        },
       },
-      cancel: {
-        label: 'Cancelar',
-        onClick: () => {}
-      }
+      cancel: { label: "Cancelar", onClick: () => {} },
     });
   };
 
-  const handleHomeClick = (e: React.MouseEvent) => {
-    if (window.location.pathname === '/') {
-      e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleHomeClick = (event: React.MouseEvent) => {
+    if (window.location.pathname === "/") {
+      event.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
+  const navLinkClass = "rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/85 transition hover:bg-white/10 hover:text-[#E5D3B3]";
+
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-[#5D4037] py-3 shadow-xl"
-            : "bg-black/40 py-6"
-        }`}
-      >
-        <div className="container mx-auto px-6 flex items-center justify-between">
-          <Link
-            to="/"
-            onClick={handleHomeClick}
-            className="text-2xl font-serif font-bold text-white flex items-center gap-3"
-          >
-            <img src="/logo.png" alt="Marobel Logo" className="h-10 w-auto object-contain" referrerPolicy="no-referrer" />
-            MAROBEL
+      <nav className={`fixed left-0 right-0 top-0 z-50 border-b border-white/10 transition-all duration-300 ${isScrolled ? "bg-[#4a332c]/95 py-2 shadow-xl backdrop-blur-xl" : "bg-[#2d211d]/55 py-3 backdrop-blur-md"}`}>
+        <div className="container mx-auto flex items-center justify-between gap-4 px-5">
+          <Link to="/" onClick={handleHomeClick} className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-white/15 hover:text-[#E5D3B3]">
+            <Home className="h-4 w-4" />
+            Inicio
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link
-              to="/"
-              onClick={handleHomeClick}
-              className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold transition-colors"
-            >
-              Inicio
-            </Link>
-            <a href="/#servicios" className="text-xs uppercase tracking-widest text-white hover:text-[#E5D3B3] font-bold transition-colors">
-              Ver Servicios
-            </a>
+          <div className="hidden items-center gap-2 md:flex">
+            <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 p-1 shadow-lg">
+              <a href="/#servicios" className={navLinkClass}>Servicios</a>
+              <a href="/#promociones" className={navLinkClass}>Promociones</a>
+              {isAdmin && <Link to="/admin" className="rounded-full bg-[#E5D3B3] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#5D4037] transition hover:bg-white">Admin</Link>}
+            </div>
 
-            {/* Cart Button — Desktop */}
             <CartButton onClick={() => setIsCartOpen(true)} />
 
-            {isAdmin && (
-              <Link to="/admin" className="text-xs uppercase tracking-widest text-yellow-500 hover:text-yellow-400 font-bold transition-colors">Admin</Link>
-            )}
-
             {user ? (
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setIsProfileModalOpen(true)}
-                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                >
-                  <img src={profile?.photoURL || user.user_metadata?.avatar_url || ''} className="w-8 h-8 rounded-full border border-white/20" alt="Avatar" referrerPolicy="no-referrer" />
-                  <span className="text-white text-xs font-medium hidden lg:block">{profile?.displayName || user.user_metadata?.full_name}</span>
+              <div className="flex items-center gap-2 rounded-full bg-white/10 p-1 pl-2">
+                <button onClick={() => setIsProfileModalOpen(true)} className="flex items-center gap-2 rounded-full px-2 py-1 transition hover:bg-white/10">
+                  <img src={profile?.photoURL || user.user_metadata?.avatar_url || ""} className="h-8 w-8 rounded-full border border-white/25" alt="Avatar" referrerPolicy="no-referrer" />
+                  <span className="hidden max-w-[150px] truncate text-xs font-semibold text-white lg:block">{profile?.displayName || user.user_metadata?.full_name}</span>
                 </button>
-                <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white hover:text-white hover:bg-white/10 transition-colors">
-                  <LogOut className="w-4 h-4" />
-                </Button>
+                <Button variant="ghost" size="sm" onClick={handleLogout} className="h-9 w-9 rounded-full p-0 text-white hover:bg-white/10 hover:text-white"><LogOut className="h-4 w-4" /></Button>
               </div>
             ) : (
-              <Button onClick={login} className="bg-[#E5D3B3] text-[#5D4037] hover:bg-white rounded-full text-xs uppercase tracking-widest font-bold transition-colors">
-                <LogIn className="w-4 h-4 mr-2" /> Ingresar
-              </Button>
+              <Button onClick={login} className="h-10 rounded-full bg-[#E5D3B3] px-5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#5D4037] hover:bg-white"><LogIn className="mr-2 h-4 w-4" />Ingresar</Button>
             )}
           </div>
 
-          {/* Mobile Nav */}
-          <div className="md:hidden flex items-center gap-4">
-            {/* Cart Button — Mobile */}
+          <div className="flex items-center gap-2 md:hidden">
             <CartButton onClick={() => setIsCartOpen(true)} />
-
-            {!user && (
-              <Button onClick={login} className="bg-[#E5D3B3] text-[#5D4037] hover:bg-white rounded-full h-8 px-4 text-[10px] uppercase tracking-widest font-bold transition-colors">
-                Ingresar
-              </Button>
-            )}
-            {user && (
-              <button onClick={() => setIsProfileModalOpen(true)}>
-                <img src={profile?.photoURL || user.user_metadata?.avatar_url || ''} className="w-8 h-8 rounded-full border border-[#E5D3B3]/30" alt="Avatar" referrerPolicy="no-referrer" />
-              </button>
-            )}
+            {!user && <Button onClick={login} className="h-9 rounded-full bg-[#E5D3B3] px-4 text-[10px] font-bold uppercase tracking-widest text-[#5D4037] hover:bg-white">Ingresar</Button>}
+            {user && <button onClick={() => setIsProfileModalOpen(true)}><img src={profile?.photoURL || user.user_metadata?.avatar_url || ""} className="h-9 w-9 rounded-full border border-[#E5D3B3]/40" alt="Avatar" referrerPolicy="no-referrer" /></button>}
             <Sheet>
-              <SheetTrigger className="text-white p-2 hover:bg-white/10 rounded-md transition-colors">
-                <Menu className="w-6 h-6" />
-              </SheetTrigger>
-              <SheetContent side="right" className="bg-[#5D4037] text-white border-l-[#E5D3B3]/20" aria-describedby={undefined}>
-                <SheetTitle className="text-[#E5D3B3] font-serif text-2xl flex items-center gap-3 mt-4">
-                  <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain" referrerPolicy="no-referrer" /> MAROBEL
-                </SheetTitle>
-                <div className="flex flex-col space-y-6 mt-10">
-                  <Link
-                    to="/"
-                    onClick={handleHomeClick}
-                    className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold transition-colors"
-                  >
-                    Inicio
-                  </Link>
-                  <a href="/#servicios" className="text-sm uppercase tracking-widest text-white/80 hover:text-white font-bold transition-colors">
-                    Ver Servicios
-                  </a>
-                  {isAdmin && <Link to="/admin" className="text-sm uppercase tracking-widest text-yellow-500 hover:text-yellow-400 font-bold transition-colors">Admin</Link>}
-                  {user && (
-                    <Button onClick={handleLogout} variant="outline" className="w-full mt-4 border-white/20 text-white hover:bg-white/10 transition-colors">
-                      Cerrar Sesión
-                    </Button>
-                  )}
+              <SheetTrigger className="rounded-full bg-white/10 p-2 text-white transition hover:bg-white/15"><Menu className="h-5 w-5" /></SheetTrigger>
+              <SheetContent side="right" className="border-l-[#E5D3B3]/20 bg-[#5D4037] text-white" aria-describedby={undefined}>
+                <SheetTitle className="mt-4 flex items-center gap-2 font-serif text-2xl text-[#E5D3B3]"><Sparkles className="h-5 w-5" />Menu</SheetTitle>
+                <div className="mt-10 flex flex-col space-y-4">
+                  <Link to="/" onClick={handleHomeClick} className="rounded-2xl bg-white/10 px-5 py-4 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white/15">Inicio</Link>
+                  <a href="/#servicios" className="rounded-2xl bg-white/10 px-5 py-4 text-sm font-bold uppercase tracking-widest text-white/85 transition hover:bg-white/15 hover:text-white">Servicios</a>
+                  <a href="/#promociones" className="rounded-2xl bg-white/10 px-5 py-4 text-sm font-bold uppercase tracking-widest text-white/85 transition hover:bg-white/15 hover:text-white">Promociones</a>
+                  {isAdmin && <Link to="/admin" className="rounded-2xl bg-[#E5D3B3] px-5 py-4 text-sm font-bold uppercase tracking-widest text-[#5D4037]">Admin</Link>}
+                  {user && <Button onClick={handleLogout} variant="outline" className="mt-4 w-full border-white/20 text-white hover:bg-white/10">Cerrar sesion</Button>}
                 </div>
               </SheetContent>
             </Sheet>
@@ -152,14 +95,8 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-
-      <ProfileModal
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
-      />
+      <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
     </>
   );
 }
-
