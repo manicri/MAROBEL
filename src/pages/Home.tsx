@@ -3,6 +3,7 @@ import About from "../components/About";
 import Services from "../components/Services";
 import InstagramGallery from "../components/InstagramGallery";
 import { PublicPromotions } from "../components/PublicPromotions";
+import ReservationForm from "@/components/ReservationForm";
 
 export default function Home() {
   return (
@@ -11,6 +12,9 @@ export default function Home() {
       <PublicPromotions />
       <About />
       <Services />
+      <section id="reservas">
+        <ReservationForm />
+      </section>
       <InstagramGallery />
     </main>
   );
