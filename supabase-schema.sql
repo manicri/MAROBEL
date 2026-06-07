@@ -70,3 +70,18 @@ CREATE POLICY "Escritura autenticada servicios" ON public.servicios FOR ALL USIN
 
 CREATE POLICY "Lectura pública bloqueos" ON public.bloqueos FOR SELECT USING (true);
 CREATE POLICY "Escritura autenticada bloqueos" ON public.bloqueos FOR ALL USING (auth.role() = 'authenticated');
+
+-- 6. Realtime para notificaciones de reservas
+-- Este bloque es seguro aunque la tabla citas ya esté habilitada.
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_publication_tables
+        WHERE pubname = 'supabase_realtime'
+          AND schemaname = 'public'
+          AND tablename = 'citas'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.citas;
+    END IF;
+END $$;
