@@ -23,7 +23,7 @@ interface CalendarProps {
 
 export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, selectedTime, isAdmin, totalDuration = 60, selectedProfessional = 'any' }) => {
   const [citasDelDia, setCitasDelDia] = useState<{hora: string, Estado: string, profesional?: string}[]>([]);
-  const [bloqueosDelDia, setBloqueosDelDia] = useState<{hora: string | null}[]>([]);
+  const [bloqueosDelDia, setBloqueosDelDia] = useState<{id: string, hora: string | null}[]>([]);
   const [isFullDayBlocked, setIsFullDayBlocked] = useState(false);
 
   const getHours = (dateStr: string) => {
@@ -56,11 +56,16 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
     if (!isAdmin || isBookedByAppointment) return;
 
     if (isBlockedByAdmin) {
+      const block = bloqueosDelDia.find(item => item.hora !== null && normalizeTime(item.hora) === time);
+      if (!block) {
+        toast.error('No se encontro el bloqueo. Actualiza la fecha e intentalo de nuevo.');
+        return;
+      }
+
       const { error } = await supabase
         .from('bloqueos')
         .delete()
-        .eq('fecha', selectedDate)
-        .eq('hora', time);
+        .eq('id', block.id);
 
       if (error) {
         toast.error(`Error al desbloquear: ${error.message}`);
@@ -92,19 +97,24 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
   const handleAdminUnblockDay = async () => {
     if (!isAdmin) return;
 
+    const fullDayBlockIds = bloqueosDelDia
+      .filter(block => block.hora === null)
+      .map(block => block.id);
+
+    if (fullDayBlockIds.length === 0) return;
+
     const { error } = await supabase
       .from('bloqueos')
       .delete()
-      .eq('fecha', selectedDate)
-      .is('hora', null);
+      .in('id', fullDayBlockIds);
 
     if (error) {
-      toast.error(`Error al desbloquear el día: ${error.message}`);
+      toast.error(`Error al desbloquear el dia: ${error.message}`);
       console.error(error);
       return;
     }
 
-    toast.success('Día desbloqueado');
+    toast.success('Dia desbloqueado');
     refreshAvailability();
   };
 
@@ -129,14 +139,14 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
       // Fetch Bloqueos
       const { data: bloqueosData, error: bloqueosError } = await supabase
         .from('bloqueos')
-        .select('hora')
+        .select('id, hora')
         .eq('fecha', selectedDate);
 
       if (bloqueosError) {
         console.error('Error fetching bloqueos:', bloqueosError);
       } else if (bloqueosData) {
         setBloqueosDelDia(bloqueosData);
-        // Si hay un bloqueo con hora null, todo el día está bloqueado
+        // Si hay un bloqueo con hora null, todo el dia esta bloqueado
         setIsFullDayBlocked(bloqueosData.some(b => b.hora === null));
       }
     };
@@ -220,26 +230,26 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
       {isFullDayBlocked ? (
         <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl border border-gray-200 px-4">
           <Lock className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-          <p className="text-[#5D4037] font-bold uppercase tracking-widest text-sm">Día No Disponible</p>
-          <p className="text-gray-500 text-xs mt-1">Este día ha sido bloqueado por administración.</p>
+          <p className="text-[#5D4037] font-bold uppercase tracking-widest text-sm">Dia No Disponible</p>
+          <p className="text-gray-500 text-xs mt-1">Este dia ha sido bloqueado por administracion.</p>
           {isAdmin && (
             <button
               type="button"
               onClick={handleAdminUnblockDay}
               className="mt-5 rounded-xl border border-green-200 bg-white px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-green-700 hover:bg-green-50"
             >
-              Desbloquear Día
+              Desbloquear Dia
             </button>
           )}
         </div>
       ) : hours.length === 0 ? (
         <div className="col-span-full py-8 text-center text-[#5D4037]/60 font-medium italic">
-          Cerrado los domingos. Por favor selecciona otro día.
+          Cerrado los domingos. Por favor selecciona otro dia.
         </div>
       ) : hours.every(time => !isSlotAvailable(time)) && !isAdmin ? (
         <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl border border-gray-200">
-          <p className="text-[#5D4037] font-bold uppercase tracking-widest text-sm mb-2">Día Sin Disponibilidad</p>
-          <p className="text-gray-500 text-xs">No hay horarios disponibles para la duración de tu servicio este día. Te sugerimos buscar en el día siguiente.</p>
+          <p className="text-[#5D4037] font-bold uppercase tracking-widest text-sm mb-2">Dia Sin Disponibilidad</p>
+          <p className="text-gray-500 text-xs">No hay horarios disponibles para la duracion de tu servicio este dia. Te sugerimos buscar en el dia siguiente.</p>
         </div>
       ) : (
         hours.map((time, index) => {
