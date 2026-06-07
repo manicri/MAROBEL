@@ -118,6 +118,25 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
     refreshAvailability();
   };
 
+  const handleAdminBlockDay = async () => {
+    if (!isAdmin || isFullDayBlocked) return;
+
+    const { error } = await supabase.from('bloqueos').insert({
+      fecha: selectedDate,
+      hora: null,
+      motivo: 'Bloqueo administrativo de dia completo'
+    });
+
+    if (error) {
+      toast.error(`Error al bloquear el dia: ${error.message}`);
+      console.error(error);
+      return;
+    }
+
+    toast.success('Dia completo bloqueado');
+    refreshAvailability();
+  };
+
   useEffect(() => {
     const fetchBookedSlots = async () => {
       // Fetch Citas
@@ -227,6 +246,15 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
 
   return (
     <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+      {isAdmin && !isFullDayBlocked && hours.length > 0 && (
+        <button
+          type="button"
+          onClick={handleAdminBlockDay}
+          className="col-span-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-700 hover:bg-red-100"
+        >
+          Bloquear dia completo
+        </button>
+      )}
       {isFullDayBlocked ? (
         <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl border border-gray-200 px-4">
           <Lock className="w-8 h-8 text-gray-400 mx-auto mb-3" />

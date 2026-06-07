@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import ServiceCard from '../components/ServiceCard';
 import FloatingReservationButton from '../components/FloatingReservationButton';
 import { ServiceSidebar } from '../components/ServiceSidebar';
+import PopularServices from '../components/PopularServices';
 import { supabase } from '../supabase';
 import { ServiceItem } from '../context/SelectionContext';
 
@@ -113,9 +114,9 @@ export default function CategoriaPage() {
             Transforma tu look con nuestros expertos. Utilizamos los mejores productos para cuidar y embellecerte.
           </p>
           <div className="flex justify-center gap-4">
-            <a href="/#reservas" className="bg-[#5D4037] text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#4a332c] transition-all shadow-md">
+            <Link to="/reserva" className="bg-[#5D4037] text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#4a332c] transition-all shadow-md">
               Consulta disponibilidad
-            </a>
+            </Link>
           </div>
         </motion.div>
 
@@ -135,6 +136,7 @@ export default function CategoriaPage() {
             )}
           </div>
         </div>
+        <PopularServices />
       </div>
       <FloatingReservationButton />
     </div>

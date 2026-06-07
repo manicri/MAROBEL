@@ -46,8 +46,6 @@ export const AdminDashboard: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [isBlocking, setIsBlocking] = useState(false);
-  const [blockTime, setBlockTime] = useState('09:00');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
 
   // Category Form State
@@ -70,29 +68,51 @@ export const AdminDashboard: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      toast.error('Selecciona un archivo de imagen valido');
+      e.target.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('La imagen no puede superar los 5 MB');
+      e.target.value = '';
+      return;
+    }
+
     setIsUploadingImage(true);
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`;
 
     try {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) {
+        throw new Error('Debes iniciar sesion como administrador antes de subir imagenes');
+      }
+
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const filePath = `${authData.user.id}/${crypto.randomUUID()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage
         .from('servicios-images')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          contentType: file.type,
+          upsert: false,
+        });
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
-        .from('servicios-images')
-        .getPublicUrl(filePath);
-
+      const { data } = supabase.storage.from('servicios-images').getPublicUrl(filePath);
       setCurrentService(prev => ({ ...prev, imagen_url: data.publicUrl }));
       toast.success('Imagen subida correctamente');
     } catch (error: any) {
-      toast.error(`Error al subir imagen: ${error.message}`);
+      const message = error?.message || 'Error desconocido';
+      const storageError = /row-level security|policy|bucket/i.test(message);
+      toast.error(storageError
+        ? 'Supabase rechazo la imagen. Ejecuta supabase-storage-fix.sql.'
+        : `Error al subir imagen: ${message}`);
       console.error(error);
     } finally {
       setIsUploadingImage(false);
+      e.target.value = '';
     }
   };
 
@@ -237,26 +257,6 @@ export const AdminDashboard: React.FC = () => {
         onClick: () => {}
       }
     });
-  };
-
-  const handleBlockTime = async (isFullDay: boolean = false) => {
-    const payload = {
-      fecha: selectedDate,
-      hora: isFullDay ? null : blockTime,
-      motivo: 'Bloqueo administrativo'
-    };
-
-    const { error } = await supabase.from('bloqueos').insert(payload);
-    
-    if (error) {
-      toast.error('Error al bloquear horario. ¿Creaste la tabla "bloqueos"?');
-      console.error(error);
-    } else {
-      toast.success(isFullDay ? 'Día completo bloqueado' : 'Horario bloqueado');
-      // Trigger calendar refresh
-      const event = new CustomEvent('marobel-block-added');
-      window.dispatchEvent(event);
-    }
   };
 
   const handleSaveService = async () => {
@@ -744,7 +744,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                       <div className="space-y-2 md:col-span-2">
                         <label className="text-[10px] uppercase tracking-widest font-bold text-[#5D4037]/60">Imagen del Servicio</label>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                           {currentService.imagen_url && (
                             <img src={currentService.imagen_url} alt="Preview" className="w-16 h-16 rounded-xl object-cover" />
                           )}
@@ -757,6 +757,16 @@ export const AdminDashboard: React.FC = () => {
                           />
                           {isUploadingImage && <span className="text-xs text-[#5D4037]/60">Subiendo...</span>}
                         </div>
+                        <Input
+                          type="url"
+                          value={currentService.imagen_url || ''}
+                          onChange={(e) => setCurrentService({ ...currentService, imagen_url: e.target.value })}
+                          className="bg-white border-none h-12 rounded-xl"
+                          placeholder="O pega aqui la URL publica de una imagen"
+                        />
+                        <p className="text-[10px] text-[#5D4037]/45">
+                          Formatos permitidos: JPG, PNG o WebP. Tamano maximo: 5 MB.
+                        </p>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -833,39 +843,6 @@ export const AdminDashboard: React.FC = () => {
                   selectedDate={selectedDate} 
                   onSelectDate={setSelectedDate} 
                 />
-              </div>
-
-              <div className="pt-4 border-t border-[#E5D3B3]/10">
-                <label className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#5D4037]/40 mb-3 block">Bloquear Horario</label>
-                <div className="flex flex-col gap-3">
-                  <div className="flex gap-2">
-                    <select 
-                      value={blockTime}
-                      onChange={(e) => setBlockTime(e.target.value)}
-                      className="flex-1 bg-[#FAF9F6] border-none rounded-xl p-3 text-sm font-bold text-[#5D4037] outline-none appearance-none"
-                    >
-                      {Array.from({ length: 10 }, (_, i) => `${i + 9}:00`).map(t => (
-                        <option key={t} value={t}>{t}</option>
-                      ))}
-                    </select>
-                    <Button 
-                      onClick={() => handleBlockTime(false)}
-                      className="bg-[#5D4037] text-white rounded-xl px-4 text-[10px] uppercase tracking-widest font-bold"
-                    >
-                      Bloquear Hora
-                    </Button>
-                  </div>
-                  <Button 
-                    onClick={() => handleBlockTime(true)}
-                    variant="outline"
-                    className="w-full border-red-200 text-red-600 hover:bg-red-50 rounded-xl text-[10px] uppercase tracking-widest font-bold"
-                  >
-                    Bloquear Día Completo
-                  </Button>
-                </div>
-                <p className="text-[9px] text-[#5D4037]/40 mt-3 italic font-light">
-                  * Esto marcará el horario o día como no disponible para los clientes.
-                </p>
               </div>
             </div>
 
