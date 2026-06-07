@@ -16,20 +16,16 @@ export const isInstalledApp = () =>
   window.matchMedia("(display-mode: standalone)").matches ||
   (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
 
-export async function enablePushNotifications(userId: string, email: string, isAdmin: boolean) {
+export async function enablePushNotifications() {
   if (!(await isSupported()) || !("serviceWorker" in navigator)) {
     throw new Error("Este navegador no admite notificaciones push.");
   }
 
   const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
-  if (!vapidKey) {
-    throw new Error("Falta configurar la clave VAPID de Firebase.");
-  }
+  if (!vapidKey) throw new Error("Falta configurar la clave VAPID de Firebase.");
 
   const permission = await Notification.requestPermission();
-  if (permission !== "granted") {
-    throw new Error("Debes permitir las notificaciones en el teléfono.");
-  }
+  if (permission !== "granted") throw new Error("Debes permitir las notificaciones en el teléfono.");
 
   const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js", { scope: "/" });
   const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
@@ -40,17 +36,10 @@ export async function enablePushNotifications(userId: string, email: string, isA
 
   if (!token) throw new Error("No se pudo registrar este teléfono.");
 
-  const { error } = await supabase.from("push_subscriptions").upsert(
-    {
-      token,
-      user_id: userId,
-      email,
-      is_admin: isAdmin,
-      user_agent: navigator.userAgent,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "token" }
-  );
+  const { error } = await supabase.rpc("register_push_subscription", {
+    p_token: token,
+    p_user_agent: navigator.userAgent,
+  });
 
   if (error) throw new Error(`No se pudo guardar el teléfono: ${error.message}`);
   return token;
