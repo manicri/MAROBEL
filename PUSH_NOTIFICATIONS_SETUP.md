@@ -2,6 +2,10 @@
 
 El codigo del sitio ya incluye Firebase Cloud Messaging, registro de telefonos y la Edge Function `send-push`. Para activarlo en produccion faltan estos pasos de configuracion.
 
+## Compatibilidad
+
+Esta integracion web con Firebase Cloud Messaging funciona en telefonos Android usando Chrome. Firebase Cloud Messaging para web no es compatible oficialmente con Safari de iPhone. Para iPhone se necesitaria una aplicacion iOS nativa o cambiar a otro proveedor de Web Push.
+
 ## 1. Crear la clave VAPID publica
 
 1. Abre Firebase Console y selecciona `gen-lang-client-0393494087`.
@@ -54,12 +58,10 @@ En Supabase > Database > Webhooks crea:
 - URL: `https://urrbofvaftsfeiasrceo.supabase.co/functions/v1/send-push`
 - Encabezado: `x-webhook-secret` con el mismo valor de `PUSH_WEBHOOK_SECRET`
 
-## 6. Activar un telefono
+## 6. Activar un telefono Android
 
-1. Inicia sesion en Marobel desde el telefono.
+1. Abre Marobel en Chrome e inicia sesion.
 2. Pulsa `Activar avisos` en el menu.
 3. Acepta el permiso del sistema.
-
-En iPhone se requiere iOS 16.4 o posterior y primero se debe agregar Marobel a la pantalla de inicio desde Safari. En Android funciona desde Chrome al aceptar el permiso.
 
 No compartas ni subas a GitHub el JSON de la cuenta de servicio ni `PUSH_WEBHOOK_SECRET`.
