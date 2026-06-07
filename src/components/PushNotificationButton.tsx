@@ -10,7 +10,7 @@ type PushNotificationButtonProps = {
 };
 
 export default function PushNotificationButton({ mobile = false, onComplete }: PushNotificationButtonProps) {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [enabled, setEnabled] = useState(() => typeof Notification !== "undefined" && Notification.permission === "granted");
 
@@ -27,7 +27,7 @@ export default function PushNotificationButton({ mobile = false, onComplete }: P
 
     setLoading(true);
     try {
-      await enablePushNotifications(user.id, user.email || "", isAdmin);
+      await enablePushNotifications();
       setEnabled(true);
       onComplete?.();
       toast.success("Notificaciones activadas", {
