@@ -12,13 +12,14 @@ const firebaseConfig = {
 };
 
 export const isIosDevice = () => /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-export const isInstalledApp = () =>
-  window.matchMedia("(display-mode: standalone)").matches ||
-  (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
 
 export async function enablePushNotifications() {
+  if (isIosDevice()) {
+    throw new Error("Firebase web push no es compatible con Safari de iPhone. Usa un teléfono Android con Chrome.");
+  }
+
   if (!(await isSupported()) || !("serviceWorker" in navigator)) {
-    throw new Error("Este navegador no admite notificaciones push.");
+    throw new Error("Este navegador no admite notificaciones push de Firebase.");
   }
 
   const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
