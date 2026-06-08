@@ -12,6 +12,7 @@ import ServiciosPage from "./pages/ServiciosPage";
 import ReservationForm from "./components/ReservationForm";
 import { AdminDashboard } from "./components/AdminDashboard";
 import AdminOverview from "./components/AdminOverview";
+import AdminRoute from "./components/AdminRoute";
 import { Toaster } from "sonner";
 import WhatsAppButton from "./components/WhatsAppButton";
 import Footer from "./components/Footer";
@@ -31,12 +32,14 @@ export default function App() {
                 <Route path="/servicios" element={<ServiciosPage />} />
                 <Route path="/reserva" element={<ReservationForm />} />
                 <Route path="/admin" element={
-                  <div className="min-h-screen bg-brand-offwhite px-4 pb-24 pt-28 sm:px-6 md:pt-32">
-                    <div className="container mx-auto">
-                      <AdminOverview />
-                      <AdminDashboard />
+                  <AdminRoute>
+                    <div className="min-h-screen bg-brand-offwhite px-4 pb-24 pt-28 sm:px-6 md:pt-32">
+                      <div className="container mx-auto">
+                        <AdminOverview />
+                        <AdminDashboard />
+                      </div>
                     </div>
-                  </div>
+                  </AdminRoute>
                 } />
               </Route>
             </Routes>
