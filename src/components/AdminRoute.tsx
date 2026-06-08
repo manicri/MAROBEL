@@ -1,9 +1,10 @@
+import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "../context/AuthContext";
 
-export default function AdminRoute({ children }: { children: React.ReactNode }) {
+export default function AdminRoute({ children }: { children: ReactNode }) {
   const { user, loading, isAdmin, login } = useAuth();
 
   if (loading) {
