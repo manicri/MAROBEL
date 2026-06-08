@@ -82,6 +82,19 @@ CREATE TABLE IF NOT EXISTS public.whatsapp_notifications (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
     UNIQUE (appointment_id, event_type, recipient)
 );
-
 ALTER TABLE public.whatsapp_notifications ENABLE ROW LEVEL SECURITY;
--- No se crean políticas públicas: solo la Edge Function con service_role puede acceder.
+
+-- 8. Administradores autorizados
+CREATE TABLE IF NOT EXISTS public.admins (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+ALTER TABLE public.admins ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Consultar acceso admin propio" ON public.admins;
+CREATE POLICY "Consultar acceso admin propio" ON public.admins
+FOR SELECT USING (auth.uid() = user_id);
+
+-- Ejecuta esta línea después de iniciar sesión al menos una vez con la cuenta administradora:
+INSERT INTO public.admins (user_id)
+SELECT id FROM auth.users WHERE email = 'crisdelrobbys@gmail.com'
+ON CONFLICT (user_id) DO NOTHING;
