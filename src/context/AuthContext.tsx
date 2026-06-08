@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../supabase';
-import { User } from '@supabase/supabase-js';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { User } from "@supabase/supabase-js";
+import { supabase } from "../supabase";
 
 export interface UserProfile {
   uid: string;
@@ -8,7 +8,7 @@ export interface UserProfile {
   displayName: string;
   photoURL: string;
   phone?: string;
-  role: 'admin' | 'client';
+  role: "admin" | "client";
 }
 
 interface AuthContextType {
@@ -29,212 +29,126 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const fetchAndSetProfile = async (currentUser: User) => {
-    console.log('Iniciando fetchAndSetProfile para:', currentUser.email);
+    const fallbackName = currentUser.user_metadata?.full_name || "";
+    let displayName = fallbackName;
+    let phone = "";
+
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single();
+      const [{ data: profileData }, { data: adminData }] = await Promise.all([
+        supabase.from("users").select("display_name, phone").eq("id", currentUser.id).maybeSingle(),
+        supabase.from("admins").select("user_id").eq("user_id", currentUser.id).maybeSingle(),
+      ]);
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error de Supabase al buscar perfil:', error);
-      }
-
-      let displayName = currentUser.user_metadata?.full_name || '';
-      let phone = '';
-
-      if (data) {
-        console.log('Perfil encontrado en BD');
-        if (data.display_name) displayName = data.display_name;
-        if (data.phone) phone = data.phone;
+      if (profileData) {
+        displayName = profileData.display_name || fallbackName;
+        phone = profileData.phone || "";
       } else {
-        console.log('Perfil no encontrado, creando uno nuevo...');
-        // Create initial record if it doesn't exist
-        const { error: upsertError } = await supabase.from('users').upsert({
-          id: currentUser.id,
-          email: currentUser.email,
-          display_name: displayName,
-        });
-        if (upsertError) console.error('Error al crear perfil inicial:', upsertError);
+        await supabase.from("users").upsert({ id: currentUser.id, email: currentUser.email, display_name: fallbackName });
       }
 
       setProfile({
         uid: currentUser.id,
-        email: currentUser.email || '',
+        email: currentUser.email || "",
         displayName,
-        photoURL: currentUser.user_metadata?.avatar_url || '',
+        photoURL: currentUser.user_metadata?.avatar_url || "",
         phone,
-        role: currentUser.email === 'crisdelrobbys@gmail.com' ? 'admin' : 'client',
+        role: adminData ? "admin" : "client",
       });
-      console.log('Perfil establecido correctamente');
-    } catch (err) {
-      console.error('Error fetching user profile:', err);
-      // Fallback to metadata
+    } catch (error) {
+      console.error("No se pudo cargar el perfil:", error);
       setProfile({
         uid: currentUser.id,
-        email: currentUser.email || '',
-        displayName: currentUser.user_metadata?.full_name || '',
-        photoURL: currentUser.user_metadata?.avatar_url || '',
-        role: currentUser.email === 'crisdelrobbys@gmail.com' ? 'admin' : 'client',
+        email: currentUser.email || "",
+        displayName: fallbackName,
+        photoURL: currentUser.user_metadata?.avatar_url || "",
+        role: "client",
       });
     }
   };
 
+  const applySession = async (currentUser: User | null) => {
+    setUser(currentUser);
+    if (currentUser) await fetchAndSetProfile(currentUser);
+    else setProfile(null);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    // Listen for OAuth success from popup
     const handleMessage = (event: MessageEvent) => {
-      // Check if the message is from our own origin
-      if (event.origin !== window.location.origin) return;
-
-      if (event.data?.type === 'OAUTH_AUTH_SUCCESS') {
-        console.log('Mensaje de éxito OAuth recibido en ventana principal');
-        setLoading(true);
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          const currentUser = session?.user ?? null;
-          console.log('Sesión recuperada tras popup:', currentUser?.email);
-          setUser(currentUser);
-          if (currentUser) {
-            fetchAndSetProfile(currentUser).finally(() => {
-              setLoading(false);
-            });
-          } else {
-            setLoading(false);
-          }
-        });
-      }
+      if (event.origin !== window.location.origin || event.data?.type !== "OAUTH_AUTH_SUCCESS") return;
+      setLoading(true);
+      supabase.auth.getSession().then(({ data: { session } }) => applySession(session?.user ?? null));
     };
-    window.addEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
 
-    // Check for errors in URL hash (e.g. Redirect URL not allowed)
-    if (window.location.hash.includes('error=')) {
+    if (window.location.hash.includes("error=")) {
       const params = new URLSearchParams(window.location.hash.substring(1));
-      const errorDesc = params.get('error_description');
-      console.error('Auth error from URL:', errorDesc);
-      // We can't use toast here directly if it's outside the Toaster context, but we can log it.
-      // Actually, we can just alert it for debugging purposes so the user knows what's wrong.
-      if (errorDesc?.includes('Redirect URL not allowed')) {
-        alert('Error de Supabase: Debes agregar esta URL (' + window.location.origin + ') a la lista de "Redirect URLs" en la configuración de Authentication de Supabase.');
+      const description = params.get("error_description");
+      if (description?.includes("Redirect URL not allowed")) {
+        alert(`Debes agregar ${window.location.origin} a Redirect URLs en Supabase Authentication.`);
       }
     }
 
-    // Initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        fetchAndSetProfile(currentUser).finally(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
-    });
+    supabase.auth.getSession().then(({ data: { session } }) => applySession(session?.user ?? null));
 
-    // Auth listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Evento de Auth detectado:', event, session?.user?.email);
-      
-      // Close popup if we are in one and authentication is complete
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (window.opener && window.opener !== window && session) {
-        console.log('Estamos en un popup, enviando mensaje de éxito y cerrando');
-        window.opener.postMessage({ type: 'OAUTH_AUTH_SUCCESS' }, window.location.origin);
-        // Pequeño retraso para asegurar que el mensaje se envíe antes de cerrar
+        window.opener.postMessage({ type: "OAUTH_AUTH_SUCCESS" }, window.location.origin);
         setTimeout(() => window.close(), 500);
         return;
       }
-
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        fetchAndSetProfile(currentUser).finally(() => setLoading(false));
-      } else {
-        setProfile(null);
-        setLoading(false);
-      }
+      setLoading(true);
+      applySession(session?.user ?? null);
     });
 
     return () => {
       subscription.unsubscribe();
-      window.removeEventListener('message', handleMessage);
+      window.removeEventListener("message", handleMessage);
     };
   }, []);
 
   const login = async () => {
-    console.log('Botón presionado - Iniciando OAuth en popup');
-    
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-        skipBrowserRedirect: true,
-      }
+      provider: "google",
+      options: { redirectTo: window.location.origin, skipBrowserRedirect: true },
     });
-    
-    if (error) {
-      console.error('OAuth error:', error);
-      return;
-    }
+    if (error) throw error;
+    if (!data?.url) return;
 
-    if (data?.url) {
-      const width = 500;
-      const height = 600;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-      
-      window.open(
-        data.url,
-        'supabase_oauth',
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
-    }
+    const width = 500;
+    const height = 650;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+    window.open(data.url, "supabase_oauth", `width=${width},height=${height},left=${left},top=${top}`);
   };
 
-  const logout = async () => {
-    await supabase.auth.signOut();
-  };
+  const logout = async () => { await supabase.auth.signOut(); };
 
   const updateProfile = async (data: { displayName?: string; phone?: string; photoURL?: string }) => {
-    if (!user) throw new Error('No user logged in');
-    
-    const updates: any = {};
+    if (!user) throw new Error("No user logged in");
+    const updates: Record<string, string> = {};
     if (data.displayName !== undefined) updates.display_name = data.displayName;
     if (data.phone !== undefined) updates.phone = data.phone;
-
-    if (Object.keys(updates).length > 0) {
-      const { error } = await supabase.from('users').update(updates).eq('id', user.id);
+    if (Object.keys(updates).length) {
+      const { error } = await supabase.from("users").update(updates).eq("id", user.id);
       if (error) throw error;
     }
 
-    const metadataUpdates: any = {};
-    if (data.displayName !== undefined) metadataUpdates.full_name = data.displayName;
-    if (data.photoURL !== undefined) metadataUpdates.avatar_url = data.photoURL;
-
-    if (Object.keys(metadataUpdates).length > 0) {
-      const { error: authError } = await supabase.auth.updateUser({ data: metadataUpdates });
-      if (authError) throw authError;
+    const metadata: Record<string, string> = {};
+    if (data.displayName !== undefined) metadata.full_name = data.displayName;
+    if (data.photoURL !== undefined) metadata.avatar_url = data.photoURL;
+    if (Object.keys(metadata).length) {
+      const { error } = await supabase.auth.updateUser({ data: metadata });
+      if (error) throw error;
     }
-
-    setProfile(prev => prev ? { ...prev, ...data } : null);
+    setProfile((previous) => previous ? { ...previous, ...data } : null);
   };
 
-  return (
-    <AuthContext.Provider value={{ 
-      user, 
-      profile, 
-      loading, 
-      isAdmin: profile?.role === 'admin',
-      login, 
-      logout,
-      updateProfile
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, profile, loading, isAdmin: profile?.role === "admin", login, logout, updateProfile }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
