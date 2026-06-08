@@ -10,8 +10,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import ServiciosPage from "./pages/ServiciosPage";
 import ReservationForm from "./components/ReservationForm";
-import { AdminDashboard } from "./components/AdminDashboard";
-import AdminOverview from "./components/AdminOverview";
+import AdminPanel from "./components/AdminPanel";
 import AdminRoute from "./components/AdminRoute";
 import { Toaster } from "sonner";
 import WhatsAppButton from "./components/WhatsAppButton";
@@ -35,8 +34,7 @@ export default function App() {
                   <AdminRoute>
                     <div className="min-h-screen bg-brand-offwhite px-4 pb-24 pt-28 sm:px-6 md:pt-32">
                       <div className="container mx-auto">
-                        <AdminOverview />
-                        <AdminDashboard />
+                        <AdminPanel />
                       </div>
                     </div>
                   </AdminRoute>
