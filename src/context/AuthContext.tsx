@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "../supabase";
 
+export type AdminRole = "full" | "schedule" | null;
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -9,6 +11,7 @@ export interface UserProfile {
   photoURL: string;
   phone?: string;
   role: "admin" | "client";
+  adminRole: AdminRole;
 }
 
 interface AuthContextType {
@@ -16,6 +19,8 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   isAdmin: boolean;
+  adminRole: AdminRole;
+  canManageServices: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: { displayName?: string; phone?: string; photoURL?: string }) => Promise<void>;
@@ -34,11 +39,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let phone = "";
 
     try {
-      const [{ data: profileData }, { data: adminData }] = await Promise.all([
+      const [{ data: profileData }, { data: adminData, error: adminError }] = await Promise.all([
         supabase.from("users").select("display_name, phone").eq("id", currentUser.id).maybeSingle(),
-        supabase.from("admins").select("user_id").eq("user_id", currentUser.id).maybeSingle(),
+        supabase.from("admins").select("user_id, role").eq("user_id", currentUser.id).maybeSingle(),
       ]);
 
+      if (adminError) console.error("No se pudo comprobar el rol administrativo:", adminError);
       if (profileData) {
         displayName = profileData.display_name || fallbackName;
         phone = profileData.phone || "";
@@ -46,13 +52,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await supabase.from("users").upsert({ id: currentUser.id, email: currentUser.email, display_name: fallbackName });
       }
 
+      const adminRole: AdminRole = adminData ? (adminData.role === "schedule" ? "schedule" : "full") : null;
       setProfile({
         uid: currentUser.id,
         email: currentUser.email || "",
         displayName,
         photoURL: currentUser.user_metadata?.avatar_url || "",
         phone,
-        role: adminData ? "admin" : "client",
+        role: adminRole ? "admin" : "client",
+        adminRole,
       });
     } catch (error) {
       console.error("No se pudo cargar el perfil:", error);
@@ -62,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         displayName: fallbackName,
         photoURL: currentUser.user_metadata?.avatar_url || "",
         role: "client",
+        adminRole: null,
       });
     }
   };
@@ -144,7 +153,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setProfile((previous) => previous ? { ...previous, ...data } : null);
   };
 
-  return <AuthContext.Provider value={{ user, profile, loading, isAdmin: profile?.role === "admin", login, logout, updateProfile }}>{children}</AuthContext.Provider>;
+  const adminRole = profile?.adminRole ?? null;
+  return <AuthContext.Provider value={{ user, profile, loading, isAdmin: profile?.role === "admin", adminRole, canManageServices: adminRole === "full", login, logout, updateProfile }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
