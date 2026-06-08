@@ -16,7 +16,7 @@ interface Service {
 const faqs = [
   { question: "¿Cómo reservo?", answer: "Elige uno o varios servicios, selecciona un horario disponible y envía tu solicitud. Marobel confirmará la cita." },
   { question: "¿Puedo cambiar mi cita?", answer: "Sí. Escríbenos por WhatsApp con anticipación para ayudarte a moverla según disponibilidad." },
-  { question: "¿Dónde estamos?", answer: "Atendemos en Guayaquil. Puedes abrir la ubicación exacta desde el mapa y los enlaces del pie de página." },
+  { question: "¿Dónde encontrarnos?", answer: "Atendemos en Guayaquil. Puedes abrir la ubicación exacta desde el mapa y los enlaces del pie de página." },
 ];
 
 export default function HomeExperience() {
