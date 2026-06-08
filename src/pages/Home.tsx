@@ -1,19 +1,15 @@
 import Hero from "../components/Hero";
-import About from "../components/About";
-import Services from "../components/Services";
+import HomeExperience from "../components/HomeExperience";
 import InstagramGallery from "../components/InstagramGallery";
-import ReservationForm from "@/components/ReservationForm";
+import About from "../components/About";
 
 export default function Home() {
   return (
     <main>
       <Hero />
-      <About />
+      <HomeExperience />
       <InstagramGallery />
-      <Services />
-      <section id="reservas">
-        <ReservationForm />
-      </section>
+      <About />
     </main>
   );
 }
