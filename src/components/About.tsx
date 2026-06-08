@@ -1,89 +1,32 @@
 import { motion } from "motion/react";
-import { Sparkles, ShieldCheck, Clock } from "lucide-react";
+import { Clock, ShieldCheck, Sparkles } from "lucide-react";
+
+const points = [
+  { icon: Sparkles, title: "Atención personalizada", text: "Cada reserva se adapta al servicio, tiempo y cuidado que necesitas." },
+  { icon: ShieldCheck, title: "Productos seleccionados", text: "Trabajamos con insumos profesionales y protocolos de higiene." },
+  { icon: Clock, title: "Agenda organizada", text: "Horarios claros, bloqueos actualizados y confirmación antes de tu visita." },
+];
 
 export default function About() {
   return (
-    <section id="nosotros" className="py-32 bg-[#FAF9F6] overflow-hidden">
-      <div className="container mx-auto px-6">
-        <div className="grid lg:grid-cols-2 gap-20 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="relative"
-          >
-            <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
-              <img
-                src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1920&auto=format&fit=crop"
-                alt="Marobel Interior"
-                className="w-full h-[600px] object-cover"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-[#E5D3B3] rounded-3xl -z-0 opacity-20"></div>
-            <div className="absolute -top-10 -left-10 w-40 h-40 border-2 border-[#5D4037]/10 rounded-full -z-0"></div>
-            
-            <motion.div 
-              initial={{ scale: 0.8, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: true }}
-              className="absolute top-1/2 -right-12 bg-white p-8 rounded-2xl shadow-2xl z-20 hidden md:block max-w-[200px]"
-            >
-              <p className="text-4xl font-serif text-[#5D4037] mb-2">10+</p>
-              <p className="text-[10px] uppercase tracking-widest text-[#5D4037]/60 font-bold">Años de Excelencia</p>
-            </motion.div>
+    <section id="nosotros" className="overflow-hidden bg-[#FAF9F6] px-5 py-16 md:py-20">
+      <div className="container mx-auto max-w-6xl">
+        <div className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+          <motion.div initial={{ opacity: 0, x: -28 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="relative">
+            <img src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop" alt="Interior Marobel" className="h-[360px] w-full rounded-[2rem] object-cover shadow-xl md:h-[460px]" referrerPolicy="no-referrer" />
+            <div className="absolute bottom-4 left-4 rounded-2xl bg-white/92 p-4 shadow-lg backdrop-blur"><p className="font-serif text-3xl text-[#5D4037]">+100</p><p className="text-[9px] font-bold uppercase tracking-widest text-[#5D4037]/55">clientas atendidas</p></div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-10"
-          >
+          <motion.div initial={{ opacity: 0, x: 28 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="space-y-7">
             <div>
-              <span className="text-[#8D6E63] font-medium tracking-[0.4em] uppercase text-xs mb-4 block">
-                Nuestra Esencia
-              </span>
-              <h2 className="text-5xl md:text-6xl font-serif text-[#5D4037] mb-8 leading-tight">
-                Donde la elegancia <br /> se encuentra con <br /> <span className="italic font-light">el bienestar</span>
-              </h2>
-              <p className="text-[#5D4037]/70 font-light leading-relaxed text-lg">
-                En Marobel, creemos que la belleza es un reflejo de tu paz interior. 
-                Ubicados en el corazón de la Alborada, Guayaquil, hemos creado un espacio 
-                donde cada detalle está pensado para tu confort y transformación.
-              </p>
+              <span className="mb-3 block text-[10px] font-bold uppercase tracking-[0.3em] text-[#8D6E63]">Nuestra esencia</span>
+              <h2 className="font-serif text-3xl leading-tight text-[#5D4037] md:text-5xl">Belleza cuidada, agenda clara y una experiencia tranquila.</h2>
+              <p className="mt-4 text-sm leading-relaxed text-[#5D4037]/65 md:text-base">Marobel reúne servicios de belleza y bienestar en un espacio pensado para que puedas elegir, reservar y llegar con confianza.</p>
             </div>
-
-            <div className="grid gap-8">
-              <div className="flex gap-6 items-start">
-                <div className="w-12 h-12 rounded-full bg-[#E5D3B3]/20 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-6 h-6 text-[#8D6E63]" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-serif text-[#5D4037] mb-2">Atención Personalizada</h4>
-                  <p className="text-sm text-[#5D4037]/60 font-light">Cada cliente es único. Diseñamos rituales específicos para tus necesidades y deseos.</p>
-                </div>
-              </div>
-              <div className="flex gap-6 items-start">
-                <div className="w-12 h-12 rounded-full bg-[#E5D3B3]/20 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-6 h-6 text-[#8D6E63]" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-serif text-[#5D4037] mb-2">Productos Premium</h4>
-                  <p className="text-sm text-[#5D4037]/60 font-light">Utilizamos solo las mejores marcas internacionales para garantizar resultados excepcionales.</p>
-                </div>
-              </div>
+            <div className="grid gap-3">
+              {points.map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-4 rounded-2xl bg-white p-4 shadow-sm"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#E5D3B3]/25"><Icon className="h-5 w-5 text-[#8D6E63]" /></div><div><h3 className="text-sm font-bold text-[#5D4037]">{title}</h3><p className="mt-1 text-xs leading-relaxed text-[#5D4037]/58">{text}</p></div></div>)}
             </div>
-
-            <div className="pt-6">
-              <div className="p-8 bg-[#5D4037] rounded-3xl text-white relative overflow-hidden group">
-                <div className="relative z-10">
-                  <p className="text-sm font-light italic mb-4 opacity-80">"Nuestra misión es que salgas de aquí sintiéndote la mejor versión de ti misma."</p>
-                  <p className="text-xs uppercase tracking-widest font-bold text-[#E5D3B3]">Fundadora de Marobel</p>
-                </div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
-              </div>
-            </div>
+            <div className="rounded-3xl bg-[#5D4037] p-6 text-white"><p className="text-sm italic leading-relaxed text-white/75">“Queremos que cada visita se sienta organizada, cálida y hecha a tu medida.”</p><p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-[#E5D3B3]">Equipo Marobel</p></div>
           </motion.div>
         </div>
       </div>
