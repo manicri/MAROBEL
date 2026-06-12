@@ -50,7 +50,7 @@ export default function ServiciosPage() {
       setLoading(true);
       const { data, error: fetchError } = await supabase
         .from("servicios")
-        .select("id, nombre, descripcion, categoria, precio, precio_desde, duracion, imagen_url")
+        .select("*")
         .order("categoria")
         .order("nombre");
 
@@ -58,7 +58,7 @@ export default function ServiciosPage() {
         console.error(fetchError);
         setError("No pudimos cargar los servicios. Intenta nuevamente.");
       } else {
-        setServices(data ?? []);
+        setServices((data as Service[]) ?? []);
         setError("");
       }
       setLoading(false);
