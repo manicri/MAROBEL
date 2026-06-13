@@ -25,6 +25,38 @@ const preferredCategoryOrder = [
   "Maquillaje",
 ];
 
+const unsplashImage = (photoId: string) => `https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=1200&h=800&q=82`;
+
+const referenceImages: Record<string, string[]> = {
+  "Manicura y pedicura": [
+    unsplashImage("photo-1693776529298-f853f526665e"),
+    unsplashImage("photo-1659391542239-9648f307c0b1"),
+    unsplashImage("photo-1680540441735-2cdc020037c8"),
+  ],
+  Cejas: [
+    unsplashImage("photo-1713085085470-fba013d67e65"),
+    unsplashImage("photo-1718720410616-8a03416f9f4d"),
+  ],
+  "Pestañas": [
+    unsplashImage("photo-1718720410616-8a03416f9f4d"),
+    unsplashImage("photo-1713085085470-fba013d67e65"),
+  ],
+  "Peluquería": [
+    unsplashImage("photo-1634449571010-02389ed0f9b0"),
+    unsplashImage("photo-1605980766335-d3a41c7332a1"),
+    unsplashImage("photo-1707979577466-2d6109c68a45"),
+    unsplashImage("photo-1470259078422-826894b933aa"),
+  ],
+  "Cosmetología": [
+    unsplashImage("photo-1713085085470-fba013d67e65"),
+    unsplashImage("photo-1544161515-4ab6ce6db874"),
+    unsplashImage("photo-1540555700478-4be289fbecef"),
+  ],
+  Maquillaje: [
+    unsplashImage("photo-1713771295889-eacfced8de80"),
+  ],
+};
+
 const sortCategories = (first: string, second: string) => {
   const firstIndex = preferredCategoryOrder.indexOf(first);
   const secondIndex = preferredCategoryOrder.indexOf(second);
@@ -32,6 +64,13 @@ const sortCategories = (first: string, second: string) => {
   if (firstIndex === -1) return 1;
   if (secondIndex === -1) return -1;
   return firstIndex - secondIndex;
+};
+
+const serviceImage = (service: Service) => {
+  if (service.imagen_url) return service.imagen_url;
+  const images = referenceImages[service.categoria || ""] || [unsplashImage("photo-1540555700478-4be289fbecef")];
+  const imageIndex = Array.from(service.nombre).reduce((total, character) => total + character.charCodeAt(0), 0) % images.length;
+  return images[imageIndex];
 };
 
 const priceLabel = (service: Service) => `${service.precio_desde ? "Desde " : ""}$${Number(service.precio || 0).toFixed(2)}`;
@@ -148,7 +187,7 @@ export default function ServiciosPage() {
           const selected = selectedServices.some((item) => item.id === service.id);
           return <article key={service.id} className={cn("flex overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg", selected ? "border-[#5D4037] ring-2 ring-[#5D4037]/10" : "border-[#E5D3B3]/30")}>
             <div className="flex w-full flex-col">
-              {service.imagen_url && <div className="h-40 bg-[#E5D3B3]/20"><img src={service.imagen_url} alt={service.nombre} className="h-full w-full object-cover" referrerPolicy="no-referrer" /></div>}
+              <div className="h-40 overflow-hidden bg-[#E5D3B3]/20 sm:h-44"><img src={serviceImage(service)} alt={`${service.nombre} en Marobel`} className="h-full w-full object-cover transition duration-500 hover:scale-105" loading="lazy" referrerPolicy="no-referrer" /></div>
               <div className="flex flex-1 flex-col p-4">
                 <div className="mb-3 flex items-start justify-between gap-3"><h3 className="font-serif text-xl leading-tight text-[#5D4037]">{service.nombre}</h3><span className="whitespace-nowrap text-sm font-bold text-[#8D6E63]">{priceLabel(service)}</span></div>
                 {service.duracion && <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#5D4037]/50"><Clock className="h-3.5 w-3.5" />{service.duracion}</p>}
