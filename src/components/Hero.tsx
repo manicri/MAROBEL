@@ -6,7 +6,12 @@ export default function Hero() {
   return (
     <section id="inicio" className="relative flex min-h-[78vh] items-center overflow-hidden bg-[#5D4037] pt-20 md:min-h-[84vh]">
       <div className="absolute inset-0">
-        <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=2070&auto=format&fit=crop" alt="Experiencia de belleza y bienestar" className="h-full w-full object-cover opacity-55" referrerPolicy="no-referrer" />
+        <img
+          src="https://files.catbox.moe/svgrgy.jpeg"
+          alt="Marobel Beauty Studio"
+          className="h-full w-full object-cover object-[62%_center] opacity-60 md:object-center"
+          referrerPolicy="no-referrer"
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-[#3b2923]/95 via-[#5D4037]/65 to-[#5D4037]/15" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#3b2923]/70 via-transparent to-transparent" />
       </div>
