@@ -26,39 +26,24 @@ const referenceImages: Record<string, string[]> = {
     unsplashImage("photo-1544161515-4ab6ce6db874"),
     unsplashImage("photo-1540555700478-4be289fbecef"),
   ],
-  Maquillaje: [
-    unsplashImage("photo-1713771295889-eacfced8de80"),
-  ],
+  Maquillaje: [unsplashImage("photo-1713771295889-eacfced8de80")],
 };
 
 const hairServices = new Set([
-  "Corte de cabello",
-  "Cepillado",
-  "Planchado",
-  "Retoque de raíz",
-  "Tinte completo",
-  "Balayage",
-  "Mechas",
-  "Rayitos",
-  "Ombré",
-  "Highlights",
-  "Peinados",
-  "Tratamiento de hidratación",
-  "Tratamiento de células madre",
-  "Botox nutritivo",
-  "Reconstrucción capilar",
-  "Tratamiento antifrizz",
-  "Repolarización capilar",
-  "Detox capilar",
-  "Taninoplastia",
+  "Corte de cabello", "Cepillado", "Planchado", "Retoque de raíz", "Tinte completo",
+  "Balayage", "Mechas", "Rayitos", "Ombré", "Highlights", "Peinados",
+  "Tratamiento de hidratación", "Tratamiento de células madre", "Botox nutritivo",
+  "Reconstrucción capilar", "Tratamiento antifrizz", "Repolarización capilar",
+  "Detox capilar", "Taninoplastia",
 ]);
 
 const serviceCategory = (serviceName: string) => {
-  if (serviceName.startsWith("Manicura") || serviceName.startsWith("Pedicura")) return "Manicura y pedicura";
-  if (serviceName.includes("pestañas")) return "Pestañas";
-  if (serviceName.includes("cejas") || ["Microblading", "Microshading", "Efecto polvo"].includes(serviceName)) return "Cejas";
+  const normalizedName = serviceName.toLocaleLowerCase("es");
+  if (normalizedName.startsWith("manicura") || normalizedName.startsWith("pedicura")) return "Manicura y pedicura";
+  if (normalizedName.includes("pestañas")) return "Pestañas";
+  if (normalizedName.includes("cejas") || ["microblading", "microshading", "efecto polvo"].includes(normalizedName)) return "Cejas";
   if (hairServices.has(serviceName)) return "Peluquería";
-  if (serviceName.startsWith("Maquillaje")) return "Maquillaje";
+  if (normalizedName.startsWith("maquillaje")) return "Maquillaje";
   return "Cosmetología";
 };
 
