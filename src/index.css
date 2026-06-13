@@ -70,5 +70,17 @@
   }
 }
 
+/* Keep the pricing notice visible before filters and service cards. */
+main > section:has(> aside) {
+  display: flex;
+  flex-direction: column;
+}
+
+main > section:has(> aside) > aside {
+  order: -1;
+  margin-top: 0;
+  margin-bottom: 2.25rem;
+}
+
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
