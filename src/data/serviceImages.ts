@@ -15,10 +15,10 @@ const serviceImageIds: Record<string, string> = {
 
   "Diseño integral de cejas con henna": "photo-1713085085470-fba013d67e65",
   "Diseño de cejas con laminado e hidratación": "photo-1512290923902-8a9f81dc236c",
-  "Visajismo y laminado de cejas": "photo-1594465919760-441fe5908ab0",
+  "Visajismo y laminado de cejas": "photo-1674049406467-824ea37c7184",
   Microblading: "photo-1535310172250-0dcb6b63324e",
   Microshading: "photo-1561505445-3d89277edf4c",
-  "Efecto polvo": "photo-1709477542149-f4e0e21d590b",
+  "Efecto polvo": "photo-1718720410616-8a03416f9f4d",
   "Pigmentación de cejas con henna": "photo-1567629307995-b9f33097bd30",
   "Laminado de cejas": "photo-1709477542153-5bedab2b5657",
 
@@ -52,7 +52,7 @@ const serviceImageIds: Record<string, string> = {
   "Limpieza facial profunda": "photo-1570172619644-dfd03ed5d881",
   "Masaje de espalda": "photo-1761718209835-c8586b7dcac0",
   "Masaje de cuerpo entero": "photo-1540555700478-4be289fbecef",
-  "Depilación con hilo - Cejas": "photo-1512290923902-8a9f81dc236c",
+  "Depilación con hilo - Cejas": "photo-1519823551278-64ac92734fb1",
   "Depilación con hilo - Bigote": "photo-1643684391140-c5056cfd3436",
   "Depilación con cera - Cejas": "photo-1731514771613-991a02407132",
   "Depilación con cera - Bigote": "photo-1552693673-1bf958298935",
@@ -60,8 +60,8 @@ const serviceImageIds: Record<string, string> = {
   "Depilación con cera - Axilas": "photo-1761718210089-ba3bb5ccb54f",
   "Depilación con cera - Brazos": "photo-1713824096348-c1956e6da321",
   "Depilación con cera - Media pierna": "photo-1643685276743-1b52832c58d5",
-  "Depilación con cera - Pierna entera": "photo-1713085085470-fba013d67e65",
-  "Depilación con cera - Bikini": "photo-1761718209835-c8586b7dcac0",
+  "Depilación con cera - Pierna entera": "photo-1741522509438-a120c0bb5e88",
+  "Depilación con cera - Bikini": "photo-1544161515-4ab6ce6db874",
   "Depilación con cera - Bikini brasilero": "photo-1531299244174-d247dd4e5a66",
 
   "Maquillaje express": "photo-1596462502278-27bfdc403348",
