@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, Clock, Search, Sparkles, X } from "lucide-react";
 import { supabase } from "../supabase";
 import { useSelection } from "../context/SelectionContext";
+import { getServiceImage } from "../data/serviceImages";
 import { cn } from "../lib/utils";
 
 interface Service {
@@ -25,38 +26,6 @@ const preferredCategoryOrder = [
   "Maquillaje",
 ];
 
-const unsplashImage = (photoId: string) => `https://images.unsplash.com/${photoId}?auto=format&fit=crop&w=1200&h=800&q=82`;
-
-const referenceImages: Record<string, string[]> = {
-  "Manicura y pedicura": [
-    unsplashImage("photo-1693776529298-f853f526665e"),
-    unsplashImage("photo-1659391542239-9648f307c0b1"),
-    unsplashImage("photo-1680540441735-2cdc020037c8"),
-  ],
-  Cejas: [
-    unsplashImage("photo-1713085085470-fba013d67e65"),
-    unsplashImage("photo-1718720410616-8a03416f9f4d"),
-  ],
-  "Pestañas": [
-    unsplashImage("photo-1718720410616-8a03416f9f4d"),
-    unsplashImage("photo-1713085085470-fba013d67e65"),
-  ],
-  "Peluquería": [
-    unsplashImage("photo-1634449571010-02389ed0f9b0"),
-    unsplashImage("photo-1605980766335-d3a41c7332a1"),
-    unsplashImage("photo-1707979577466-2d6109c68a45"),
-    unsplashImage("photo-1470259078422-826894b933aa"),
-  ],
-  "Cosmetología": [
-    unsplashImage("photo-1713085085470-fba013d67e65"),
-    unsplashImage("photo-1544161515-4ab6ce6db874"),
-    unsplashImage("photo-1540555700478-4be289fbecef"),
-  ],
-  Maquillaje: [
-    unsplashImage("photo-1713771295889-eacfced8de80"),
-  ],
-};
-
 const sortCategories = (first: string, second: string) => {
   const firstIndex = preferredCategoryOrder.indexOf(first);
   const secondIndex = preferredCategoryOrder.indexOf(second);
@@ -66,14 +35,8 @@ const sortCategories = (first: string, second: string) => {
   return firstIndex - secondIndex;
 };
 
-const serviceImage = (service: Service) => {
-  if (service.imagen_url) return service.imagen_url;
-  const images = referenceImages[service.categoria || ""] || [unsplashImage("photo-1540555700478-4be289fbecef")];
-  const imageIndex = Array.from(service.nombre).reduce((total, character) => total + character.charCodeAt(0), 0) % images.length;
-  return images[imageIndex];
-};
-
-const priceLabel = (service: Service) => `${service.precio_desde ? "Desde " : ""}$${Number(service.precio || 0).toFixed(2)}`;
+const priceLabel = (service: Service) =>
+  `${service.precio_desde ? "Desde " : ""}$${Number(service.precio || 0).toFixed(2)}`;
 
 export default function ServiciosPage() {
   const [services, setServices] = useState<Service[]>([]);
@@ -111,7 +74,9 @@ export default function ServiciosPage() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  useEffect(() => setSelectedCategory(searchParams.get("categoria") || "Todos"), [searchParams]);
+  useEffect(() => {
+    setSelectedCategory(searchParams.get("categoria") || "Todos");
+  }, [searchParams]);
 
   const categories = useMemo(() => [
     "Todos",
@@ -137,7 +102,10 @@ export default function ServiciosPage() {
 
     return Object.entries(groups)
       .sort(([first], [second]) => sortCategories(first, second))
-      .map(([category, items]) => ({ category, items: items.sort((a, b) => a.nombre.localeCompare(b.nombre, "es")) }));
+      .map(([category, items]) => ({
+        category,
+        items: items.sort((a, b) => a.nombre.localeCompare(b.nombre, "es")),
+      }));
   }, [filteredServices]);
 
   const clearFilters = () => {
@@ -163,10 +131,17 @@ export default function ServiciosPage() {
   return <main className="min-h-screen bg-[#FAF9F6] pb-24 pt-24">
     <section className="border-b border-[#E5D3B3]/30 bg-[#5D4037] px-5 py-10 text-white md:py-12">
       <div className="container mx-auto max-w-7xl">
-        <span className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-[#E5D3B3]"><Sparkles className="h-4 w-4" />Catálogo completo</span>
+        <span className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-[#E5D3B3]">
+          <Sparkles className="h-4 w-4" />Catálogo completo
+        </span>
         <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div><h1 className="mb-4 max-w-4xl font-serif text-3xl leading-tight md:text-5xl">Servicios Marobel</h1><p className="max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">Explora cada especialidad, revisa sus detalles y combina todos los servicios que desees en una misma reserva.</p></div>
-          {selectedServices.length > 0 && <Link to="/reserva" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#E5D3B3] px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-[#5D4037] transition hover:bg-white">Reservar {selectedServices.length} servicio{selectedServices.length > 1 ? "s" : ""}<ArrowRight className="h-4 w-4" /></Link>}
+          <div>
+            <h1 className="mb-4 max-w-4xl font-serif text-3xl leading-tight md:text-5xl">Servicios Marobel</h1>
+            <p className="max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">Explora cada especialidad, revisa sus detalles y combina todos los servicios que desees en una misma reserva.</p>
+          </div>
+          {selectedServices.length > 0 && <Link to="/reserva" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#E5D3B3] px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-[#5D4037] transition hover:bg-white">
+            Reservar {selectedServices.length} servicio{selectedServices.length > 1 ? "s" : ""}<ArrowRight className="h-4 w-4" />
+          </Link>}
         </div>
       </div>
     </section>
@@ -174,30 +149,46 @@ export default function ServiciosPage() {
     <section className="container mx-auto max-w-7xl px-4 py-8 sm:px-6 md:py-10">
       <div className="mb-9 rounded-2xl border border-[#E5D3B3]/30 bg-white p-4 shadow-sm">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-          <div className="relative flex-1"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8D6E63]" /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar servicio..." className="h-11 w-full rounded-xl bg-[#FAF9F6] pl-11 pr-4 text-sm text-[#5D4037] outline-none ring-[#8D6E63]/30 transition focus:ring-2" /></div>
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8D6E63]" />
+            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar servicio..." className="h-11 w-full rounded-xl bg-[#FAF9F6] pl-11 pr-4 text-sm text-[#5D4037] outline-none ring-[#8D6E63]/30 transition focus:ring-2" />
+          </div>
           {(search || selectedCategory !== "Todos") && <button type="button" onClick={clearFilters} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[#E5D3B3] px-4 text-[9px] font-bold uppercase tracking-widest text-[#5D4037]"><X className="h-4 w-4" />Limpiar</button>}
         </div>
-        <div className="mb-3 flex items-center justify-between"><p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#5D4037]/45">Tipos de servicio</p><p className="text-xs text-[#8D6E63]">{filteredServices.length} opción{filteredServices.length === 1 ? "" : "es"}</p></div>
-        <div className="flex gap-2 overflow-x-auto pb-1">{categories.map((category) => <button key={category} type="button" onClick={() => setSearchParams(category === "Todos" ? {} : { categoria: category })} className={cn("shrink-0 rounded-full px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest transition", selectedCategory === category ? "bg-[#5D4037] text-white" : "border border-[#E5D3B3] text-[#5D4037] hover:border-[#5D4037]")}>{category}{category !== "Todos" && <span className="ml-2 opacity-60">{services.filter((service) => service.categoria === category).length}</span>}</button>)}</div>
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#5D4037]/45">Tipos de servicio</p>
+          <p className="text-xs text-[#8D6E63]">{filteredServices.length} opción{filteredServices.length === 1 ? "" : "es"}</p>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {categories.map((category) => <button key={category} type="button" onClick={() => setSearchParams(category === "Todos" ? {} : { categoria: category })} className={cn("shrink-0 rounded-full px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest transition", selectedCategory === category ? "bg-[#5D4037] text-white" : "border border-[#E5D3B3] text-[#5D4037] hover:border-[#5D4037]")}>{category}{category !== "Todos" && <span className="ml-2 opacity-60">{services.filter((service) => service.categoria === category).length}</span>}</button>)}
+        </div>
       </div>
 
-      {loading ? <div className="rounded-2xl bg-white py-16 text-center text-[#5D4037]/60">Cargando servicios...</div> : error ? <div className="rounded-2xl border border-red-100 bg-red-50 py-16 text-center text-red-600">{error}</div> : !filteredServices.length ? <div className="rounded-2xl bg-white py-16 text-center text-[#5D4037]/60"><p className="mb-4">No encontramos servicios con esos filtros.</p><button type="button" onClick={clearFilters} className="rounded-full bg-[#5D4037] px-5 py-2.5 text-[9px] font-bold uppercase tracking-widest text-white">Ver todos</button></div> : <div className="space-y-12">{groupedServices.map(({ category, items }) => <section key={category} aria-labelledby={`category-${category}`}>
-        <div className="mb-5 flex items-end justify-between gap-4 border-b border-[#E5D3B3]/40 pb-4"><div><span className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#8D6E63]">Especialidad Marobel</span><h2 id={`category-${category}`} className="mt-1 font-serif text-3xl text-[#5D4037] md:text-4xl">{category}</h2></div><span className="shrink-0 rounded-full bg-[#E5D3B3]/25 px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-[#5D4037]">{items.length} servicio{items.length === 1 ? "" : "s"}</span></div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{items.map((service) => {
-          const selected = selectedServices.some((item) => item.id === service.id);
-          return <article key={service.id} className={cn("flex overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg", selected ? "border-[#5D4037] ring-2 ring-[#5D4037]/10" : "border-[#E5D3B3]/30")}>
-            <div className="flex w-full flex-col">
-              <div className="h-40 overflow-hidden bg-[#E5D3B3]/20 sm:h-44"><img src={serviceImage(service)} alt={`${service.nombre} en Marobel`} className="h-full w-full object-cover transition duration-500 hover:scale-105" loading="lazy" referrerPolicy="no-referrer" /></div>
-              <div className="flex flex-1 flex-col p-4">
-                <div className="mb-3 flex items-start justify-between gap-3"><h3 className="font-serif text-xl leading-tight text-[#5D4037]">{service.nombre}</h3><span className="whitespace-nowrap text-sm font-bold text-[#8D6E63]">{priceLabel(service)}</span></div>
-                {service.duracion && <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#5D4037]/50"><Clock className="h-3.5 w-3.5" />{service.duracion}</p>}
-                <p className="mb-5 flex-1 text-xs leading-relaxed text-[#5D4037]/65">{service.descripcion || "Tratamiento profesional personalizado según tus necesidades."}</p>
-                <button type="button" onClick={() => toggleService(service)} className={cn("w-full rounded-full px-4 py-3 text-[10px] font-bold uppercase tracking-widest transition", selected ? "bg-[#E5D3B3] text-[#5D4037]" : "bg-[#5D4037] text-white hover:bg-[#4a332c]")}>{selected ? "Quitar de la reserva" : "Agregar a mi reserva"}</button>
+      {loading ? <div className="rounded-2xl bg-white py-16 text-center text-[#5D4037]/60">Cargando servicios...</div>
+        : error ? <div className="rounded-2xl border border-red-100 bg-red-50 py-16 text-center text-red-600">{error}</div>
+        : !filteredServices.length ? <div className="rounded-2xl bg-white py-16 text-center text-[#5D4037]/60"><p className="mb-4">No encontramos servicios con esos filtros.</p><button type="button" onClick={clearFilters} className="rounded-full bg-[#5D4037] px-5 py-2.5 text-[9px] font-bold uppercase tracking-widest text-white">Ver todos</button></div>
+        : <div className="space-y-12">{groupedServices.map(({ category, items }) => <section key={category} aria-labelledby={`category-${category}`}>
+          <div className="mb-5 flex items-end justify-between gap-4 border-b border-[#E5D3B3]/40 pb-4">
+            <div><span className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#8D6E63]">Especialidad Marobel</span><h2 id={`category-${category}`} className="mt-1 font-serif text-3xl text-[#5D4037] md:text-4xl">{category}</h2></div>
+            <span className="shrink-0 rounded-full bg-[#E5D3B3]/25 px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-[#5D4037]">{items.length} servicio{items.length === 1 ? "" : "s"}</span>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{items.map((service) => {
+            const selected = selectedServices.some((item) => item.id === service.id);
+            return <article key={service.id} className={cn("flex overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg", selected ? "border-[#5D4037] ring-2 ring-[#5D4037]/10" : "border-[#E5D3B3]/30")}>
+              <div className="flex w-full flex-col">
+                <div className="h-40 overflow-hidden bg-[#E5D3B3]/20 sm:h-44">
+                  <img src={getServiceImage(service.nombre, service.imagen_url)} alt={`${service.nombre} en Marobel`} className="h-full w-full object-cover transition duration-500 hover:scale-105" loading="lazy" referrerPolicy="no-referrer" />
+                </div>
+                <div className="flex flex-1 flex-col p-4">
+                  <div className="mb-3 flex items-start justify-between gap-3"><h3 className="font-serif text-xl leading-tight text-[#5D4037]">{service.nombre}</h3><span className="whitespace-nowrap text-sm font-bold text-[#8D6E63]">{priceLabel(service)}</span></div>
+                  {service.duracion && <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#5D4037]/50"><Clock className="h-3.5 w-3.5" />{service.duracion}</p>}
+                  <p className="mb-5 flex-1 text-xs leading-relaxed text-[#5D4037]/65">{service.descripcion || "Tratamiento profesional personalizado según tus necesidades."}</p>
+                  <button type="button" onClick={() => toggleService(service)} className={cn("w-full rounded-full px-4 py-3 text-[10px] font-bold uppercase tracking-widest transition", selected ? "bg-[#E5D3B3] text-[#5D4037]" : "bg-[#5D4037] text-white hover:bg-[#4a332c]")}>{selected ? "Quitar de la reserva" : "Agregar a mi reserva"}</button>
+                </div>
               </div>
-            </div>
-          </article>;
-        })}</div>
-      </section>)}</div>}
+            </article>;
+          })}</div>
+        </section>)}</div>}
     </section>
 
     {selectedServices.length > 0 && <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl bg-[#5D4037] p-3 text-white shadow-2xl md:hidden"><Link to="/reserva" className="flex items-center justify-between"><span className="text-xs font-bold">{selectedServices.length} servicio{selectedServices.length > 1 ? "s" : ""} seleccionado{selectedServices.length > 1 ? "s" : ""}</span><span className="rounded-full bg-[#E5D3B3] px-4 py-2 text-[9px] font-bold uppercase tracking-widest text-[#5D4037]">Continuar</span></Link></div>}
