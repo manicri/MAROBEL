@@ -2,18 +2,26 @@ import { motion } from "motion/react";
 import { ArrowRight, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 
+const heroImage = "https://files.catbox.moe/svgrgy.jpeg";
+
 export default function Hero() {
   return (
-    <section id="inicio" className="relative flex min-h-[78vh] items-center overflow-hidden bg-[#5D4037] pt-20 md:min-h-[84vh]">
+    <section id="inicio" className="relative mt-[64px] flex min-h-[calc(100svh-64px)] items-center overflow-hidden bg-[#3b2923] md:mt-[66px] md:min-h-[calc(100vh-66px)]">
       <div className="absolute inset-0">
         <img
-          src="https://files.catbox.moe/svgrgy.jpeg"
+          src={heroImage}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full scale-110 object-cover opacity-30 blur-xl"
+        />
+        <img
+          src={heroImage}
           alt="Marobel Beauty Studio"
-          className="h-full w-full object-cover object-[62%_center] opacity-60 md:object-center"
+          className="relative h-full w-full object-cover object-[62%_center] opacity-65 md:object-contain md:object-center md:opacity-75"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#3b2923]/95 via-[#5D4037]/65 to-[#5D4037]/15" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#3b2923]/70 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#3b2923]/95 via-[#5D4037]/58 to-[#5D4037]/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#3b2923]/65 via-transparent to-transparent" />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="container relative z-10 mx-auto px-5 py-16 sm:px-6">
