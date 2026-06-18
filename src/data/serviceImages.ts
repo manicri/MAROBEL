@@ -7,7 +7,8 @@ const requestedServiceImages: Record<string, string> = {
   "Efecto polvo": "https://files.catbox.moe/j2en8h.jpg",
   "Manicura con Rubber Base": "https://files.catbox.moe/gzgcyk.jpg",
   "Manicura con gel de construcción": "https://files.catbox.moe/8v3ety.png",
-  "Manicura Polygel": "https://files.catbox.moe/o7tl4p.jpg",
+  "Manicura Polygel": "https://files.catbox.moe/nqdifm.jpg",
+  "Manicura técnica Soft Gel": "https://files.catbox.moe/lqu0ys.jpg",
   "Manicura técnica en acrílico": "https://files.catbox.moe/jwl4v1.jpg",
 };
 
@@ -20,7 +21,6 @@ const serviceImageIds: Record<string, string> = {
   "Pedicura semipermanente": "photo-1680540441735-2cdc020037c8",
   "Pedicura con Rubber Base": "photo-1610992015762-45dca7fa3a85",
   "Pedicura con gel de construcción": "photo-1690749138086-7422f71dc159",
-  "Manicura técnica Soft Gel": "photo-1604654894610-df63bc536371",
 
   "Visajismo y laminado de cejas": "photo-1674049406467-824ea37c7184",
   "Pigmentación de cejas con henna": "photo-1567629307995-b9f33097bd30",
