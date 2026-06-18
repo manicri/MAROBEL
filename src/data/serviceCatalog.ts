@@ -21,7 +21,7 @@ const catalog: CatalogDefinition[] = [
   { nombre: "Manicura con Rubber Base", aliases: ["Manicura base Rubber"], descripcion: "Refuerzo y nivelación de la uña natural con Rubber Base.", categoria: "Manicura y pedicura", seccion: "Manicura", precio: 20, precio_desde: false },
   { nombre: "Manicura técnica Soft Gel", descripcion: "Extensión de uñas con técnica Soft Gel.", categoria: "Manicura y pedicura", seccion: "Manicura", precio: 25, precio_desde: false },
   { nombre: "Manicura con gel de construcción", descripcion: "Construcción y refuerzo de uñas cortas o largas con gel.", categoria: "Manicura y pedicura", seccion: "Manicura", precio: 25, precio_desde: true },
-  { nombre: "Manicura técnica Polygel", descripcion: "Extensión o refuerzo de uñas con técnica Polygel.", categoria: "Manicura y pedicura", seccion: "Manicura", precio: 25, precio_desde: true },
+  { nombre: "Manicura Polygel", aliases: ["Manicura técnica Polygel"], descripcion: "Extensión o refuerzo de uñas con técnica Polygel.", categoria: "Manicura y pedicura", seccion: "Manicura", precio: 25, precio_desde: true },
   { nombre: "Manicura técnica en acrílico", descripcion: "Extensión en acrílico; el valor final depende del tamaño.", categoria: "Manicura y pedicura", seccion: "Manicura", precio: 25, precio_desde: true },
   { nombre: "Pedicura spa", descripcion: "Cuidado relajante e hidratante para los pies.", categoria: "Manicura y pedicura", seccion: "Pedicura", precio: 10, precio_desde: false },
   { nombre: "Pedicura rusa, solo limpieza", descripcion: "Limpieza técnica profunda de uñas y cutículas.", categoria: "Manicura y pedicura", seccion: "Pedicura", precio: 10, precio_desde: false },
