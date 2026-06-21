@@ -1,6 +1,13 @@
 -- Ejecuta este archivo en Supabase SQL Editor si ya tienes los servicios cargados.
 -- Sincroniza los cambios nuevos de manicura/pedicura sin borrar tus citas ni reservas.
 
+alter table public.servicios add column if not exists precio_desde boolean not null default false;
+alter table public.servicios add column if not exists orden integer;
+alter table public.servicios add column if not exists subcategoria text;
+
+create unique index if not exists servicios_nombre_categoria_unique
+on public.servicios (nombre, categoria);
+
 update public.servicios
 set
   nombre = 'Manicura en acrílico',
@@ -29,8 +36,7 @@ insert into public.servicios (
   duracion,
   categoria,
   subcategoria,
-  orden,
-  activo
+  orden
 )
 values (
   'Pedicura Spa + Semipermanente',
@@ -40,8 +46,7 @@ values (
   null,
   'Manicura y pedicura',
   'Pedicura',
-  12,
-  true
+  12
 )
 on conflict (nombre, categoria) do update
 set
@@ -50,8 +55,7 @@ set
   precio_desde = excluded.precio_desde,
   duracion = excluded.duracion,
   subcategoria = excluded.subcategoria,
-  orden = excluded.orden,
-  activo = true;
+  orden = excluded.orden;
 
 -- Mantiene el orden correcto dentro del grupo de pedicura.
 update public.servicios set orden = 8 where nombre = 'Pedicura spa' and categoria = 'Manicura y pedicura';
