@@ -9,7 +9,7 @@ const requestedServiceImages: Record<string, string> = {
   "Manicura con gel de construcción": "https://files.catbox.moe/8v3ety.png",
   "Manicura Polygel": "https://files.catbox.moe/nqdifm.jpg",
   "Manicura técnica Soft Gel": "https://files.catbox.moe/4scd7n.jpg",
-  "Manicura en acrílico": "https://files.catbox.moe/r6fvep.jpg",
+  "Manicura en acrílico": "https://files.catbox.moe/y368kb.jpg",
   "Pedicura spa": "https://files.catbox.moe/uqg0z2.jpg",
   "Pedicura básica": "https://files.catbox.moe/1djayd.jpg",
   "Pedicura tradicional": "https://files.catbox.moe/uqg0z2.jpg",
