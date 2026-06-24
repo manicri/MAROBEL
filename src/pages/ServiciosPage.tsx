@@ -10,6 +10,12 @@ import { cn } from "../lib/utils";
 const priceLabel = (service: CatalogService) =>
   `${service.precio_desde ? "Desde " : ""}$${Number(service.precio || 0).toFixed(2)}`;
 
+const serviceImageFocus: Record<string, string> = {
+  "Manicura con Rubber Base": "50% 58%",
+  "Manicura técnica Soft Gel": "50% 62%",
+  "Manicura en acrílico": "54% 57%",
+};
+
 export default function ServiciosPage() {
   const [services, setServices] = useState<CatalogService[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,9 +125,10 @@ export default function ServiciosPage() {
             {section !== category && <h3 className="mb-4 flex items-center gap-3 text-sm font-bold uppercase tracking-[0.2em] text-[#8D6E63]"><span className="h-px w-8 bg-[#E5D3B3]" />{section}</h3>}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{items.map((service) => {
               const selected = selectedServices.some((item) => item.id === service.id);
+              const imageFocus = serviceImageFocus[service.nombre] || "50% 50%";
               return <article key={service.id} className={cn("flex overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg", selected ? "border-[#5D4037] ring-2 ring-[#5D4037]/10" : "border-[#E5D3B3]/30")}>
                 <div className="flex w-full flex-col">
-                  <div className="h-40 overflow-hidden bg-[#E5D3B3]/20 sm:h-44"><img src={getServiceImage(service.nombre, service.imagen_url)} alt={`${service.nombre} en Marobel`} className="h-full w-full object-cover transition duration-500 hover:scale-105" loading="lazy" referrerPolicy="no-referrer" /></div>
+                  <div className="h-40 overflow-hidden bg-[#E5D3B3]/20 sm:h-44"><img src={getServiceImage(service.nombre, service.imagen_url)} alt={`${service.nombre} en Marobel`} className="h-full w-full object-cover transition duration-500 hover:scale-105" style={{ objectPosition: imageFocus }} loading="lazy" referrerPolicy="no-referrer" /></div>
                   <div className="flex flex-1 flex-col p-4">
                     <div className="mb-3 flex items-start justify-between gap-3"><h4 className="font-serif text-xl leading-tight text-[#5D4037]">{service.nombre}</h4><span className="whitespace-nowrap text-sm font-bold text-[#8D6E63]">{priceLabel(service)}</span></div>
                     {service.duracion && <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#5D4037]/50"><Clock className="h-3.5 w-3.5" />{service.duracion}</p>}
