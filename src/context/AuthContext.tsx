@@ -83,13 +83,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin || event.data?.type !== "OAUTH_AUTH_SUCCESS") return;
-      setLoading(true);
-      supabase.auth.getSession().then(({ data: { session } }) => applySession(session?.user ?? null));
-    };
-    window.addEventListener("message", handleMessage);
-
     if (window.location.hash.includes("error=")) {
       const params = new URLSearchParams(window.location.hash.substring(1));
       const description = params.get("error_description");
@@ -101,34 +94,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session } }) => applySession(session?.user ?? null));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (window.opener && window.opener !== window && session) {
-        window.opener.postMessage({ type: "OAUTH_AUTH_SUCCESS" }, window.location.origin);
-        setTimeout(() => window.close(), 500);
-        return;
-      }
       setLoading(true);
       applySession(session?.user ?? null);
     });
 
     return () => {
       subscription.unsubscribe();
-      window.removeEventListener("message", handleMessage);
     };
   }, []);
 
   const login = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const redirectTo = `${window.location.origin}/admin`;
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin, skipBrowserRedirect: true },
+      options: { redirectTo },
     });
     if (error) throw error;
-    if (!data?.url) return;
-
-    const width = 500;
-    const height = 650;
-    const left = window.screenX + (window.outerWidth - width) / 2;
-    const top = window.screenY + (window.outerHeight - height) / 2;
-    window.open(data.url, "supabase_oauth", `width=${width},height=${height},left=${left},top=${top}`);
   };
 
   const logout = async () => { await supabase.auth.signOut(); };
