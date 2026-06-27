@@ -6,7 +6,9 @@ import { Check, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CalendarProps { selectedDate: string; onSelectSlot: (time: string | null) => void; selectedTime: string | null; isAdmin?: boolean; totalDuration?: number; selectedProfessional?: string; }
+const FULL_DAY_BLOCK_TIME = '00:00';
 const normalizeTime = (time: string) => { const [h, m] = time.split(':'); return `${Number(h)}:${m?.slice(0, 2) === '00' ? '00' : '30'}`; };
+const isFullDayBlock = (time: string | null) => !time || time.slice(0, 5) === FULL_DAY_BLOCK_TIME;
 
 export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, selectedTime, isAdmin = false, totalDuration = 60, selectedProfessional = 'any' }) => {
   const [appointments, setAppointments] = useState<{ hora: string; Estado: string }[]>([]);
@@ -30,9 +32,9 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
     return () => { supabase.removeChannel(citas); supabase.removeChannel(bloqueos); window.removeEventListener('marobel-block-added', refresh); };
   }, [fetchAvailability, selectedDate, selectedProfessional]);
 
-  const fullDayBlocks = blocks.filter((block) => block.hora === null);
+  const fullDayBlocks = blocks.filter((block) => isFullDayBlock(block.hora));
   const fullDay = fullDayBlocks.length > 0;
-  const adminBlocks = useMemo(() => blocks.filter((block) => block.hora).map((block) => normalizeTime(block.hora!)), [blocks]);
+  const adminBlocks = useMemo(() => blocks.filter((block) => block.hora && !isFullDayBlock(block.hora)).map((block) => normalizeTime(block.hora!)), [blocks]);
   const appointmentSlots = useMemo(() => appointments.filter((item) => item.Estado?.toLowerCase() === 'aceptada').map((item) => normalizeTime(item.hora)), [appointments]);
   const occupied = useMemo(() => [...adminBlocks, ...appointmentSlots], [adminBlocks, appointmentSlots]);
   const available = React.useCallback((time: string) => {
@@ -50,7 +52,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
     toast.success(`Horario ${time} ${blocked ? 'desbloqueado' : 'bloqueado'}`); refresh();
   };
   const toggleDay = async () => {
-    const result = fullDay ? await supabase.from('bloqueos').delete().in('id', fullDayBlocks.map((item) => item.id)) : await supabase.from('bloqueos').insert({ fecha: selectedDate, hora: null, motivo: 'Bloqueo administrativo de dia completo' });
+    const result = fullDay ? await supabase.from('bloqueos').delete().in('id', fullDayBlocks.map((item) => item.id)) : await supabase.from('bloqueos').insert({ fecha: selectedDate, hora: FULL_DAY_BLOCK_TIME, motivo: 'Bloqueo administrativo de dia completo' });
     if (result.error) return void toast.error(`Error al ${fullDay ? 'desbloquear' : 'bloquear'} el dia: ${result.error.message}`);
     toast.success(fullDay ? 'Dia desbloqueado' : 'Dia completo bloqueado'); refresh();
   };
