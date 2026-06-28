@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+
 type Appointment = {
   cita: string;
   Nombre_cliente: string;
@@ -66,10 +68,34 @@ const buildEmailHtml = (appointment: Appointment) => `
   </div>
 `;
 
+const getServiceClient = () => {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceRoleKey) return null;
+  return createClient(supabaseUrl, serviceRoleKey);
+};
+
+const reserveNotification = async (appointment: Appointment, recipient: string) => {
+  const client = getServiceClient();
+  if (!client) return true;
+
+  const { error } = await client.from("whatsapp_notifications").insert({
+    appointment_id: appointment.cita,
+    event_type: "accepted_confirmation",
+    recipient,
+  });
+
+  if (!error) return true;
+  if (String(error.message || "").toLowerCase().includes("duplicate")) return false;
+  console.error("No se pudo registrar la notificacion:", error);
+  return true;
+};
+
 const sendEmail = async (appointment: Appointment) => {
   const apiKey = Deno.env.get("RESEND_API_KEY");
   const from = Deno.env.get("RESEND_FROM_EMAIL") || "Marobel Beauty Studio <onboarding@resend.dev>";
   if (!apiKey || !appointment.cliente_email) return false;
+  if (!(await reserveNotification(appointment, `email:${appointment.cliente_email}`))) return "skipped";
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -95,6 +121,7 @@ const sendWhatsApp = async (appointment: Appointment) => {
   const phoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
   const to = cleanPhone(appointment.whatsapp);
   if (!token || !phoneNumberId || !to) return false;
+  if (!(await reserveNotification(appointment, `whatsapp:${to}`))) return "skipped";
 
   const response = await fetch(`https://graph.facebook.com/v20.0/${phoneNumberId}/messages`, {
     method: "POST",
@@ -129,7 +156,11 @@ Deno.serve(async (req) => {
       sendWhatsApp(appointment),
     ]);
 
-    return new Response(JSON.stringify({ email, whatsapp }), {
+    return new Response(JSON.stringify({
+      email: email === true,
+      whatsapp: whatsapp === true,
+      skipped: email === "skipped" || whatsapp === "skipped",
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
