@@ -16,7 +16,7 @@ export default function Hero() {
         </motion.div>
 
         <div className="relative flex items-center justify-center overflow-hidden bg-[#241916]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(229,211,179,0.18),transparent_30%),linear-gradient(90deg,rgba(47,33,29,0.22),transparent_28%)]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#2f211d]/30 via-transparent to-transparent" />
           <img
             src={heroImage}
             alt="Marobel Beauty Studio"
