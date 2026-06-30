@@ -8,13 +8,13 @@ export default function Hero() {
   return (
     <section id="inicio" className="relative mt-[64px] overflow-hidden bg-[#3b2923] md:mt-[66px]">
       <div className="hidden bg-[#2f211d] md:block">
-        <div className="relative bg-[#241916]">
+        <div className="relative flex h-[68vh] min-h-[520px] max-h-[760px] items-center justify-center overflow-hidden bg-[#241916]">
           <img
             src={heroImage}
             alt="Marobel Beauty Studio"
             width="1536"
             height="1024"
-            className="block h-auto w-full"
+            className="h-full w-full object-contain"
             referrerPolicy="no-referrer"
           />
         </div>
