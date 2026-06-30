@@ -12,7 +12,7 @@ const requestedServiceImages: Record<string, string> = {
   "Manicura en acrílico": "https://files.catbox.moe/y368kb.jpg",
   "Pedicura spa": "https://i.pinimg.com/originals/de/4a/7f/de4a7fe255b1e33a838e4137ea88c966.jpg",
   "Pedicura básica": "https://i.pinimg.com/originals/a2/9f/b2/a29fb2863c9ff41afd0bc9be7bd55c31.jpg",
-  "Pedicura tradicional": "https://images.unsplash.com/photo-1659391542239-9648f307c0b1?auto=format&fit=crop&w=1200&h=800&q=84",
+  "Pedicura tradicional": "https://files.catbox.moe/hpy401.png",
   "Pedicura semipermanente": "https://i.pinimg.com/originals/19/aa/27/19aa27e4183a0314cc50e6b71666ef3d.jpg",
   "Pedicura Spa + Semipermanente": "https://i.pinimg.com/originals/d9/d9/e7/d9d9e7df6b69b172aa2e26c4d341e6b6.jpg",
   "Pedicura con Rubber Base": "https://i.pinimg.com/originals/9b/ea/a1/9beaa10248e74a57576549d3a77e33db.jpg",
