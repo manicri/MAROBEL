@@ -10,13 +10,13 @@ const requestedServiceImages: Record<string, string> = {
   "Manicura Polygel": "https://files.catbox.moe/nqdifm.jpg",
   "Manicura técnica Soft Gel": "https://files.catbox.moe/4scd7n.jpg",
   "Manicura en acrílico": "https://files.catbox.moe/y368kb.jpg",
-  "Pedicura spa": "https://files.catbox.moe/uqg0z2.jpg",
-  "Pedicura básica": "https://files.catbox.moe/1djayd.jpg",
-  "Pedicura tradicional": "https://files.catbox.moe/uqg0z2.jpg",
-  "Pedicura semipermanente": "https://files.catbox.moe/z1xah6.jpg",
-  "Pedicura Spa + Semipermanente": "https://files.catbox.moe/wsyhl1.jpg",
-  "Pedicura con Rubber Base": "https://files.catbox.moe/55dpii.jpg",
-  "Pedicura con gel de construcción": "https://files.catbox.moe/79dte4.jpg",
+  "Pedicura spa": "https://i.pinimg.com/originals/de/4a/7f/de4a7fe255b1e33a838e4137ea88c966.jpg",
+  "Pedicura básica": "https://i.pinimg.com/originals/a2/9f/b2/a29fb2863c9ff41afd0bc9be7bd55c31.jpg",
+  "Pedicura tradicional": "https://images.unsplash.com/photo-1659391542239-9648f307c0b1?auto=format&fit=crop&w=1200&h=800&q=84",
+  "Pedicura semipermanente": "https://i.pinimg.com/originals/19/aa/27/19aa27e4183a0314cc50e6b71666ef3d.jpg",
+  "Pedicura Spa + Semipermanente": "https://i.pinimg.com/originals/d9/d9/e7/d9d9e7df6b69b172aa2e26c4d341e6b6.jpg",
+  "Pedicura con Rubber Base": "https://i.pinimg.com/originals/9b/ea/a1/9beaa10248e74a57576549d3a77e33db.jpg",
+  "Pedicura con gel de construcción": "https://i.pinimg.com/originals/32/18/b0/3218b080a2285a43f72cfeb51b0ffbbd.jpg",
 };
 
 const serviceImageIds: Record<string, string> = {
