@@ -8,13 +8,13 @@ export default function Hero() {
   return (
     <section id="inicio" className="relative mt-[64px] overflow-hidden bg-[#3b2923] md:mt-[66px]">
       <div className="hidden bg-[#2f211d] md:block">
-        <div className="relative flex min-h-[calc(100vh-66px)] items-center justify-center bg-[#241916] px-6 py-8 lg:px-10">
+        <div className="relative bg-[#241916]">
           <img
             src={heroImage}
             alt="Marobel Beauty Studio"
             width="1536"
             height="1024"
-            className="h-auto max-h-[calc(100vh-130px)] w-full max-w-[1500px] rounded-[2rem] object-contain shadow-2xl shadow-black/25"
+            className="block h-auto w-full"
             referrerPolicy="no-referrer"
           />
         </div>
