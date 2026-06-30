@@ -14,6 +14,7 @@ const serviceImageFocus: Record<string, string> = {
   "Manicura con Rubber Base": "50% 58%",
   "Manicura técnica Soft Gel": "50% 62%",
   "Manicura en acrílico": "54% 57%",
+  "Pedicura con gel de construcción": "50% 28%",
 };
 
 export default function ServiciosPage() {
