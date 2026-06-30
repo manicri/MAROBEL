@@ -10,13 +10,13 @@ const requestedServiceImages: Record<string, string> = {
   "Manicura Polygel": "https://files.catbox.moe/nqdifm.jpg",
   "Manicura técnica Soft Gel": "https://files.catbox.moe/4scd7n.jpg",
   "Manicura en acrílico": "https://files.catbox.moe/y368kb.jpg",
-  "Pedicura spa": "https://files.catbox.moe/2zrrjj.png",
-  "Pedicura básica": "https://files.catbox.moe/5qywiw.png",
-  "Pedicura tradicional": "https://files.catbox.moe/psuy1t.png",
-  "Pedicura semipermanente": "https://files.catbox.moe/jkkrtf.png",
-  "Pedicura Spa + Semipermanente": "https://files.catbox.moe/sa1z0m.png",
-  "Pedicura con Rubber Base": "https://files.catbox.moe/idxfua.png",
-  "Pedicura con gel de construcción": "https://files.catbox.moe/87mk6n.png",
+  "Pedicura spa": "https://files.catbox.moe/9wvyps.png",
+  "Pedicura básica": "https://files.catbox.moe/hyyq2j.png",
+  "Pedicura tradicional": "https://files.catbox.moe/g2n9c5.png",
+  "Pedicura semipermanente": "https://files.catbox.moe/52tw9e.png",
+  "Pedicura Spa + Semipermanente": "https://files.catbox.moe/cp0o3x.png",
+  "Pedicura con Rubber Base": "https://files.catbox.moe/9te318.png",
+  "Pedicura con gel de construcción": "https://files.catbox.moe/ot321g.png",
 };
 
 const serviceImageIds: Record<string, string> = {
