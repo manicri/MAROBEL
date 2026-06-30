@@ -16,11 +16,13 @@ export default function Hero() {
           className="block h-auto w-full"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 hidden bg-gradient-to-r from-[#2f211d]/90 via-[#3b2923]/42 to-transparent md:block" />
+        <div className="absolute inset-0 hidden bg-gradient-to-r from-[#1f1512]/78 via-[#2f211d]/20 to-transparent md:block" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#3b2923] to-transparent md:hidden" />
 
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="container absolute inset-0 z-10 mx-auto hidden items-center px-6 md:flex lg:px-10">
-          <HeroContent />
+          <div className="max-w-xl rounded-[2rem] border border-white/14 bg-[#2f211d]/64 p-7 shadow-2xl shadow-black/20 backdrop-blur-sm lg:p-9">
+            <HeroContent />
+          </div>
         </motion.div>
       </div>
 
@@ -33,10 +35,10 @@ export default function Hero() {
 
 function HeroContent({ mobile = false }: { mobile?: boolean }) {
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-xl">
       <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.25em] text-[#E5D3B3] backdrop-blur md:mb-5"><MapPin className="h-3.5 w-3.5" />Guayaquil</span>
-      <h1 className={`${mobile ? "text-4xl sm:text-5xl" : "text-5xl lg:text-6xl xl:text-7xl"} max-w-2xl font-serif leading-[0.96] text-white`}>Tu momento de <span className="italic text-[#E5D3B3]">belleza y bienestar</span></h1>
-      <p className="mt-5 max-w-lg text-sm leading-relaxed text-white/78 md:mt-6 md:text-base">Elige tus servicios, revisa precios y agenda en pocos pasos. Una experiencia cuidada desde la reserva hasta tu visita.</p>
+      <h1 className={`${mobile ? "text-4xl sm:text-5xl" : "text-5xl lg:text-6xl"} max-w-xl font-serif leading-[0.98] text-white`}>Tu momento de <span className="italic text-[#E5D3B3]">belleza y bienestar</span></h1>
+      <p className="mt-5 max-w-lg text-sm leading-relaxed text-white/80 md:mt-6 md:text-base">Elige tus servicios, revisa precios y agenda en pocos pasos. Una experiencia cuidada desde la reserva hasta tu visita.</p>
       <div className="mt-7 flex flex-col gap-3 min-[420px]:flex-row md:mt-8">
         <Link to="/servicios" className="inline-flex h-12 items-center justify-center rounded-full bg-[#E5D3B3] px-7 text-[10px] font-bold uppercase tracking-widest text-[#5D4037] transition hover:bg-white">Reservar cita <ArrowRight className="ml-2 h-4 w-4" /></Link>
         <a href="https://wa.me/593969272530" target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center justify-center rounded-full border border-white/25 bg-white/8 px-7 text-center text-[10px] font-bold uppercase tracking-widest text-white transition hover:bg-white/15">Consultar por WhatsApp</a>
