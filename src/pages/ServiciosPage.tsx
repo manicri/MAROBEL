@@ -17,16 +17,29 @@ const serviceImageFocus: Record<string, string> = {
   "Pedicura con gel de construcción": "50% 28%",
   Microshading: "50% 50%",
   "Efecto polvo": "50% 50%",
+  "Pedicura spa": "50% 82%",
+  "Pedicura básica": "50% 70%",
+  "Pedicura tradicional": "50% 50%",
 };
 
 const serviceImageClass: Record<string, string> = {
   Microshading: "h-full w-full object-contain p-1",
   "Efecto polvo": "h-[172%] w-auto max-w-none object-contain",
+  "Pedicura spa": "h-full w-full object-contain p-1",
+  "Pedicura básica": "h-full w-full object-contain p-1",
+  "Pedicura tradicional": "h-full w-full object-contain p-1",
 };
 
 const serviceImageTransform: Record<string, string> = {
   "Efecto polvo": "rotate(-90deg) scale(1.08)",
 };
+
+const noHoverZoom = new Set([
+  "Microshading",
+  "Pedicura spa",
+  "Pedicura básica",
+  "Pedicura tradicional",
+]);
 
 export default function ServiciosPage() {
   const [services, setServices] = useState<CatalogService[]>([]);
@@ -142,7 +155,7 @@ export default function ServiciosPage() {
               const imageTransform = serviceImageTransform[service.nombre];
               return <article key={service.id} className={cn("flex overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg", selected ? "border-[#5D4037] ring-2 ring-[#5D4037]/10" : "border-[#E5D3B3]/30")}>
                 <div className="flex w-full flex-col">
-                  <div className="flex h-40 items-center justify-center overflow-hidden bg-[#E5D3B3]/20 sm:h-44"><img src={getServiceImage(service.nombre, service.imagen_url)} alt={`${service.nombre} en Marobel`} className={cn(imageClass, "transition duration-500", !imageTransform && service.nombre !== "Microshading" && "hover:scale-105")} style={{ objectPosition: imageFocus, transform: imageTransform, transformOrigin: "center" }} loading="lazy" referrerPolicy="no-referrer" /></div>
+                  <div className="flex h-40 items-center justify-center overflow-hidden bg-[#E5D3B3]/20 sm:h-44"><img src={getServiceImage(service.nombre, service.imagen_url)} alt={`${service.nombre} en Marobel`} className={cn(imageClass, "transition duration-500", !imageTransform && !noHoverZoom.has(service.nombre) && "hover:scale-105")} style={{ objectPosition: imageFocus, transform: imageTransform, transformOrigin: "center" }} loading="lazy" referrerPolicy="no-referrer" /></div>
                   <div className="flex flex-1 flex-col p-4">
                     <div className="mb-3 flex items-start justify-between gap-3"><h4 className="font-serif text-xl leading-tight text-[#5D4037]">{service.nombre}</h4><span className="whitespace-nowrap text-sm font-bold text-[#8D6E63]">{priceLabel(service)}</span></div>
                     {service.duracion && <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#5D4037]/50"><Clock className="h-3.5 w-3.5" />{service.duracion}</p>}
