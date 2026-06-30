@@ -14,32 +14,21 @@ const serviceImageFocus: Record<string, string> = {
   "Manicura con Rubber Base": "50% 58%",
   "Manicura técnica Soft Gel": "50% 62%",
   "Manicura en acrílico": "54% 57%",
-  "Pedicura con gel de construcción": "50% 28%",
+  "Pedicura con gel de construcción": "50% 50%",
   Microshading: "50% 50%",
   "Efecto polvo": "50% 50%",
-  "Pedicura spa": "50% 82%",
-  "Pedicura básica": "50% 70%",
-  "Pedicura tradicional": "50% 50%",
 };
 
 const serviceImageClass: Record<string, string> = {
   Microshading: "h-full w-full object-contain p-1",
   "Efecto polvo": "h-[172%] w-auto max-w-none object-contain",
-  "Pedicura spa": "h-full w-full object-contain p-1",
-  "Pedicura básica": "h-full w-full object-contain p-1",
-  "Pedicura tradicional": "h-full w-full object-contain p-1",
 };
 
 const serviceImageTransform: Record<string, string> = {
   "Efecto polvo": "rotate(-90deg) scale(1.08)",
 };
 
-const noHoverZoom = new Set([
-  "Microshading",
-  "Pedicura spa",
-  "Pedicura básica",
-  "Pedicura tradicional",
-]);
+const noHoverZoom = new Set(["Microshading"]);
 
 export default function ServiciosPage() {
   const [services, setServices] = useState<CatalogService[]>([]);
