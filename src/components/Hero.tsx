@@ -7,25 +7,23 @@ const heroImage = "https://files.catbox.moe/svgrgy.jpeg";
 export default function Hero() {
   return (
     <section id="inicio" className="relative mt-[64px] overflow-hidden bg-[#3b2923] md:mt-[66px]">
-      <div className="hidden min-h-[calc(100vh-66px)] grid-cols-[0.42fr_0.58fr] bg-[#2f211d] md:grid">
-        <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }} className="relative z-10 flex items-center px-8 py-16 lg:px-14 xl:px-20">
-          <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-[#E5D3B3]/30 to-transparent" />
-          <div className="max-w-xl">
+      <div className="relative hidden min-h-[calc(100vh-66px)] bg-[#241916] md:block">
+        <img
+          src={heroImage}
+          alt="Marobel Beauty Studio"
+          width="1536"
+          height="1024"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1f1512]/82 via-[#2f211d]/42 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1f1512]/55 via-transparent to-[#1f1512]/10" />
+
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="container relative z-10 mx-auto flex min-h-[calc(100vh-66px)] items-center px-6 py-16 lg:px-10">
+          <div className="max-w-xl rounded-[2rem] border border-white/15 bg-[#2f211d]/72 p-8 shadow-2xl shadow-black/25 backdrop-blur-md lg:p-10">
             <HeroContent />
           </div>
         </motion.div>
-
-        <div className="relative flex items-center justify-center overflow-hidden bg-[#241916]">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#2f211d]/30 via-transparent to-transparent" />
-          <img
-            src={heroImage}
-            alt="Marobel Beauty Studio"
-            width="1536"
-            height="1024"
-            className="relative z-10 h-auto max-h-[calc(100vh-66px)] w-full object-contain"
-            referrerPolicy="no-referrer"
-          />
-        </div>
       </div>
 
       <div className="relative w-full bg-[#2f211d] md:hidden">
