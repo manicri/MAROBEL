@@ -45,7 +45,10 @@ export default function ServiciosPage() {
   const { user } = useAuth();
   const [editingImageId, setEditingImageId] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
-  const canEditImages = user?.email?.trim().toLowerCase() === OWNER_EMAIL;
+  const canEditImages = false;
+  const canEditImagesInline = user?.email?.trim().toLowerCase() === OWNER_EMAIL;
+  const [cropWidth, setCropWidth] = useState(1200);
+  const [cropHeight, setCropHeight] = useState(800);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -120,6 +123,30 @@ export default function ServiciosPage() {
     });
   };
 
+  const cropServiceImage = (file: File, width: number, height: number) => new Promise<File>((resolve, reject) => {
+    const image = new Image();
+    const reader = new FileReader();
+    reader.onload = () => { image.src = String(reader.result); };
+    reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
+    image.onload = () => {
+      const targetRatio = width / height;
+      const sourceRatio = image.width / image.height;
+      let sourceWidth = image.width;
+      let sourceHeight = image.height;
+      let sourceX = 0;
+      let sourceY = 0;
+      if (sourceRatio > targetRatio) { sourceWidth = image.height * targetRatio; sourceX = (image.width - sourceWidth) / 2; }
+      else { sourceHeight = image.width / targetRatio; sourceY = (image.height - sourceHeight) / 2; }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d")?.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, width, height);
+      canvas.toBlob((blob) => blob ? resolve(new File([blob], "servicio.webp", { type: "image/webp" })) : reject(new Error("No se pudo recortar la imagen")), "image/webp", 0.9);
+    };
+    image.onerror = () => reject(new Error("El archivo no es una imagen válida"));
+    reader.readAsDataURL(file);
+  });
+
   const handlePublicImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -128,9 +155,9 @@ export default function ServiciosPage() {
     if (file.size > 10 * 1024 * 1024) { toast.error("La imagen no puede superar los 10 MB"); return; }
     setUploadingImage(true);
     try {
-      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${user?.id}/${crypto.randomUUID()}.${extension}`;
-      const { error: uploadError } = await supabase.storage.from("servicios-images").upload(path, file, { contentType: file.type, upsert: false });
+      const croppedFile = await cropServiceImage(file, Math.max(320, cropWidth), Math.max(240, cropHeight));
+      const path = `${user?.id}/${crypto.randomUUID()}.webp`;
+      const { error: uploadError } = await supabase.storage.from("servicios-images").upload(path, croppedFile, { contentType: "image/webp", upsert: false });
       if (uploadError) throw uploadError;
       const { data: publicData } = supabase.storage.from("servicios-images").getPublicUrl(path);
       const { error: updateError } = await supabase.from("servicios").update({ imagen_url: publicData.publicUrl }).eq("id", editingImageId);
@@ -179,6 +206,7 @@ export default function ServiciosPage() {
               const imageTransform = serviceImageTransform[service.nombre];
               return <article key={service.id} className={cn("flex overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg", selected ? "border-[#5D4037] ring-2 ring-[#5D4037]/10" : "border-[#E5D3B3]/30")}>
                 <div className="flex w-full flex-col">
+                  {canEditImagesInline && <div className="border-b border-[#E5D3B3]/40 bg-[#E5D3B3]/10 p-3"><div className="mb-2 flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-widest text-[#5D4037]">Editar imagen</p><button type="button" onClick={() => setEditingImageId(editingImageId === service.id ? "" : service.id)} className="text-[10px] font-bold uppercase tracking-widest text-[#8D6E63]">{editingImageId === service.id ? "Cerrar" : "Abrir"}</button></div>{editingImageId === service.id && <div className="space-y-2"><div className="grid grid-cols-2 gap-2"><input type="number" min="320" max="2400" value={cropWidth} onChange={(event) => setCropWidth(Number(event.target.value))} className="h-9 rounded-lg border-none bg-white px-2 text-xs" aria-label="Ancho en píxeles" placeholder="Ancho px" /><input type="number" min="240" max="2400" value={cropHeight} onChange={(event) => setCropHeight(Number(event.target.value))} className="h-9 rounded-lg border-none bg-white px-2 text-xs" aria-label="Alto en píxeles" placeholder="Alto px" /></div><label className="inline-flex h-9 w-full cursor-pointer items-center justify-center rounded-lg bg-[#5D4037] text-[9px] font-bold uppercase tracking-widest text-white">Elegir y recortar<input type="file" accept="image/*" onChange={handlePublicImageUpload} disabled={uploadingImage} className="hidden" /></label><button type="button" onClick={async () => { const { error: deleteError } = await supabase.from("servicios").update({ imagen_url: null }).eq("id", service.id); if (deleteError) toast.error(`No se pudo borrar: ${deleteError.message}`); else { setServices((previous) => previous.map((item) => item.id === service.id ? { ...item, imagen_url: undefined } : item)); toast.success("Imagen borrada"); } }} className="h-9 w-full rounded-lg border border-red-200 text-[9px] font-bold uppercase tracking-widest text-red-600">Borrar imagen</button></div>}</div>}
                   <div className="flex h-40 items-center justify-center overflow-hidden bg-[#E5D3B3]/20 sm:h-44"><img src={getServiceImage(service.nombre, service.imagen_url)} alt={`${service.nombre} en Marobel`} className={cn(imageClass, "transition duration-500", !imageTransform && !noHoverZoom.has(service.nombre) && "hover:scale-105")} style={{ objectPosition: service.imagen_posicion || imageFocus, transform: imageTransform, transformOrigin: "center" }} loading="lazy" referrerPolicy="no-referrer" /></div>
                   <div className="flex flex-1 flex-col p-4">
                     <div className="mb-3 flex items-start justify-between gap-3"><h4 className="font-serif text-xl leading-tight text-[#5D4037]">{service.nombre}</h4><span className="whitespace-nowrap text-sm font-bold text-[#8D6E63]">{priceLabel(service)}</span></div>
