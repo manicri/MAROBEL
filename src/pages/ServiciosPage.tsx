@@ -34,6 +34,7 @@ export default function ServiciosPage() {
   const [services, setServices] = useState<CatalogService[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [catalogWarning, setCatalogWarning] = useState("");
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,10 +46,13 @@ export default function ServiciosPage() {
       const { data, error: fetchError } = await supabase.from("servicios").select("*");
       if (fetchError) {
         console.error(fetchError);
-        setError("No pudimos cargar los servicios. Intenta nuevamente.");
+        setServices(buildServiceCatalog([]));
+        setCatalogWarning("La base de datos no está disponible. Mostrando el catálogo guardado localmente.");
+        setError("");
       } else {
         setServices(buildServiceCatalog((data as Array<Record<string, unknown>>) ?? []));
         setError("");
+        setCatalogWarning("");
       }
       setLoading(false);
     };
@@ -132,7 +136,7 @@ export default function ServiciosPage() {
 
       {loading ? <div className="rounded-2xl bg-white py-16 text-center text-[#5D4037]/60">Cargando servicios...</div>
         : error ? <div className="rounded-2xl border border-red-100 bg-red-50 py-16 text-center text-red-600">{error}</div>
-        : !filteredServices.length ? <div className="rounded-2xl bg-white py-16 text-center text-[#5D4037]/60"><p className="mb-4">No encontramos servicios con esos filtros.</p><button type="button" onClick={clearFilters} className="rounded-full bg-[#5D4037] px-5 py-2.5 text-[9px] font-bold uppercase tracking-widest text-white">Ver todos</button></div>
+        : <>{catalogWarning && <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">{catalogWarning}</div>}{!filteredServices.length ? <div className="rounded-2xl bg-white py-16 text-center text-[#5D4037]/60"><p className="mb-4">No encontramos servicios con esos filtros.</p><button type="button" onClick={clearFilters} className="rounded-full bg-[#5D4037] px-5 py-2.5 text-[9px] font-bold uppercase tracking-widest text-white">Ver todos</button></div>
         : <div className="space-y-14">{groupedServices.map(({ category, count, sections }) => <section key={category} aria-labelledby={`category-${category}`}>
           <div className="mb-6 flex items-end justify-between gap-4 border-b border-[#E5D3B3]/40 pb-4"><div><span className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#8D6E63]">Especialidad Marobel</span><h2 id={`category-${category}`} className="mt-1 font-serif text-3xl text-[#5D4037] md:text-4xl">{category}</h2></div><span className="shrink-0 rounded-full bg-[#E5D3B3]/25 px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-[#5D4037]">{count} servicio{count === 1 ? "" : "s"}</span></div>
           <div className="space-y-9">{sections.map(({ section, items }) => <div key={section}>
@@ -155,7 +159,7 @@ export default function ServiciosPage() {
               </article>;
             })}</div>
           </div>)}</div>
-        </section>)}</div>}
+        </section>)}</div>}</>}
 
       {!loading && !error && <aside className="mt-12 rounded-2xl border border-[#E5D3B3]/50 bg-[#E5D3B3]/15 p-5 text-[#5D4037] md:p-7"><div className="flex items-start gap-4"><Info className="mt-0.5 h-5 w-5 shrink-0 text-[#8D6E63]" /><div><h2 className="mb-2 font-serif text-2xl">Información importante</h2><p className="text-sm leading-relaxed text-[#5D4037]/75">Los precios indicados como <strong>“desde”</strong> pueden variar según el largo y la cantidad del cabello, el tamaño de las uñas, el diseño, la técnica seleccionada o la cantidad de producto utilizado.</p><p className="mt-2 text-sm leading-relaxed text-[#5D4037]/75">Para recibir una cotización exacta, comunícate con nosotros o agenda una valoración.</p></div></div></aside>}
     </section>
