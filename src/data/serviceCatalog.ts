@@ -99,9 +99,11 @@ export const categoryOrder = [
 ];
 
 export function buildServiceCatalog(databaseServices: Array<Record<string, unknown>>): CatalogService[] {
-  return catalog.map((definition, index) => {
+  const matchedIds = new Set<string>();
+  const catalogServices = catalog.map((definition, index) => {
     const names = [definition.nombre, ...(definition.aliases || [])];
     const source = databaseServices.find((service) => names.includes(String(service.nombre || "")));
+    if (source?.id) matchedIds.add(String(source.id));
     return {
       id: source ? String(source.id) : `catalog-${index + 1}`,
       nombre: definition.nombre,
@@ -117,4 +119,23 @@ export function buildServiceCatalog(databaseServices: Array<Record<string, unkno
       orden: index + 1,
     };
   });
+
+  const customServices = databaseServices
+    .filter((service) => service.id && !matchedIds.has(String(service.id)))
+    .map((service, index) => ({
+      id: String(service.id),
+      nombre: String(service.nombre || "Servicio"),
+      descripcion: String(service.descripcion || ""),
+      categoria: String(service.categoria || "Otros"),
+      seccion: String(service.subcategoria || service.categoria || "Otros"),
+      precio: Number(service.precio || 0),
+      precio_desde: Boolean(service.precio_desde),
+      duracion: service.duracion ? String(service.duracion) : undefined,
+      imagen_url: service.imagen_url ? String(service.imagen_url) : undefined,
+      imagen_ajuste: service.imagen_ajuste === "contain" ? "contain" as const : "cover" as const,
+      imagen_posicion: service.imagen_posicion ? String(service.imagen_posicion) : "center",
+      orden: catalogServices.length + index + 1,
+    }));
+
+  return [...catalogServices, ...customServices];
 }
