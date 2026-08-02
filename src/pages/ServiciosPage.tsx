@@ -144,11 +144,11 @@ export default function ServiciosPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{items.map((service) => {
               const selected = selectedServices.some((item) => item.id === service.id);
               const imageFocus = serviceImageFocus[service.nombre] || "50% 50%";
-              const imageClass = serviceImageClass[service.nombre] || "h-full w-full object-cover";
+              const imageClass = service.imagen_url ? (service.imagen_ajuste === "contain" ? "h-full w-full object-contain p-2" : "h-full w-full object-cover") : (serviceImageClass[service.nombre] || "h-full w-full object-cover");
               const imageTransform = serviceImageTransform[service.nombre];
               return <article key={service.id} className={cn("flex overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg", selected ? "border-[#5D4037] ring-2 ring-[#5D4037]/10" : "border-[#E5D3B3]/30")}>
                 <div className="flex w-full flex-col">
-                  <div className="flex h-40 items-center justify-center overflow-hidden bg-[#E5D3B3]/20 sm:h-44"><img src={getServiceImage(service.nombre, service.imagen_url)} alt={`${service.nombre} en Marobel`} className={cn(imageClass, "transition duration-500", !imageTransform && !noHoverZoom.has(service.nombre) && "hover:scale-105")} style={{ objectPosition: imageFocus, transform: imageTransform, transformOrigin: "center" }} loading="lazy" referrerPolicy="no-referrer" /></div>
+                  <div className="flex h-40 items-center justify-center overflow-hidden bg-[#E5D3B3]/20 sm:h-44"><img src={getServiceImage(service.nombre, service.imagen_url)} alt={`${service.nombre} en Marobel`} className={cn(imageClass, "transition duration-500", !imageTransform && !noHoverZoom.has(service.nombre) && "hover:scale-105")} style={{ objectPosition: service.imagen_posicion || imageFocus, transform: imageTransform, transformOrigin: "center" }} loading="lazy" referrerPolicy="no-referrer" /></div>
                   <div className="flex flex-1 flex-col p-4">
                     <div className="mb-3 flex items-start justify-between gap-3"><h4 className="font-serif text-xl leading-tight text-[#5D4037]">{service.nombre}</h4><span className="whitespace-nowrap text-sm font-bold text-[#8D6E63]">{priceLabel(service)}</span></div>
                     {service.duracion && <p className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[#5D4037]/50"><Clock className="h-3.5 w-3.5" />{service.duracion}</p>}
