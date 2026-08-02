@@ -153,14 +153,19 @@ export default function ServiciosPage() {
       const image = new Image();
       image.src = cropSource;
       await new Promise<void>((resolve, reject) => { image.onload = () => resolve(); image.onerror = () => reject(new Error("No se pudo leer la imagen")); });
-      const sx = Math.round(image.naturalWidth * cropSelection.x / 100);
-      const sy = Math.round(image.naturalHeight * cropSelection.y / 100);
-      const sw = Math.max(1, Math.round(image.naturalWidth * cropSelection.width / 100));
-      const sh = Math.max(1, Math.round(image.naturalHeight * cropSelection.height / 100));
+      const recommendedWidth = 1600;
+      const recommendedHeight = 900;
+      let sx = Math.round(image.naturalWidth * cropSelection.x / 100);
+      let sy = Math.round(image.naturalHeight * cropSelection.y / 100);
+      let sw = Math.max(1, Math.round(image.naturalWidth * cropSelection.width / 100));
+      let sh = Math.max(1, Math.round(image.naturalHeight * cropSelection.height / 100));
+      const targetRatio = recommendedWidth / recommendedHeight;
+      if (sw / sh > targetRatio) { const adjustedWidth = Math.round(sh * targetRatio); sx += Math.round((sw - adjustedWidth) / 2); sw = adjustedWidth; }
+      else { const adjustedHeight = Math.round(sw / targetRatio); sy += Math.round((sh - adjustedHeight) / 2); sh = adjustedHeight; }
       const canvas = document.createElement("canvas");
-      canvas.width = sw;
-      canvas.height = sh;
-      canvas.getContext("2d")?.drawImage(image, sx, sy, sw, sh, 0, 0, sw, sh);
+      canvas.width = recommendedWidth;
+      canvas.height = recommendedHeight;
+      canvas.getContext("2d")?.drawImage(image, sx, sy, sw, sh, 0, 0, recommendedWidth, recommendedHeight);
       const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((value) => value ? resolve(value) : reject(new Error("No se pudo preparar el recorte")), "image/webp", 0.9));
       const path = `${user.id}/${crypto.randomUUID()}.webp`;
       const { error: uploadError } = await supabase.storage.from("servicios-images").upload(path, new File([blob], "servicio.webp", { type: "image/webp" }), { contentType: "image/webp", upsert: false });
