@@ -54,6 +54,7 @@ export default function ServiciosPage() {
   const [cropSelection, setCropSelection] = useState({ x: 15, y: 15, width: 70, height: 70 });
   const [cropStart, setCropStart] = useState({ x: 0, y: 0 });
   const [isSelectingCrop, setIsSelectingCrop] = useState(false);
+  const [imageUrlInput, setImageUrlInput] = useState("");
   const [cropWidth, setCropWidth] = useState(1200);
   const [cropHeight, setCropHeight] = useState(800);
 
@@ -123,6 +124,20 @@ export default function ServiciosPage() {
     if (file.size > 10 * 1024 * 1024) { toast.error("La imagen no puede superar los 10 MB"); return; }
     setCropSource(URL.createObjectURL(file));
     setCropSelection({ x: 15, y: 15, width: 70, height: 70 });
+  };
+
+  const handlePublishImageUrl = async (serviceId: string) => {
+    const imageUrl = imageUrlInput.trim();
+    if (!/^https?:\/\//i.test(imageUrl)) { toast.error("Pega un enlace válido que empiece con http o https"); return; }
+    setUploadingImage(true);
+    try {
+      const { error } = await supabase.from("servicios").update({ imagen_url: imageUrl }).eq("id", serviceId);
+      if (error) throw error;
+      setServices((previous) => previous.map((service) => service.id === serviceId ? { ...service, imagen_url: imageUrl } : service));
+      setImageUrlInput("");
+      toast.success("Imagen del enlace publicada");
+    } catch (error: any) { toast.error(`No se pudo publicar el enlace: ${error?.message || "error desconocido"}`); }
+    finally { setUploadingImage(false); }
   };
 
   const getCropPoint = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -279,6 +294,7 @@ export default function ServiciosPage() {
               const imageTransform = serviceImageTransform[service.nombre];
               return <article key={service.id} className={cn("flex overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg", selected ? "border-[#5D4037] ring-2 ring-[#5D4037]/10" : "border-[#E5D3B3]/30")}>
                 <div className="flex w-full flex-col">
+                  {canEditImagesCards && <div className="border-b border-[#E5D3B3]/40 bg-white p-3"><div className="flex gap-2"><input type="url" value={imageUrlInput} onChange={(event) => setImageUrlInput(event.target.value)} placeholder="Pegar enlace de imagen" className="h-9 min-w-0 flex-1 rounded-lg border border-[#E5D3B3]/50 px-2 text-xs text-[#5D4037] outline-none" /><button type="button" onClick={() => handlePublishImageUrl(service.id)} disabled={uploadingImage} className="h-9 rounded-lg bg-[#5D4037] px-3 text-[9px] font-bold uppercase tracking-widest text-white">Publicar enlace</button></div><p className="mt-2 text-[10px] text-[#5D4037]/55">Pega la URL directa de la imagen, no la URL de una página.</p></div>}
                   {canEditImagesCards && <div className="border-b border-[#E5D3B3]/40 bg-[#E5D3B3]/10 p-3"><div className="mb-2 flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-widest text-[#5D4037]">Editar imagen</p><button type="button" onClick={() => setEditingImageId(editingImageId === service.id ? "" : service.id)} className="text-[10px] font-bold uppercase tracking-widest text-[#8D6E63]">{editingImageId === service.id ? "Cerrar" : "Abrir"}</button></div>{editingImageId === service.id && <div className="space-y-2"><label className="inline-flex h-9 w-full cursor-pointer items-center justify-center rounded-lg border border-[#E5D3B3] bg-white text-[9px] font-bold uppercase tracking-widest text-[#5D4037]">Elegir foto<input type="file" accept="image/*" onChange={handleCropFileSelect} disabled={uploadingImage} className="hidden" /></label>{cropSource && <><p className="text-[10px] text-[#5D4037]/65">Arrastra sobre la imagen para seleccionar el recorte.</p><div onPointerDown={handleCropPointerDown} onPointerMove={handleCropPointerMove} onPointerUp={handleCropPointerUp} className="relative aspect-[4/3] touch-none select-none overflow-hidden rounded-lg bg-black"><img src={cropSource} alt="Vista previa del recorte" className="h-full w-full object-contain" draggable={false} /><div className="pointer-events-none absolute border-2 border-white bg-white/10 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]" style={{ left: `${cropSelection.x}%`, top: `${cropSelection.y}%`, width: `${cropSelection.width}%`, height: `${cropSelection.height}%` }} /></div><button type="button" onClick={handleConfirmCrop} disabled={uploadingImage} className="h-9 w-full rounded-lg bg-[#5D4037] text-[9px] font-bold uppercase tracking-widest text-white">{uploadingImage ? "Publicando..." : "Confirmar y publicar"}</button><button type="button" onClick={() => setCropSource(null)} className="h-9 w-full rounded-lg border border-[#E5D3B3] text-[9px] font-bold uppercase tracking-widest text-[#5D4037]">Cancelar recorte</button></>}</div>}</div>}
                   {canEditImagesInline && <div className="border-b border-[#E5D3B3]/40 bg-[#E5D3B3]/10 p-3"><div className="mb-2 flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-widest text-[#5D4037]">Editar imagen</p><button type="button" onClick={() => setEditingImageId(editingImageId === service.id ? "" : service.id)} className="text-[10px] font-bold uppercase tracking-widest text-[#8D6E63]">{editingImageId === service.id ? "Cerrar" : "Abrir"}</button></div>{editingImageId === service.id && <div className="space-y-2"><div className="grid grid-cols-2 gap-2"><input type="number" min="320" max="2400" value={cropWidth} onChange={(event) => setCropWidth(Number(event.target.value))} className="h-9 rounded-lg border-none bg-white px-2 text-xs" aria-label="Ancho en píxeles" placeholder="Ancho px" /><input type="number" min="240" max="2400" value={cropHeight} onChange={(event) => setCropHeight(Number(event.target.value))} className="h-9 rounded-lg border-none bg-white px-2 text-xs" aria-label="Alto en píxeles" placeholder="Alto px" /></div><label className="inline-flex h-9 w-full cursor-pointer items-center justify-center rounded-lg bg-[#5D4037] text-[9px] font-bold uppercase tracking-widest text-white">Elegir y recortar<input type="file" accept="image/*" onChange={handlePublicImageUpload} disabled={uploadingImage} className="hidden" /></label><button type="button" onClick={async () => { const { error: deleteError } = await supabase.from("servicios").update({ imagen_url: null }).eq("id", service.id); if (deleteError) toast.error(`No se pudo borrar: ${deleteError.message}`); else { setServices((previous) => previous.map((item) => item.id === service.id ? { ...item, imagen_url: undefined } : item)); toast.success("Imagen borrada"); } }} className="h-9 w-full rounded-lg border border-red-200 text-[9px] font-bold uppercase tracking-widest text-red-600">Borrar imagen</button></div>}</div>}
                   <div className="flex h-40 items-center justify-center overflow-hidden bg-[#E5D3B3]/20 sm:h-44"><img src={getServiceImage(service.nombre, service.imagen_url)} alt={`${service.nombre} en Marobel`} className={cn(imageClass, "transition duration-500", !imageTransform && !noHoverZoom.has(service.nombre) && "hover:scale-105")} style={{ objectPosition: service.imagen_posicion || imageFocus, transform: imageTransform, transformOrigin: "center" }} loading="lazy" referrerPolicy="no-referrer" /></div>
