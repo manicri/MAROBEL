@@ -69,7 +69,7 @@ export default function ServiciosPage() {
     setSelectedCategory(searchParams.get("categoria") || "Todos");
   }, [searchParams]);
 
-  const categories = useMemo(() => ["Todos", ...categoryOrder], []);
+  const categories = useMemo(() => ["Todos", ...Array.from(new Set([...categoryOrder, ...services.map((service) => service.categoria)]))], [services]);
 
   const filteredServices = useMemo(() => {
     const value = search.trim().toLowerCase();
@@ -80,7 +80,7 @@ export default function ServiciosPage() {
     });
   }, [search, selectedCategory, services]);
 
-  const groupedServices = useMemo(() => categoryOrder.map((category) => {
+  const groupedServices = useMemo(() => Array.from(new Set([...categoryOrder, ...services.map((service) => service.categoria)])).map((category) => {
     const categoryServices = filteredServices.filter((service) => service.categoria === category);
     const sectionNames = Array.from(new Set(categoryServices.map((service) => service.seccion)));
     return {
