@@ -15,8 +15,12 @@ CREATE TABLE IF NOT EXISTS public.servicios (
     duracion TEXT,
     categoria TEXT,
     imagen_url TEXT,
+    imagen_ajuste TEXT DEFAULT 'cover',
+    imagen_posicion TEXT DEFAULT 'center',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
+ALTER TABLE public.servicios ADD COLUMN IF NOT EXISTS imagen_ajuste TEXT DEFAULT 'cover';
+ALTER TABLE public.servicios ADD COLUMN IF NOT EXISTS imagen_posicion TEXT DEFAULT 'center';
 CREATE TABLE IF NOT EXISTS public.bloqueos (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     fecha DATE NOT NULL,
