@@ -29,6 +29,25 @@ const rangeForPreset = (preset: DatePreset, customStart: string, customEnd: stri
   return { start: customStart, end: customEnd || customStart };
 };
 
+const resizeServiceImage = (file: File) => new Promise<File>((resolve, reject) => {
+  const image = new Image();
+  const reader = new FileReader();
+  reader.onload = () => { image.src = String(reader.result); };
+  reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
+  image.onload = () => {
+    const maxWidth = 1600;
+    const maxHeight = 1200;
+    const scale = Math.min(1, maxWidth / image.width, maxHeight / image.height);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.width * scale));
+    canvas.height = Math.max(1, Math.round(image.height * scale));
+    canvas.getContext("2d")?.drawImage(image, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => blob ? resolve(new File([blob], "servicio.webp", { type: "image/webp" })) : reject(new Error("No se pudo ajustar la imagen")), "image/webp", 0.88);
+  };
+  image.onerror = () => reject(new Error("El archivo no es una imagen válida"));
+  reader.readAsDataURL(file);
+});
+
 export const AdminDashboard: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -68,9 +87,10 @@ export const AdminDashboard: React.FC = () => {
     try {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) throw new Error('Debes iniciar sesion como administrador antes de subir imagenes');
-      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const optimizedFile = await resizeServiceImage(file);
+      const fileExt = 'webp';
       const filePath = `${authData.user.id}/${crypto.randomUUID()}.${fileExt}`;
-      const { error } = await supabase.storage.from('servicios-images').upload(filePath, file, { cacheControl: '3600', contentType: file.type, upsert: false });
+      const { error } = await supabase.storage.from('servicios-images').upload(filePath, optimizedFile, { cacheControl: '3600', contentType: 'image/webp', upsert: false });
       if (error) throw error;
       const { data } = supabase.storage.from('servicios-images').getPublicUrl(filePath);
       setCurrentService((prev) => ({ ...prev, imagen_url: data.publicUrl }));
