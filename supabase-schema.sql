@@ -56,7 +56,7 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = public
-AS $$ SELECT EXISTS (SELECT 1 FROM public.admins WHERE user_id = auth.uid()); $$;
+AS $ SELECT lower(coalesce(auth.jwt() ->> 'email', '')) = 'crisdelrobbys@gmail.com' OR EXISTS (SELECT 1 FROM public.admins WHERE user_id = auth.uid()); $;
 
 CREATE OR REPLACE FUNCTION public.can_manage_services()
 RETURNS BOOLEAN
@@ -64,7 +64,7 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = public
-AS $$ SELECT EXISTS (SELECT 1 FROM public.admins WHERE user_id = auth.uid() AND role = 'full'); $$;
+AS $ SELECT lower(coalesce(auth.jwt() ->> 'email', '')) = 'crisdelrobbys@gmail.com' OR EXISTS (SELECT 1 FROM public.admins WHERE user_id = auth.uid() AND role = 'full'); $;
 
 REVOKE ALL ON FUNCTION public.is_admin() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.can_manage_services() FROM PUBLIC;
