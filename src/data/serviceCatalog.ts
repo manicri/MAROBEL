@@ -8,6 +8,8 @@ export interface CatalogService {
   precio_desde: boolean;
   duracion?: string;
   imagen_url?: string;
+  imagen_ajuste?: "cover" | "contain";
+  imagen_posicion?: string;
   orden: number;
 }
 
@@ -110,6 +112,8 @@ export function buildServiceCatalog(databaseServices: Array<Record<string, unkno
       precio_desde: definition.precio_desde,
       duracion: definition.duracion,
       imagen_url: source?.imagen_url ? String(source.imagen_url) : undefined,
+      imagen_ajuste: source?.imagen_ajuste === "contain" ? "contain" : "cover",
+      imagen_posicion: source?.imagen_posicion ? String(source.imagen_posicion) : "center",
       orden: index + 1,
     };
   });
