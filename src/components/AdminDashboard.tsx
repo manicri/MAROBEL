@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { AdminPromotions } from './AdminPromotions';
 
 interface Appointment { cita: string; Nombre_cliente: string; cliente_email: string; Servicio: string; fecha: string; hora: string; Estado: 'pendiente' | 'aceptada' | 'rechazada'; whatsapp?: string; notas?: string; }
-interface Service { id: string; nombre: string; descripcion: string; categoria: string; categoria_id?: string; precio: number; duracion: string; imagen_url?: string; }
+interface Service { id: string; nombre: string; descripcion: string; categoria: string; categoria_id?: string; precio: number; duracion: string; imagen_url?: string; imagen_ajuste?: "cover" | "contain"; imagen_posicion?: string; }
 interface Category { id: string; nombre: string; }
 type Tab = 'appointments' | 'services' | 'promotions';
 type DatePreset = 'all' | 'today' | 'week' | 'month' | 'lastMonth' | 'custom';
@@ -45,7 +45,7 @@ export const AdminDashboard: React.FC = () => {
   const [editingCategory, setEditingCategory] = useState<Partial<Category>>({ nombre: '' });
   const [isEditingService, setIsEditingService] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [currentService, setCurrentService] = useState<Partial<Service>>({ nombre: '', descripcion: '', categoria: '', precio: 0, duracion: '', imagen_url: '' });
+  const [currentService, setCurrentService] = useState<Partial<Service>>({ nombre: '', descripcion: '', categoria: '', precio: 0, duracion: '', imagen_url: '', imagen_ajuste: 'cover', imagen_posicion: 'center' });
 
   const fetchAppointments = async () => { const { data, error } = await supabase.from('citas').select('*'); error ? toast.error(`Error BD: ${error.message}`) : setAppointments((data as Appointment[]) || []); };
   const fetchServices = async () => { const { data, error } = await supabase.from('servicios').select('*').order('categoria').order('nombre'); if (!error) setServices(data || []); };
@@ -96,11 +96,11 @@ export const AdminDashboard: React.FC = () => {
   const handleSaveService = async () => {
     if (!currentService.nombre?.trim() || !currentService.categoria?.trim()) { toast.error('Nombre y categoria son obligatorios'); return; }
     if (Number(currentService.precio || 0) < 0) { toast.error('El precio no puede ser negativo'); return; }
-    const payload = { id: currentService.id || undefined, nombre: currentService.nombre.trim(), descripcion: currentService.descripcion || '', categoria: currentService.categoria, precio: Number(currentService.precio || 0), duracion: currentService.duracion || '', imagen_url: currentService.imagen_url || null };
+    const payload = { id: currentService.id || undefined, nombre: currentService.nombre.trim(), descripcion: currentService.descripcion || '', categoria: currentService.categoria, precio: Number(currentService.precio || 0), duracion: currentService.duracion || '', imagen_url: currentService.imagen_url || null, imagen_ajuste: currentService.imagen_ajuste || 'cover', imagen_posicion: currentService.imagen_posicion || 'center' };
     const { error } = await supabase.from('servicios').upsert(payload);
     if (error) { toast.error(`Error al guardar servicio: ${error.message}`); console.error(error); return; }
     toast.success(currentService.id ? 'Servicio actualizado' : 'Servicio creado');
-    setIsEditingService(false); setCurrentService({ nombre: '', descripcion: '', categoria: '', precio: 0, duracion: '', imagen_url: '' }); fetchServices();
+    setIsEditingService(false); setCurrentService({ nombre: '', descripcion: '', categoria: '', precio: 0, duracion: '', imagen_url: '', imagen_ajuste: 'cover', imagen_posicion: 'center' }); fetchServices();
   };
 
   const handleDeleteService = async (id: string) => toast('¿Eliminar este servicio?', { action: { label: 'Eliminar', onClick: async () => { const { error } = await supabase.from('servicios').delete().eq('id', id); error ? toast.error(`Error al eliminar: ${error.message}`) : (toast.success('Servicio eliminado'), fetchServices()); } }, cancel: { label: 'Cancelar', onClick: () => {} } });

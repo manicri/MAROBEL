@@ -86,8 +86,8 @@ const serviceImageIds: Record<string, string> = {
 const fallbackImage = unsplashImage("photo-1540555700478-4be289fbecef");
 
 export const getServiceImage = (serviceName: string, customImage?: string) => {
-  if (requestedServiceImages[serviceName]) return requestedServiceImages[serviceName];
   if (customImage?.trim()) return customImage;
+  if (requestedServiceImages[serviceName]) return requestedServiceImages[serviceName];
   const photoId = serviceImageIds[serviceName];
   return photoId ? unsplashImage(photoId) : fallbackImage;
 };

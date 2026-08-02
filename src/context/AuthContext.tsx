@@ -3,6 +3,7 @@ import { User } from "@supabase/supabase-js";
 import { supabase } from "../supabase";
 
 export type AdminRole = "full" | "schedule" | null;
+const OWNER_EMAIL = "crisdelrobbys@gmail.com";
 
 export interface UserProfile {
   uid: string;
@@ -52,7 +53,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await supabase.from("users").upsert({ id: currentUser.id, email: currentUser.email, display_name: fallbackName });
       }
 
-      const adminRole: AdminRole = adminData ? (adminData.role === "schedule" ? "schedule" : "full") : null;
+      const isOwner = currentUser.email?.trim().toLowerCase() === OWNER_EMAIL;
+      const adminRole: AdminRole = isOwner ? "full" : null;
       setProfile({
         uid: currentUser.id,
         email: currentUser.email || "",
@@ -69,8 +71,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: currentUser.email || "",
         displayName: fallbackName,
         photoURL: currentUser.user_metadata?.avatar_url || "",
-        role: "client",
-        adminRole: null,
+        role: currentUser.email?.trim().toLowerCase() === OWNER_EMAIL ? "admin" : "client",
+        adminRole: currentUser.email?.trim().toLowerCase() === OWNER_EMAIL ? "full" : null,
       });
     }
   };

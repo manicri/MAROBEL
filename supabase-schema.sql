@@ -15,8 +15,12 @@ CREATE TABLE IF NOT EXISTS public.servicios (
     duracion TEXT,
     categoria TEXT,
     imagen_url TEXT,
+    imagen_ajuste TEXT DEFAULT 'cover',
+    imagen_posicion TEXT DEFAULT 'center',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
+ALTER TABLE public.servicios ADD COLUMN IF NOT EXISTS imagen_ajuste TEXT DEFAULT 'cover';
+ALTER TABLE public.servicios ADD COLUMN IF NOT EXISTS imagen_posicion TEXT DEFAULT 'center';
 CREATE TABLE IF NOT EXISTS public.bloqueos (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     fecha DATE NOT NULL,
@@ -52,7 +56,7 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = public
-AS $$ SELECT EXISTS (SELECT 1 FROM public.admins WHERE user_id = auth.uid()); $$;
+AS $ SELECT lower(coalesce(auth.jwt() ->> 'email', '')) = 'crisdelrobbys@gmail.com' OR EXISTS (SELECT 1 FROM public.admins WHERE user_id = auth.uid()); $;
 
 CREATE OR REPLACE FUNCTION public.can_manage_services()
 RETURNS BOOLEAN
@@ -60,7 +64,7 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = public
-AS $$ SELECT EXISTS (SELECT 1 FROM public.admins WHERE user_id = auth.uid() AND role = 'full'); $$;
+AS $ SELECT lower(coalesce(auth.jwt() ->> 'email', '')) = 'crisdelrobbys@gmail.com' OR EXISTS (SELECT 1 FROM public.admins WHERE user_id = auth.uid() AND role = 'full'); $;
 
 REVOKE ALL ON FUNCTION public.is_admin() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.can_manage_services() FROM PUBLIC;
