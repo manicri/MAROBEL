@@ -10,7 +10,7 @@ const requestedServiceImages: Record<string, string> = {
   "Manicura Polygel": "https://files.catbox.moe/nqdifm.jpg",
   "Manicura técnica Soft Gel": "https://files.catbox.moe/4scd7n.jpg",
   "Manicura en acrílico": "https://files.catbox.moe/y368kb.jpg",
-  "Pedicura spa": "https://files.catbox.moe/9wvyps.png",
+  "Pedicura spa": "https://images.unsplash.com/photo-1632345031435-8727f6897d53?auto=format&fit=crop&w=1200&h=800&q=84",
   "Pedicura básica": "https://files.catbox.moe/hyyq2j.png",
   "Pedicura tradicional": "https://files.catbox.moe/g2n9c5.png",
   "Pedicura semipermanente": "https://files.catbox.moe/52tw9e.png",
@@ -20,7 +20,7 @@ const requestedServiceImages: Record<string, string> = {
 };
 
 const serviceImageIds: Record<string, string> = {
-  "Manicura tradicional": "photo-1693776529298-f853f526665e",
+  "Manicura tradicional": "photo-1607779097040-26e80aa78e66",
   "Manicura semipermanente": "photo-1607779097040-26e80aa78e66",
   "Pedicura tradicional": "photo-1659391542239-9648f307c0b1",
   "Pedicura spa": "photo-1659391542239-9648f307c0b1",
