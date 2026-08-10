@@ -54,7 +54,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const isOwner = currentUser.email?.trim().toLowerCase() === OWNER_EMAIL;
-      const adminRole: AdminRole = isOwner ? "full" : null;
+      const databaseRole: AdminRole = adminData?.role === "full" || adminData?.role === "schedule" ? adminData.role : null;
+      const adminRole: AdminRole = isOwner ? "full" : databaseRole;
       setProfile({
         uid: currentUser.id,
         email: currentUser.email || "",
@@ -145,3 +146,4 @@ export const useAuth = () => {
   if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
+
