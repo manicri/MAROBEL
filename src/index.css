@@ -1,12 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
-  --color-brand-cream: #e8d8bd;
-  --color-brand-brown: #3d302b;
-  --color-brand-offwhite: #fdfbf7;
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+  --color-brand-cream: #E5D3B3;
+  --color-brand-brown: #5D4037;
+  --color-brand-offwhite: #FAF9F6;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -21,66 +23,54 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: #a8483d;
-  --color-destructive-foreground: #fdfbf7;
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-lg: 0.75rem;
-  --radius-md: 0.55rem;
-  --radius-sm: 0.35rem;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-sm: calc(var(--radius) * 0.6);
 }
 
 @layer base {
-  html { scroll-behavior: smooth; }
-
+  html {
+    scroll-behavior: smooth;
+  }
+  
   :root {
-    --background: #fdfbf7;
-    --foreground: #3d302b;
-    --card: #fffefa;
-    --card-foreground: #3d302b;
-    --popover: #fffefa;
-    --popover-foreground: #3d302b;
-    --primary: #3d302b;
-    --primary-foreground: #fdfbf7;
-    --secondary: #e8d8bd;
-    --secondary-foreground: #3d302b;
-    --muted: #f1ebe2;
-    --muted-foreground: #76685f;
-    --accent: #c58d72;
-    --accent-foreground: #fffefa;
-    --border: #e5d9ca;
-    --input: #e5d9ca;
-    --ring: #a98268;
+    --background: #FAF9F6;
+    --foreground: #5D4037;
+    --card: #FAF9F6;
+    --card-foreground: #5D4037;
+    --popover: #FAF9F6;
+    --popover-foreground: #5D4037;
+    --primary: #5D4037;
+    --primary-foreground: #FAF9F6;
+    --secondary: #E5D3B3;
+    --secondary-foreground: #5D4037;
+    --muted: #E5D3B3;
+    --muted-foreground: #5D4037;
+    --accent: #E5D3B3;
+    --accent-foreground: #5D4037;
+    --destructive: #ef4444;
+    --destructive-foreground: #FAF9F6;
+    --border: #E5D3B3;
+    --input: #E5D3B3;
+    --ring: #5D4037;
+    --radius: 0.75rem;
   }
 
   body {
-    @apply bg-brand-offwhite font-sans text-brand-brown antialiased;
+    @apply font-sans text-brand-brown bg-brand-offwhite;
   }
-
-  h1, h2, h3, h4, h5, h6 { @apply font-serif font-medium; }
-  ::selection { background: #e8d8bd; color: #3d302b; }
-}
-
-@layer components {
-  .marobel-kicker {
-    @apply text-[10px] font-bold uppercase tracking-[0.32em] text-[#98735f];
-  }
-
-  .marobel-rule {
-    @apply h-px bg-[#d9cabb];
-  }
-
-  .service-grid > article:nth-child(5n + 1) {
-    @apply md:col-span-2;
-  }
-
-  .service-grid > article:nth-child(5n + 1) > div > div:first-child {
-    @apply sm:h-56;
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
   }
 }
 
-/* Keep the pricing note above the service filters without adding another card layer. */
+/* Keep the pricing notice visible before filters and service cards. */
 main > section:has(> aside) {
   display: flex;
   flex-direction: column;
