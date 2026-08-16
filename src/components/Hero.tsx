@@ -1,30 +1,48 @@
-import { ArrowUpRight, MapPin } from "lucide-react";
+import { motion } from "motion/react";
+import { ArrowRight, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const heroImage = "https://files.catbox.moe/svgrgy.jpeg";
 
 export default function Hero() {
   return (
-    <section id="inicio" className="bg-[#f3ede5] px-4 pb-10 pt-24 sm:px-6 md:pb-16 md:pt-28">
-      <div className="mx-auto grid max-w-7xl items-stretch gap-0 lg:grid-cols-[0.88fr_1.12fr]">
-        <div className="relative z-10 flex min-h-[510px] flex-col justify-between bg-[#3d302b] px-7 py-9 text-[#fdfbf7] sm:px-10 sm:py-12 lg:-mr-10 lg:min-h-[590px] lg:px-14 lg:py-14">
-          <div>
-            <span className="marobel-kicker text-[#e8d8bd]">Beauty studio · Guayaquil</span>
-            <div className="mt-8 flex items-center gap-3 text-xs text-white/65"><MapPin className="h-4 w-4 text-[#e8d8bd]" /> La Alborada, Guayaquil</div>
-            <h1 className="mt-6 max-w-xl text-5xl leading-[0.9] sm:text-6xl lg:text-7xl">Belleza que se siente <em className="text-[#e8d8bd]">bien</em>.</h1>
-            <p className="mt-7 max-w-md text-sm leading-7 text-white/70 sm:text-base">Un espacio para cuidar tus manos, tu piel y tu tiempo. Elige tu servicio, consulta disponibilidad y llega a tu cita con todo claro.</p>
-          </div>
-          <div className="mt-12 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-            <Link to="/servicios" className="inline-flex items-center gap-3 border border-[#e8d8bd] bg-[#e8d8bd] px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#3d302b] transition hover:bg-white hover:border-white">Explorar servicios <ArrowUpRight className="h-4 w-4" /></Link>
-            <a href="https://wa.me/593969272530" target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/75 underline decoration-[#e8d8bd]/60 underline-offset-8 transition hover:text-white">Consultar disponibilidad</a>
-          </div>
-        </div>
+    <section id="inicio" className="relative mt-[64px] overflow-hidden bg-[#3b2923] md:mt-[66px]">
+      <div className="relative w-full bg-[#2f211d]">
+        <img
+          src={heroImage}
+          alt="Marobel Beauty Studio"
+          width="1536"
+          height="1024"
+          className="block h-auto w-full"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0 hidden bg-gradient-to-r from-[#1f1512]/78 via-[#2f211d]/20 to-transparent md:block" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#3b2923] to-transparent md:hidden" />
 
-        <div className="relative min-h-[350px] overflow-hidden bg-[#d9cabb] lg:min-h-[590px]">
-          <img src={heroImage} alt="Interior y experiencia de Marobel Beauty Studio" className="h-full min-h-[350px] w-full object-cover lg:min-h-[590px]" referrerPolicy="no-referrer" />
-          <div className="absolute bottom-0 left-0 bg-[#fdfbf7] px-5 py-4 sm:px-7"><p className="font-serif text-2xl text-[#3d302b]">Marobel</p><p className="marobel-kicker mt-1">Cuidado · calma · detalle</p></div>
-        </div>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="container absolute inset-0 z-10 mx-auto hidden items-center px-6 md:flex lg:px-10">
+          <div className="max-w-xl rounded-[2rem] border border-white/14 bg-[#2f211d]/64 p-7 shadow-2xl shadow-black/20 backdrop-blur-sm lg:p-9">
+            <HeroContent />
+          </div>
+        </motion.div>
       </div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }} className="container relative z-10 mx-auto -mt-1 px-5 pb-14 pt-5 sm:px-6 md:hidden">
+        <HeroContent mobile />
+      </motion.div>
     </section>
+  );
+}
+
+function HeroContent({ mobile = false }: { mobile?: boolean }) {
+  return (
+    <div className="max-w-xl">
+      <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[9px] font-bold uppercase tracking-[0.25em] text-[#E5D3B3] backdrop-blur md:mb-5"><MapPin className="h-3.5 w-3.5" />Guayaquil</span>
+      <h1 className={`${mobile ? "text-4xl sm:text-5xl" : "text-5xl lg:text-6xl"} max-w-xl font-serif leading-[0.98] text-white`}>Tu momento de <span className="italic text-[#E5D3B3]">belleza y bienestar</span></h1>
+      <p className="mt-5 max-w-lg text-sm leading-relaxed text-white/80 md:mt-6 md:text-base">Elige tus servicios, revisa precios y agenda en pocos pasos. Una experiencia cuidada desde la reserva hasta tu visita.</p>
+      <div className="mt-7 flex flex-col gap-3 min-[420px]:flex-row md:mt-8">
+        <Link to="/servicios" className="inline-flex h-12 items-center justify-center rounded-full bg-[#E5D3B3] px-7 text-[10px] font-bold uppercase tracking-widest text-[#5D4037] transition hover:bg-white">Reservar cita <ArrowRight className="ml-2 h-4 w-4" /></Link>
+        <a href="https://wa.me/593969272530" target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center justify-center rounded-full border border-white/25 bg-white/8 px-7 text-center text-[10px] font-bold uppercase tracking-widest text-white transition hover:bg-white/15">Consultar por WhatsApp</a>
+      </div>
+    </div>
   );
 }
