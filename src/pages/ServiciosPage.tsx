@@ -300,7 +300,7 @@ export default function ServiciosPage() {
           <div className="mb-6 flex items-end justify-between gap-4 border-b border-[#E5D3B3]/40 pb-4"><div><span className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#8D6E63]">Especialidad Marobel</span><h2 id={`category-${category}`} className="mt-1 font-serif text-3xl text-[#5D4037] md:text-4xl">{category}</h2></div><span className="shrink-0 rounded-full bg-[#E5D3B3]/25 px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-[#5D4037]">{count} servicio{count === 1 ? "" : "s"}</span></div>
           <div className="space-y-9">{sections.map(({ section, items }) => <div key={section}>
             {section !== category && <h3 className="mb-4 flex items-center gap-3 text-sm font-bold uppercase tracking-[0.2em] text-[#8D6E63]"><span className="h-px w-8 bg-[#E5D3B3]" />{section}</h3>}
-            <div className="service-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{items.map((service) => {
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{items.map((service) => {
               const selected = selectedServices.some((item) => item.id === service.id);
               const imageFocus = serviceImageFocus[service.nombre] || "50% 50%";
               const imageClass = service.imagen_url ? (service.imagen_ajuste === "contain" ? "h-full w-full object-contain p-2" : "h-full w-full object-cover") : (serviceImageClass[service.nombre] || "h-full w-full object-cover");
@@ -330,3 +330,4 @@ export default function ServiciosPage() {
     {selectedServices.length > 0 && <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl bg-[#5D4037] p-3 text-white shadow-2xl md:hidden"><Link to="/reserva" className="flex items-center justify-between"><span className="text-xs font-bold">{selectedServices.length} servicio{selectedServices.length > 1 ? "s" : ""} seleccionado{selectedServices.length > 1 ? "s" : ""}</span><span className="rounded-full bg-[#E5D3B3] px-4 py-2 text-[9px] font-bold uppercase tracking-widest text-[#5D4037]">Continuar</span></Link></div>}
   </main>;
 }
+
