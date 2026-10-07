@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowRight, Clock, Info, Search, Sparkles, X } from "lucide-react";
+import { ArrowRight, Clock, Info, Search, X } from "lucide-react";
 import { supabase } from "../supabase";
 import { useSelection } from "../context/SelectionContext";
 import { buildServiceCatalog, categoryOrder, type CatalogService } from "../data/serviceCatalog";
@@ -273,7 +273,7 @@ export default function ServiciosPage() {
   return <main className="min-h-screen bg-[#FAF9F6] pb-24 pt-24">
     <section className="border-b border-[#E5D3B3]/30 bg-[#5D4037] px-5 py-10 text-white md:py-12">
       <div className="container mx-auto max-w-7xl">
-        <span className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-[#E5D3B3]"><Sparkles className="h-4 w-4" />Catálogo completo</span>
+        <span className="mb-3 block text-[10px] font-bold uppercase tracking-[0.3em] text-[#E5D3B3]">Catálogo completo</span>
         <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
           <div><h1 className="mb-4 max-w-4xl font-serif text-3xl leading-tight md:text-5xl">Nuestros servicios</h1><p className="max-w-2xl text-sm leading-relaxed text-white/70 md:text-base">Explora cada especialidad en el orden de nuestro catálogo, revisa sus detalles y combina varios servicios en una sola reserva.</p></div>
           {selectedServices.length > 0 && <Link to="/reserva" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#E5D3B3] px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-[#5D4037] transition hover:bg-white">Reservar {selectedServices.length} servicio{selectedServices.length > 1 ? "s" : ""}<ArrowRight className="h-4 w-4" /></Link>}
