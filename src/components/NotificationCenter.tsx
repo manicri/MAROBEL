@@ -66,7 +66,9 @@ export default function NotificationCenter() {
   };
 
   const openNotice = async (notice: AppointmentNotice) => {
-    try { await markRead(notice); } catch (error) { console.error(error); }
+    if (!(isAdmin && notice.event_type === "new_reservation")) {
+      try { await markRead(notice); } catch (error) { console.error(error); }
+    }
     setOpen(false);
     navigate(notice.target_path);
   };
