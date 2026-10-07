@@ -19,9 +19,9 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
 
   const fetchAvailability = React.useCallback(async () => {
     setIsLoading(true); setAvailabilityError(null);
-    const [citas, bloqueos] = await Promise.all([supabase.from('citas').select('hora, Estado').eq('fecha', selectedDate), supabase.from('bloqueos').select('id, hora').eq('fecha', selectedDate)]);
+    const [citas, bloqueos] = await Promise.all([supabase.rpc('get_booked_hours', { p_date: selectedDate }), supabase.from('bloqueos').select('id, hora').eq('fecha', selectedDate)]);
     if (citas.error || bloqueos.error) { console.error(citas.error || bloqueos.error); setAvailabilityError('No se pudo confirmar la disponibilidad. Intenta nuevamente.'); setIsLoading(false); return; }
-    setAppointments(citas.data ?? []); setBlocks(bloqueos.data ?? []); setIsLoading(false);
+    setAppointments((citas.data ?? []).map((item: { hora: string }) => ({ hora: item.hora, Estado: 'aceptada' }))); setBlocks(bloqueos.data ?? []); setIsLoading(false);
   }, [selectedDate]);
 
   useEffect(() => {
@@ -29,7 +29,10 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
     const citas = supabase.channel(`citas_${selectedDate}_${selectedProfessional}`).on('postgres_changes', { event: '*', schema: 'public', table: 'citas', filter: `fecha=eq.${selectedDate}` }, fetchAvailability).subscribe();
     const bloqueos = supabase.channel(`bloqueos_${selectedDate}`).on('postgres_changes', { event: '*', schema: 'public', table: 'bloqueos', filter: `fecha=eq.${selectedDate}` }, fetchAvailability).subscribe();
     const refresh = () => fetchAvailability(); window.addEventListener('marobel-block-added', refresh);
-    return () => { supabase.removeChannel(citas); supabase.removeChannel(bloqueos); window.removeEventListener('marobel-block-added', refresh); };
+    const refreshWhenVisible = () => { if (!document.hidden) void fetchAvailability(); };
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+    const interval = window.setInterval(refreshWhenVisible, 30000);
+    return () => { supabase.removeChannel(citas); supabase.removeChannel(bloqueos); window.removeEventListener('marobel-block-added', refresh); document.removeEventListener('visibilitychange', refreshWhenVisible); window.clearInterval(interval); };
   }, [fetchAvailability, selectedDate, selectedProfessional]);
 
   const fullDayBlocks = blocks.filter((block) => isFullDayBlock(block.hora));

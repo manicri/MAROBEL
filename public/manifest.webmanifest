@@ -1,0 +1,12 @@
+{
+  "name": "Marobel Beauty Studio",
+  "short_name": "Marobel",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#5D4037",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

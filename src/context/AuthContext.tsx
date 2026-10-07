@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "../supabase";
+import { disableWebPush } from "../lib/webPush";
 
 export type AdminRole = "full" | "schedule" | null;
 const OWNER_EMAIL = "crisdelrobbys@gmail.com";
@@ -107,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async () => {
-    const redirectTo = `${window.location.origin}/admin`;
+    const redirectTo = new URL(`${import.meta.env.BASE_URL}admin`, window.location.origin).href;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo },
@@ -115,7 +116,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error;
   };
 
-  const logout = async () => { await supabase.auth.signOut(); };
+  const logout = async () => {
+    if (user) {
+      try { await disableWebPush(user.id); }
+      catch (error) { console.error("No se pudo desactivar este dispositivo:", error); }
+    }
+    await supabase.auth.signOut();
+  };
 
   const updateProfile = async (data: { displayName?: string; phone?: string; photoURL?: string }) => {
     if (!user) throw new Error("No user logged in");

@@ -9,6 +9,7 @@ import { SelectionProvider } from "./context/SelectionContext";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import ServiciosPage from "./pages/ServiciosPage";
+import MyAppointments from "./pages/MyAppointments";
 import ReservationForm from "./components/ReservationForm";
 import AdminPanel from "./components/AdminPanel";
 import AdminRoute from "./components/AdminRoute";
@@ -30,6 +31,7 @@ export default function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/servicios" element={<ServiciosPage />} />
                 <Route path="/reserva" element={<ReservationForm />} />
+                <Route path="/mis-citas" element={<MyAppointments />} />
                 <Route path="/admin" element={
                   <AdminRoute>
                     <div className="min-h-screen bg-brand-offwhite px-4 pb-24 pt-28 sm:px-6 md:pt-32">

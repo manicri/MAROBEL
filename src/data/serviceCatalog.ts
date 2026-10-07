@@ -114,7 +114,7 @@ export function buildServiceCatalog(databaseServices: Array<Record<string, unkno
       precio_desde: definition.precio_desde,
       duracion: definition.duracion,
       imagen_url: source?.imagen_url ? String(source.imagen_url) : undefined,
-      imagen_ajuste: source?.imagen_ajuste === "contain" ? "contain" : "cover",
+      imagen_ajuste: source?.imagen_ajuste === "contain" ? "contain" as const : "cover" as const,
       imagen_posicion: source?.imagen_posicion ? String(source.imagen_posicion) : "center",
       orden: index + 1,
     };

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type * as React from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, Clock, Info, Search, X } from "lucide-react";
 import { supabase } from "../supabase";

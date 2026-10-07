@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type * as React from "react";
 import { CalendarDays, Search, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "../supabase";
@@ -64,10 +65,11 @@ export default function ScheduleAdminDashboard() {
   }, []);
 
   const updateStatus = async (id: string, Estado: Appointment["Estado"]) => {
-    const { error } = await supabase.from("citas").update({ Estado }).eq("cita", id);
+    const { data, error } = await supabase.from("citas").update({ Estado }).eq("cita", id).eq("Estado", "pendiente").select("cita");
     if (error) return void toast.error(`Error al actualizar: ${error.message}`);
+    if (!data?.length) { void fetchAppointments(); return void toast.info("Esta cita ya fue respondida."); }
     setAppointments((previous) => previous.map((appointment) => appointment.cita === id ? { ...appointment, Estado } : appointment));
-    toast.success(`Cita ${Estado} correctamente`);
+    toast.success(`Cita ${Estado}. El cliente recibirá el aviso.`);
   };
 
   const deleteAppointment = (id: string) => toast("¿Eliminar esta cita?", {
@@ -94,7 +96,7 @@ export default function ScheduleAdminDashboard() {
 
   const selectedAppointments = appointments.filter((appointment) => appointment.fecha === selectedDate).sort((a, b) => a.hora.localeCompare(b.hora));
 
-  const AppointmentCard = ({ appointment }: { appointment: Appointment }) => {
+  const AppointmentCard = ({ appointment }: { appointment: Appointment; key?: React.Key }) => {
     const status = appointment.Estado || "pendiente";
     const statusColor = status === "aceptada" ? "bg-green-50 text-green-700" : status === "rechazada" ? "bg-gray-100 text-gray-600" : "bg-yellow-50 text-yellow-700";
     const expanded = expandedId === appointment.cita;
@@ -106,7 +108,7 @@ export default function ScheduleAdminDashboard() {
         </div>
         {expanded && <div className="mt-4 space-y-3 border-t border-[#E5D3B3]/20 pt-4 text-xs text-[#5D4037]/70">
           <p><strong>Email:</strong> {appointment.cliente_email || "N/A"}</p><p><strong>WhatsApp:</strong> {appointment.whatsapp || "N/A"}</p>{appointment.notas && <p className="rounded-xl bg-[#FAF9F6] p-3"><strong>Notas:</strong> {appointment.notas}</p>}
-          <div className="flex flex-wrap gap-2"><Button size="sm" className="bg-green-600 text-white hover:bg-green-700" onClick={(event) => { event.stopPropagation(); updateStatus(appointment.cita, "aceptada"); }}>Aceptar</Button><Button size="sm" variant="outline" onClick={(event) => { event.stopPropagation(); updateStatus(appointment.cita, "rechazada"); }}>Rechazar</Button><Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50" onClick={(event) => { event.stopPropagation(); deleteAppointment(appointment.cita); }}><Trash2 className="mr-1 h-4 w-4" />Eliminar</Button></div>
+          <div className="flex flex-wrap gap-2">{status === "pendiente" && <><Button size="sm" className="bg-green-600 text-white hover:bg-green-700" onClick={(event) => { event.stopPropagation(); updateStatus(appointment.cita, "aceptada"); }}>Aceptar</Button><Button size="sm" variant="outline" onClick={(event) => { event.stopPropagation(); updateStatus(appointment.cita, "rechazada"); }}>Rechazar</Button></>}<Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50" onClick={(event) => { event.stopPropagation(); deleteAppointment(appointment.cita); }}><Trash2 className="mr-1 h-4 w-4" />Eliminar</Button></div>
         </div>}
       </CardContent>
     </Card>;
