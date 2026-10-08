@@ -8,8 +8,6 @@ export interface CatalogService {
   precio_desde: boolean;
   duracion?: string;
   imagen_url?: string;
-  imagen_ajuste?: "cover" | "contain";
-  imagen_posicion?: string;
   orden: number;
 }
 
@@ -114,8 +112,6 @@ export function buildServiceCatalog(databaseServices: Array<Record<string, unkno
       precio_desde: definition.precio_desde,
       duracion: definition.duracion,
       imagen_url: source?.imagen_url ? String(source.imagen_url) : undefined,
-      imagen_ajuste: source?.imagen_ajuste === "contain" ? "contain" as const : "cover" as const,
-      imagen_posicion: source?.imagen_posicion ? String(source.imagen_posicion) : "center",
       orden: index + 1,
     };
   });
@@ -132,8 +128,6 @@ export function buildServiceCatalog(databaseServices: Array<Record<string, unkno
       precio_desde: Boolean(service.precio_desde),
       duracion: service.duracion ? String(service.duracion) : undefined,
       imagen_url: service.imagen_url ? String(service.imagen_url) : undefined,
-      imagen_ajuste: service.imagen_ajuste === "contain" ? "contain" as const : "cover" as const,
-      imagen_posicion: service.imagen_posicion ? String(service.imagen_posicion) : "center",
       orden: catalogServices.length + index + 1,
     }));
 
