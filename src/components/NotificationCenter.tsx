@@ -9,7 +9,7 @@ import { canUseWebPush, disableWebPush, enableWebPush, isPushEnabledHere } from 
 type AppointmentNotice = {
   id: string;
   cita_id: number | null;
-  event_type: "new_reservation" | "status_accepted" | "status_rejected";
+  event_type: "new_reservation" | "status_accepted" | "status_rejected" | "push_test";
   title: string;
   body: string;
   target_path: string;
@@ -37,8 +37,11 @@ export default function NotificationCenter() {
       if (error) console.error("No se pudieron cargar los avisos:", error);
     };
     void load();
-    void isPushEnabledHere(user.id).then((value) => active && setPushEnabled(value))
+    const refreshPush = () => void isPushEnabledHere(user.id)
+      .then((value) => active && setPushEnabled(value))
       .catch(() => active && setPushEnabled(false));
+    refreshPush();
+    window.addEventListener("marobel-push-changed", refreshPush);
     const channel = supabase.channel(`app_notifications_${user.id}`)
       .on("postgres_changes", {
         event: "*", schema: "public", table: "app_notifications",
@@ -50,7 +53,7 @@ export default function NotificationCenter() {
         }
         void load();
       }).subscribe();
-    return () => { active = false; void supabase.removeChannel(channel); };
+    return () => { active = false; window.removeEventListener("marobel-push-changed", refreshPush); void supabase.removeChannel(channel); };
   }, [user?.id]);
 
   if (!user) return null;
@@ -96,15 +99,25 @@ export default function NotificationCenter() {
       if (pushEnabled) {
         await disableWebPush(user.id);
         setPushEnabled(false);
+        window.dispatchEvent(new Event("marobel-push-changed"));
         toast.success("Avisos desactivados en este dispositivo");
       } else {
         await enableWebPush(user.id);
         setPushEnabled(true);
+        window.dispatchEvent(new Event("marobel-push-changed"));
         toast.success("Avisos activados en este dispositivo");
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "No se pudieron activar los avisos.");
     } finally { setPushBusy(false); }
+  };
+
+  const sendTest = async () => {
+    setPushBusy(true);
+    const { error } = await supabase.rpc("send_test_push");
+    setPushBusy(false);
+    if (error) toast.error(error.message);
+    else toast.success("Prueba enviada a tus dispositivos registrados.");
   };
 
   return <div className="relative">
@@ -117,11 +130,10 @@ export default function NotificationCenter() {
     </button>
     {open && <div className="fixed right-3 top-16 z-[60] max-h-[min(70vh,560px)] w-[calc(100vw-1.5rem)] max-w-sm overflow-y-auto rounded-2xl border border-[#E5D3B3]/50 bg-white p-4 text-[#5D4037] shadow-2xl md:absolute md:right-0 md:top-12 md:w-96">
       <div className="mb-3 flex items-center justify-between"><h2 className="font-serif text-xl">Avisos</h2><button type="button" onClick={() => setOpen(false)} aria-label="Cerrar avisos" className="rounded-full p-1 hover:bg-[#FAF9F6]"><X className="h-4 w-4" /></button></div>
-      {canUseWebPush() ? <button type="button" onClick={togglePush} disabled={pushBusy}
-        className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[#E5D3B3] bg-[#FAF9F6] px-3 py-2.5 text-xs font-semibold disabled:opacity-60">
-        {pushEnabled && <Check className="h-4 w-4" />}
-        {pushBusy ? "Preparando avisos..." : pushEnabled ? "Avisos activados en este dispositivo" : "Activar avisos en este dispositivo"}
-      </button> : <p className="mb-4 rounded-xl bg-[#FAF9F6] p-3 text-xs text-[#5D4037]/65">Este navegador no permite avisos externos. Si usas iPhone, añade la página a la pantalla de inicio y ábrela desde allí.</p>}
+      {canUseWebPush() ? <div className="mb-4 space-y-2">
+        {pushEnabled ? <><p className="flex items-center gap-2 text-xs font-semibold text-green-700"><Check className="h-4 w-4" />Avisos activados en este dispositivo</p><button type="button" onClick={sendTest} disabled={pushBusy} className="w-full rounded-xl bg-[#5D4037] px-3 py-2.5 text-xs font-semibold text-white disabled:opacity-60">Enviar alerta de prueba</button><button type="button" onClick={togglePush} disabled={pushBusy} className="w-full text-xs text-[#5D4037]/60 disabled:opacity-60">Desactivar en este dispositivo</button></> :
+          <button type="button" onClick={togglePush} disabled={pushBusy} className="flex w-full items-center justify-center rounded-xl border border-[#E5D3B3] bg-[#FAF9F6] px-3 py-2.5 text-xs font-semibold disabled:opacity-60">{pushBusy ? "Preparando avisos..." : "Activar avisos en este dispositivo"}</button>}
+      </div> : <p className="mb-4 rounded-xl bg-[#FAF9F6] p-3 text-xs text-[#5D4037]/65">Este navegador no permite avisos externos. Si usas iPhone, añade la página a la pantalla de inicio y ábrela desde allí.</p>}
       {!notices.length ? <p className="rounded-xl bg-[#FAF9F6] p-5 text-center text-sm text-[#5D4037]/60">Todavía no tienes avisos.</p> :
         <div className="space-y-2">{notices.map((notice) => <div key={notice.id} className={`rounded-xl border p-3 ${notice.read_at ? "border-[#E5D3B3]/25 bg-white" : "border-[#E5D3B3] bg-[#FAF9F6]"}`}>
           <button type="button" onClick={() => openNotice(notice)} className="w-full text-left">

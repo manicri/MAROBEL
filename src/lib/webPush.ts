@@ -23,7 +23,11 @@ export const isPushEnabledHere = async (userId: string) => {
   if (!canUseWebPush() || Notification.permission !== "granted") return false;
   const registration = await getRegistration();
   const subscription = await registration.pushManager.getSubscription();
-  return Boolean(subscription && localStorage.getItem(DEVICE_OWNER_KEY) === userId);
+  if (!subscription || localStorage.getItem(DEVICE_OWNER_KEY) !== userId) return false;
+  const { data, error } = await supabase.from("push_subscriptions")
+    .select("id").eq("user_id", userId).eq("endpoint", subscription.endpoint).maybeSingle();
+  if (error) throw error;
+  return Boolean(data);
 };
 
 export const enableWebPush = async (userId: string) => {
