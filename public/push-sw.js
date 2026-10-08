@@ -1,3 +1,11 @@
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener("push", (event) => {
   let message = {};
   try { message = event.data?.json() || {}; } catch { /* Ignore malformed payloads. */ }
@@ -15,12 +23,13 @@ self.addEventListener("notificationclick", (event) => {
   const path = String(event.notification.data?.path || "/").replace(/^\/+/, "");
   const destination = new URL(path, self.registration.scope).href;
   event.waitUntil((async () => {
-    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-    const existing = windows.find((client) => new URL(client.url).origin === self.location.origin);
-    if (existing) {
-      await existing.navigate(destination);
-      return existing.focus();
+    try {
+      if (await self.clients.openWindow(destination)) return;
+    } catch (error) {
+      console.error("No se pudo abrir Marobel desde el aviso:", error);
     }
-    return self.clients.openWindow(destination);
+    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    const existing = windows.find((client) => client.url.startsWith(self.registration.scope));
+    if (existing) await existing.focus();
   })());
 });
