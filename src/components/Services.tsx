@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Scissors, Sparkles, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import TreatmentIcon from "./TreatmentIcon";
 import { Link } from "react-router-dom";
 import { supabase } from "../supabase";
 import ServicesPromotionsMenu from "./ServicesPromotionsMenu";
@@ -8,7 +9,6 @@ import ServicesPromotionsMenu from "./ServicesPromotionsMenu";
 interface Category { id: string; nombre: string; }
 interface Service { id: string; nombre: string; descripcion: string; categoria: string; precio: number; duracion: string; imagen_url?: string; }
 
-const defaultIcons: Record<string, any> = { Cabello: Scissors, 'Uñas': Star, 'Estética Facial': Sparkles, 'Rituales Spa': Heart };
 const defaultImages: Record<string, string> = {
   Cabello: "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=2069&auto=format&fit=crop",
   'Uñas': "https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=1974&auto=format&fit=crop",
@@ -63,7 +63,6 @@ export default function Services() {
         <div id="servicios-anchor" className="mb-20 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {displayCategories.map((category, index) => {
             const categoryServices = services.filter((service) => service.categoria === category.nombre);
-            const Icon = defaultIcons[category.nombre] || Sparkles;
             const image = categoryServices.find((service) => service.imagen_url)?.imagen_url || defaultImages[category.nombre] || defaultImages.Cabello;
             const linkPath = `/servicios?categoria=${encodeURIComponent(category.nombre)}`;
             return (
@@ -72,7 +71,7 @@ export default function Services() {
                   <img src={image} alt={`Servicios de ${category.nombre}`} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" referrerPolicy="no-referrer" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#5D4037] via-transparent to-transparent opacity-80" />
                   <div className="absolute bottom-5 left-5 right-5">
-                    <Icon className="mb-3 h-6 w-6 text-[#E5D3B3]" />
+                    <TreatmentIcon category={category.nombre} className="mb-3 h-6 w-6 text-[#E5D3B3]" />
                     <h3 className="mb-2 font-serif text-xl text-white">{category.nombre}</h3>
                     <div className="flex flex-wrap gap-1.5">
                       {categoryServices.slice(0, 3).map((service) => <span key={service.id} className="rounded-full border border-white/20 px-2 py-1 text-[7px] uppercase tracking-widest text-white/70">{service.nombre}</span>)}

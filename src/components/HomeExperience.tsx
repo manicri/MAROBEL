@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, Clock, HelpCircle, MapPin, MessageCircle, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, ChevronDown, Clock, MapPin, MessageCircle, UserRound } from "lucide-react";
 import { supabase } from "../supabase";
+import TreatmentIcon from "./TreatmentIcon";
 
 interface Service {
   id: string;
@@ -50,7 +51,7 @@ export default function HomeExperience() {
           {services.length ? services.map((service) => (
             <article key={service.id} className="overflow-hidden rounded-3xl border border-[#E5D3B3]/30 bg-white shadow-sm">
               <div className="h-44 bg-[#E5D3B3]/20">
-                {service.imagen_url ? <img src={service.imagen_url} alt={service.nombre} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><Sparkles className="h-9 w-9 text-[#8D6E63]/35" /></div>}
+                {service.imagen_url ? <img src={service.imagen_url} alt={service.nombre} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center"><TreatmentIcon category={service.categoria} className="h-10 w-10 text-[#8D6E63]/65" /></div>}
               </div>
               <div className="p-5">
                 <div className="mb-2 flex items-start justify-between gap-3"><h3 className="font-serif text-xl text-[#5D4037]">{service.nombre}</h3><span className="font-bold text-[#8D6E63]">${Number(service.precio || 0).toFixed(2)}</span></div>
@@ -63,12 +64,12 @@ export default function HomeExperience() {
         </div>
 
         <div className="mt-12 grid gap-4 rounded-3xl bg-[#5D4037] p-5 text-white md:grid-cols-3 md:p-7">
-          {[{ icon: ShieldCheck, title: "Atención profesional", text: "Protocolos claros y servicios personalizados." }, { icon: MessageCircle, title: "Confirmación directa", text: "Recibe el estado de tu reserva por WhatsApp." }, { icon: MapPin, title: "Ubicación accesible", text: "Consulta el mapa y llega fácilmente al local." }].map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-3 rounded-2xl bg-white/8 p-4"><Icon className="mt-0.5 h-5 w-5 shrink-0 text-[#E5D3B3]" /><div><h3 className="text-sm font-bold">{title}</h3><p className="mt-1 text-xs leading-relaxed text-white/65">{text}</p></div></div>)}
+          {[{ icon: UserRound, title: "Atención profesional", text: "Protocolos claros y servicios personalizados." }, { icon: MessageCircle, title: "Confirmación directa", text: "Recibe el estado de tu reserva por WhatsApp." }, { icon: MapPin, title: "Ubicación accesible", text: "Consulta el mapa y llega fácilmente al local." }].map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-3 rounded-2xl bg-white/8 p-4"><Icon className="mt-0.5 h-5 w-5 shrink-0 text-[#E5D3B3]" /><div><h3 className="text-sm font-bold">{title}</h3><p className="mt-1 text-xs leading-relaxed text-white/65">{text}</p></div></div>)}
         </div>
 
         <div className="mt-14 grid gap-7 lg:grid-cols-[0.7fr_1.3fr]">
-          <div><span className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-[#8D6E63]"><HelpCircle className="h-4 w-4" />Antes de reservar</span><h2 className="font-serif text-3xl text-[#5D4037]">Preguntas frecuentes</h2><p className="mt-3 text-sm leading-relaxed text-[#5D4037]/60">Lo esencial para que reserves con tranquilidad.</p></div>
-          <div className="grid gap-3">{faqs.map((faq) => <details key={faq.question} className="group rounded-2xl border border-[#E5D3B3]/30 bg-white p-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold text-[#5D4037]"><span>{faq.question}</span><CheckCircle2 className="h-4 w-4 text-[#8D6E63]" /></summary><p className="pt-3 text-xs leading-relaxed text-[#5D4037]/60">{faq.answer}</p></details>)}</div>
+          <div><span className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-[#8D6E63]">Antes de reservar</span><h2 className="font-serif text-3xl text-[#5D4037]">Preguntas frecuentes</h2><p className="mt-3 text-sm leading-relaxed text-[#5D4037]/60">Lo esencial para que reserves con tranquilidad.</p></div>
+          <div className="grid gap-3">{faqs.map((faq) => <details key={faq.question} className="group rounded-2xl border border-[#E5D3B3]/30 bg-white p-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold text-[#5D4037]"><span>{faq.question}</span><ChevronDown className="h-4 w-4 shrink-0 text-[#8D6E63] transition-transform group-open:rotate-180" aria-hidden="true" /></summary><p className="pt-3 text-xs leading-relaxed text-[#5D4037]/60">{faq.answer}</p></details>)}</div>
         </div>
       </div>
     </section>

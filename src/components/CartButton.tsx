@@ -17,7 +17,7 @@ export default function CartButton({ onClick }: CartButtonProps) {
       aria-label="Abrir carrito de servicios"
     >
       <div className="relative">
-        <ShoppingBag className="w-6 h-6" />
+        <ShoppingBag className="w-5 h-5" aria-hidden="true" />
         <AnimatePresence>
           {count > 0 && (
             <motion.span

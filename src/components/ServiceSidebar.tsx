@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Scissors, Sparkles, Heart, Droplets, Star } from 'lucide-react';
+import TreatmentIcon from "./TreatmentIcon";
 import { supabase } from '../supabase';
-
-const defaultIcons: Record<string, any> = {
-  'Cabello': Scissors,
-  'Uñas': Star,
-  'Estética Facial': Sparkles,
-  'Rituales Spa': Heart,
-};
 
 interface Category {
   id: string;
@@ -52,7 +45,6 @@ export const ServiceSidebar: React.FC = () => {
         {displayCategories.map((category) => {
           const path = `/${category.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-')}`;
           const isActive = location.pathname === path;
-          const Icon = defaultIcons[category.nombre] || Sparkles;
           
           return (
             <Link
@@ -64,7 +56,7 @@ export const ServiceSidebar: React.FC = () => {
                   : 'text-[#5D4037]/70 hover:bg-[#E5D3B3]/20 hover:text-[#5D4037]'
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? 'text-[#E5D3B3]' : ''}`} />
+              <TreatmentIcon category={category.nombre} className={`w-5 h-5 ${isActive ? 'text-[#E5D3B3]' : ''}`} />
               <span className="font-medium text-sm">{category.nombre}</span>
             </Link>
           );

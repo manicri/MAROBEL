@@ -84,3 +84,9 @@ main > section:has(> aside) > aside {
 
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+
+/* One quiet line weight across navigation, forms and administrative controls. */
+.lucide {
+  stroke-width: 1.65;
+  flex-shrink: 0;
+}

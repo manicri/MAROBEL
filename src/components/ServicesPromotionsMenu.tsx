@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowRight, Check, Sparkles, Tag } from "lucide-react";
+import { ArrowRight, Check, Tag } from "lucide-react";
 import type { Promotion } from "./AdminPromotions";
 import { useSelection } from "@/context/SelectionContext";
 import { cn } from "@/lib/utils";
@@ -79,7 +79,7 @@ export default function ServicesPromotionsMenu({ services }: ServicesPromotionsM
     <div id="promociones-servicios" className="scroll-mt-28 mb-20 rounded-[2rem] border border-[#E5D3B3]/40 bg-white p-5 shadow-lg md:p-8">
       <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <span className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-[#8D6E63]"><Sparkles className="h-4 w-4" />Mini menu</span>
+          <span className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-[#8D6E63]">Mini menu</span>
           <h2 className="font-serif text-3xl text-[#5D4037]">Promociones del mes</h2>
         </div>
         <p className="max-w-md text-sm leading-relaxed text-[#5D4037]/60">Elige una promocion para revisar exactamente los servicios incluidos antes de reservar.</p>

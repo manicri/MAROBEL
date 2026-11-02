@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, ShoppingBag, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowRight, ShoppingBag, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelection } from "../context/SelectionContext";
 
@@ -39,7 +39,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <div className="flex-1 space-y-3 overflow-y-auto px-6 py-6">
               {selectedServices.length === 0 ? (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex h-full flex-col items-center justify-center px-8 pb-16 text-center">
-                  <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#E5D3B3]/20"><Sparkles className="h-9 w-9 text-[#E5D3B3]" /></div>
+                  <div className="mb-6 text-[#8D6E63]"><ShoppingBag className="h-10 w-10" aria-hidden="true" /></div>
                   <h3 className="mb-3 font-serif text-2xl text-[#5D4037]">Tu carrito está vacío</h3>
                   <p className="mb-8 text-sm font-light leading-relaxed text-[#5D4037]/60">Explora el catálogo y elige los servicios que deseas reservar.</p>
                   <button onClick={() => goTo("/servicios")} className="rounded-full bg-[#5D4037] px-8 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-[#4a332c]">Ver servicios</button>
