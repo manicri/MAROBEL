@@ -15,7 +15,7 @@ export const Calendar: React.FC<CalendarProps> = ({ selectedDate, onSelectSlot, 
   const [blocks, setBlocks] = useState<{ id: string; hora: string | null }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
-  const hours = useMemo(() => new Date(selectedDate).getUTCDay() === 0 ? [] : Array.from({ length: 20 }, (_, i) => { const value = 540 + i * 30; return `${Math.floor(value / 60)}:${value % 60 ? '30' : '00'}`; }), [selectedDate]);
+  const hours = useMemo(() => new Date(selectedDate).getUTCDay() === 0 ? [] : Array.from({ length: 19 }, (_, i) => { const value = 540 + i * 30; return `${Math.floor(value / 60)}:${value % 60 ? '30' : '00'}`; }), [selectedDate]);
 
   const fetchAvailability = React.useCallback(async () => {
     setIsLoading(true); setAvailabilityError(null);
